@@ -1,0 +1,26 @@
+{
+  "openapi" : "3.0.3",
+  "info" : {
+    "title" : "selc-user-group",
+    "description" : "The services described in this section deal with the management of UserGroup entity, providing the necessary  methods for its creation, consultation and activation.",
+    "version" : "1.0-SNAPSHOT"
+  },
+  "servers" : [ {
+    "url" : "http://localhost:80",
+    "description" : "Inferred Url"
+  } ],
+  "tags" : [ {
+    "name" : "user-group",
+    "description" : "User group endpoint CRUD operations"
+  } ],
+  "components" : {
+    "securitySchemes" : {
+      "bearerAuth" : {
+        "type" : "http",
+        "description" : "A bearer token in the format of a JWS and conformed to the specifications included in [RFC8725](https://tools.ietf.org/html/RFC8725)",
+        "scheme" : "bearer",
+        "bearerFormat" : "JWT"
+      }
+    }
+  }
+}

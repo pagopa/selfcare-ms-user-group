@@ -1,0 +1,12 @@
+it\pagopa\selfcare\user_group\web\handler\GroupExceptionHandler.class
+it\pagopa\selfcare\user_group\web\model\UserGroupResource.class
+it\pagopa\selfcare\user_group\web\config\SwaggerConfig$enConfig.class
+it\pagopa\selfcare\user_group\web\validator\NameControllerResponseValidator.class
+it\pagopa\selfcare\user_group\web\model\CreateUserGroupDto.class
+it\pagopa\selfcare\user_group\web\model\mapper\GroupMapper.class
+it\pagopa\selfcare\user_group\web\config\NameSecurityConfig.class
+it\pagopa\selfcare\user_group\web\controller\GroupController.class
+it\pagopa\selfcare\user_group\web\config\WebConfig.class
+it\pagopa\selfcare\user_group\web\model\GroupDto.class
+it\pagopa\selfcare\user_group\web\config\SwaggerConfig.class
+it\pagopa\selfcare\user_group\web\config\SwaggerConfig$itConfig.class

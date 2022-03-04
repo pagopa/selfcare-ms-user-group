@@ -1,0 +1,60 @@
+package it.pagopa.selfcare.user_group.web.controller;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import it.pagopa.selfcare.user_group.api.UserGroupOperations;
+import it.pagopa.selfcare.user_group.core.UserGroupService;
+import it.pagopa.selfcare.user_group.web.model.CreateUserGroupDto;
+import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
+import it.pagopa.selfcare.user_group.web.model.mapper.GroupMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+
+@Slf4j
+@RestController
+@RequestMapping(value = "/user-groups", produces = MediaType.APPLICATION_JSON_VALUE)
+@Api(tags = "user-group")
+public class GroupController {
+
+    private final UserGroupService groupService;
+
+
+    @Autowired
+    public GroupController(UserGroupService groupService) {
+        this.groupService = groupService;
+    }
+
+    @PostMapping(value = "/", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.createUserGroup}")
+    public UserGroupResource createGroup(@RequestBody
+                                         @Valid
+                                                 CreateUserGroupDto group) {
+        log.trace("createGroup start");
+        log.debug("createGroup group = {}", group);
+        UserGroupOperations groupOperations = groupService.createGroup(GroupMapper.fromDto(group));
+        UserGroupResource result = GroupMapper.toResource(groupOperations);
+        log.debug("createGroup result = {}", result);
+        log.trace("createGroup end");
+        return result;
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.deleteUserGroup}")
+    public void deteleGroup(@ApiParam("${swagger.user-group.model.id}")
+                            @PathVariable("id")
+                                    String id) {
+        log.trace("deteleGroup start");
+        log.debug("deleteGroup id = {}", id);
+        groupService.deleteGroup(id);
+        log.trace("deteleGroup end");
+
+    }
+}
