@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
@@ -36,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class GroupControllerTest {
 
     private static final DummyCreateUserGroupDto CREATE_USER_GROUP_DTO = TestUtils.mockInstance(new DummyCreateUserGroupDto());
-    private static final String BASE_URL = "/groups";
+    private static final String BASE_URL = "/user-groups";
 
     @MockBean
     private UserGroupService groupServiceMock;
@@ -83,5 +84,95 @@ class GroupControllerTest {
         assertNotNull(error);
     }
 
+    @Test
+    void deleteGroup() throws Exception {
+        Mockito.doNothing()
+                .when(groupServiceMock).deleteGroup(Mockito.anyString());
+        // when
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                .delete(BASE_URL + "/id")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andReturn();
+        // then
+        assertEquals("", result.getResponse().getContentAsString());
+        Mockito.verify(groupServiceMock, Mockito.times(1))
+                .deleteGroup(Mockito.anyString());
+        Mockito.verifyNoMoreInteractions(groupServiceMock);
+
+    }
+
+    @Test
+    void activateGroup_doesNotExists() throws Exception {
+        //given
+        String groupId = "groupId";
+        Mockito.doThrow(ResourceNotFoundException.class)
+                .when(groupServiceMock).activateGroup(Mockito.anyString());
+        //when
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                .post(BASE_URL + "/{id}/activate", groupId)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().is(HttpStatus.NOT_FOUND.value()))
+                .andReturn();
+        //then
+        ErrorResource error = mapper.readValue(result.getResponse().getContentAsString(), ErrorResource.class);
+        assertNotNull(error);
+    }
+
+    @Test
+    void activateGroup() throws Exception {
+        //given
+        String groupId = "groupId";
+        //when
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                .post(BASE_URL + "/{id}/activate", groupId)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().isNoContent())
+                .andReturn();
+        //then
+        assertEquals(0, result.getResponse().getContentLength());
+        Mockito.verify(groupServiceMock, Mockito.times(1))
+                .activateGroup(groupId);
+        Mockito.verifyNoMoreInteractions(groupServiceMock);
+    }
+
+    @Test
+    void suspendGroup_doesNotExists() throws Exception {
+        //given
+        String groupId = "groupId";
+        Mockito.doThrow(ResourceNotFoundException.class)
+                .when(groupServiceMock).suspendGroup(Mockito.anyString());
+        //when
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                .post(BASE_URL + "/{id}/suspend", groupId)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().is(HttpStatus.NOT_FOUND.value()))
+                .andReturn();
+        //then
+        ErrorResource error = mapper.readValue(result.getResponse().getContentAsString(), ErrorResource.class);
+        assertNotNull(error);
+    }
+
+    @Test
+    void suspendGroup() throws Exception {
+        //given
+        String groupId = "groupId";
+        //when
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                .post(BASE_URL + "/{id}/suspend", groupId)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().isNoContent())
+                .andReturn();
+        //then
+        assertEquals(0, result.getResponse().getContentLength());
+        Mockito.verify(groupServiceMock, Mockito.times(1))
+                .suspendGroup(groupId);
+        Mockito.verifyNoMoreInteractions(groupServiceMock);
+    }
 
 }

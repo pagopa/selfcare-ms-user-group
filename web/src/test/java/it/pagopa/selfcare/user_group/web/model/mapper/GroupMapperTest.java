@@ -27,8 +27,6 @@ class GroupMapperTest {
         assertEquals(group.getInstitutionId(), resource.getInstitutionId());
         assertEquals(group.getProductId(), resource.getProductId());
         assertEquals(group.getDescription(), resource.getDescription());
-        assertTrue(now.isBefore(resource.getCreatedAt()));
-        assertTrue(now.isBefore(resource.getModifiedAt()));
         assertEquals(group.getMembers(), resource.getMembers());
         assertEquals(group.getName(), resource.getName());
         assertEquals(group.getCreatedBy(), resource.getCreatedBy());

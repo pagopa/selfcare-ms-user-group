@@ -18,7 +18,7 @@ public class UserGroupResource {
     @ApiModelProperty(value = "${swagger.user-group.model.id}", required = true)
     @JsonProperty(required = true)
     @NotBlank
-    private UUID id;
+    private String id;
 
     @ApiModelProperty(value = "${swagger.user-group.model.institutionId}", required = true)
     @JsonProperty(required = true)

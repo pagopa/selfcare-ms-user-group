@@ -9,7 +9,6 @@ import java.util.UUID;
 @Data
 public class DummyCreateUserGroupDto {
 
-    private String id;
     private String institutionId;
     private String productId;
     private String name;

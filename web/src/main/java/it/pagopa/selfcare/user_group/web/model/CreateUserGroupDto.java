@@ -14,10 +14,6 @@ import java.util.UUID;
 @Data
 public class CreateUserGroupDto {
 
-    @ApiModelProperty(value = "${swagger.user-group.model.id}", required = true)
-    @JsonProperty(required = true)
-    @NotBlank
-    private UUID id;
 
     @ApiModelProperty(value = "${swagger.user-group.model.institutionId}", required = true)
     @JsonProperty(required = true)

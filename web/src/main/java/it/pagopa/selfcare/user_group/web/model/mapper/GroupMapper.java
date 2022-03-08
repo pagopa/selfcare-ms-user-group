@@ -6,8 +6,6 @@ import it.pagopa.selfcare.user_group.web.model.GroupDto;
 import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.UUID;
-
 @Slf4j
 public class GroupMapper {
 
@@ -19,7 +17,7 @@ public class GroupMapper {
 
         if (entity != null) {
             resource = new UserGroupResource();
-            resource.setId(UUID.fromString(entity.getId()));
+            resource.setId(entity.getId());
             resource.setInstitutionId(entity.getInstitutionId());
             resource.setProductId(entity.getProductId());
             resource.setName(entity.getName());
@@ -42,7 +40,6 @@ public class GroupMapper {
         UserGroupOperations group = null;
         if (dto != null) {
             group = new GroupDto();
-            group.setId(dto.getId().toString());
             group.setInstitutionId(dto.getInstitutionId());
             group.setProductId(dto.getProductId());
             group.setName(dto.getName());

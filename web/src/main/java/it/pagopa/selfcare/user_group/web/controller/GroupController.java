@@ -48,7 +48,7 @@ public class GroupController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.deleteUserGroup}")
-    public void deteleGroup(@ApiParam("${swagger.user-group.model.id}")
+    public void deleteGroup(@ApiParam("${swagger.user-group.model.id}")
                             @PathVariable("id")
                                     String id) {
         log.trace("deteleGroup start");
@@ -57,4 +57,29 @@ public class GroupController {
         log.trace("deteleGroup end");
 
     }
+
+    @PostMapping("/{id}/activate")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.activateUserGroup}")
+    public void activateGroup(@ApiParam("${swagger.user-group.model.id}")
+                              @PathVariable("id")
+                                      String id) {
+        log.trace("activateGroup start");
+        log.debug("activateGroup id = {}", id);
+        groupService.activateGroup(id);
+        log.trace("activateGroup end");
+    }
+
+    @PostMapping("/{id}/suspend")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.suspendUserGroup}")
+    public void suspendGroup(@ApiParam("${swagger.user-group.model.id}")
+                             @PathVariable("id")
+                                     String id) {
+        log.trace("suspendGroup start");
+        log.debug("suspendGroup id = {}", id);
+        groupService.suspendGroup(id);
+        log.trace("suspendGroup end");
+    }
+
 }

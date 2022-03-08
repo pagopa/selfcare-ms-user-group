@@ -3,6 +3,7 @@ package it.pagopa.selfcare.user_group.web.handler;
 import it.pagopa.selfcare.commons.web.model.ErrorResource;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceAlreadyExistsException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.user_group.web.controller.GroupController;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import static it.pagopa.selfcare.commons.web.handler.RestExceptionsHandler.UNHANDLED_EXCEPTION;
 
-@ControllerAdvice(assignableTypes = GroupExceptionHandler.class)
+@ControllerAdvice(assignableTypes = GroupController.class)
 @Slf4j
 public class GroupExceptionHandler {
 

@@ -34,7 +34,6 @@ class CreateUserGroupDtoTest {
     void validateNullFields() {
         // given
         HashMap<String, Class<? extends Annotation>> toCheckMap = new HashMap<>();
-        toCheckMap.put("id", NotBlank.class);
         toCheckMap.put("institutionId", NotBlank.class);
         toCheckMap.put("productId", NotBlank.class);
         toCheckMap.put("name", NotBlank.class);
@@ -43,7 +42,6 @@ class CreateUserGroupDtoTest {
         toCheckMap.put("members", NotEmpty.class);
         CreateUserGroupDto createUserGroupDto = new CreateUserGroupDto();
         createUserGroupDto.setDescription(null);
-        createUserGroupDto.setId(null);
         createUserGroupDto.setMembers(null);
         createUserGroupDto.setName(null);
         createUserGroupDto.setStatus(null);
