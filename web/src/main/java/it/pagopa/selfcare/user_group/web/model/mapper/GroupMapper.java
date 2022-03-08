@@ -3,6 +3,7 @@ package it.pagopa.selfcare.user_group.web.model.mapper;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.web.model.CreateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.GroupDto;
+import it.pagopa.selfcare.user_group.web.model.UpdateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,6 +43,24 @@ public class GroupMapper {
             group = new GroupDto();
             group.setInstitutionId(dto.getInstitutionId());
             group.setProductId(dto.getProductId());
+            group.setName(dto.getName());
+            group.setDescription(dto.getDescription());
+            group.setStatus(dto.getStatus());
+            group.setMembers(dto.getMembers());
+        }
+        log.debug("fromDto group = {}", group);
+        log.trace("fromDto end");
+        return group;
+    }
+
+
+    public static UserGroupOperations fromDto(UpdateUserGroupDto dto) {
+        log.trace("fromDto start");
+        log.debug("fromDto dto = {}", dto);
+        UserGroupOperations group = null;
+        if (dto != null) {
+            group = new GroupDto();
+
             group.setName(dto.getName());
             group.setDescription(dto.getDescription());
             group.setStatus(dto.getStatus());

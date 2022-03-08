@@ -11,4 +11,6 @@ public interface UserGroupService {
     void suspendGroup(String id);
 
     void activateGroup(String id);
+
+    UserGroupOperations updateGroup(String id, UserGroupOperations group);
 }

@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.core.UserGroupService;
 import it.pagopa.selfcare.user_group.web.model.CreateUserGroupDto;
+import it.pagopa.selfcare.user_group.web.model.UpdateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
 import it.pagopa.selfcare.user_group.web.model.mapper.GroupMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -80,6 +81,24 @@ public class GroupController {
         log.debug("suspendGroup id = {}", id);
         groupService.suspendGroup(id);
         log.trace("suspendGroup end");
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.updateUserGroup}")
+    public UserGroupResource updateUserGroup(@ApiParam("${swagger.user-group.model.id}")
+                                             @PathVariable("id")
+                                                     String id,
+                                             @RequestBody
+                                             @Valid
+                                                     UpdateUserGroupDto groupDto) {
+        log.trace("updateUserGroup start");
+        log.debug("updateUserGroup id = {}", id);
+        UserGroupOperations updatedGroup = groupService.updateGroup(id, GroupMapper.fromDto(groupDto));
+        UserGroupResource result = GroupMapper.toResource(updatedGroup);
+        log.debug("updateUserGroup result = {}", result);
+        log.trace("updateUserGroup end");
+        return result;
     }
 
 }
