@@ -1,6 +1,6 @@
-package it.pagopa.selfcare.user_group.api;
+package it.pagopa.selfcare.user_group.connector.api;
 
-import it.pagopa.selfcare.user_group.model.UserGroupStatus;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 
 import java.time.Instant;
 import java.util.List;

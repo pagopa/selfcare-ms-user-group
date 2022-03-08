@@ -1,4 +1,4 @@
-package it.pagopa.selfcare.user_group.exception;
+package it.pagopa.selfcare.user_group.connector.exception;
 
 public class ResourceAlreadyExistsException extends RuntimeException {
 

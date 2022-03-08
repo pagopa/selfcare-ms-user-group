@@ -2,7 +2,7 @@ package it.pagopa.selfcare.user_group.web.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
-import it.pagopa.selfcare.user_group.model.UserGroupStatus;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;

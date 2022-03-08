@@ -1,15 +1,17 @@
 package it.pagopa.selfcare.user_group.connector;
 
-import it.pagopa.selfcare.user_group.api.UserGroupOperations;
-import it.pagopa.selfcare.user_group.model.UserGroupStatus;
+import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.Data;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 @Data
 public class DummyGroup implements UserGroupOperations {
+
+
     private String id;
     private String institutionId;
     private String productId;
@@ -17,8 +19,8 @@ public class DummyGroup implements UserGroupOperations {
     private String description;
     private UserGroupStatus status;
     private List<UUID> members;
-    private OffsetDateTime createdAt;
+    private Instant createdAt;
     private String createdBy;
-    private OffsetDateTime modifiedAt;
+    private Instant modifiedAt;
     private String modifiedBy;
 }

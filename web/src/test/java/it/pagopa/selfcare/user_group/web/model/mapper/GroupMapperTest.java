@@ -1,12 +1,12 @@
 package it.pagopa.selfcare.user_group.web.model.mapper;
 
 import it.pagopa.selfcare.commons.utils.TestUtils;
-import it.pagopa.selfcare.user_group.api.UserGroupOperations;
+import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.web.model.CreateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
 import org.junit.jupiter.api.Test;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +17,7 @@ class GroupMapperTest {
     @Test
     void toResource_notNull() {
         // given
-        OffsetDateTime now = OffsetDateTime.now().minusSeconds(1);
+        Instant now = Instant.now().minusSeconds(1);
         UserGroupOperations group = TestUtils.mockInstance(new DummyGroupOperations());
         group.setMembers(List.of(UUID.randomUUID()));
         //when

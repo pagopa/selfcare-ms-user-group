@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.user_group.web.model.mapper;
 
-import it.pagopa.selfcare.user_group.api.UserGroupOperations;
+import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.web.model.CreateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.GroupDto;
 import it.pagopa.selfcare.user_group.web.model.UserGroupResource;

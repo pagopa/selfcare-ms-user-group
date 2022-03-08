@@ -3,20 +3,25 @@ package it.pagopa.selfcare.user_group.connector.dao;
 
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.result.UpdateResult;
-import it.pagopa.selfcare.user_group.api.UserGroupConnector;
-import it.pagopa.selfcare.user_group.api.UserGroupOperations;
+import it.pagopa.selfcare.commons.base.security.SelfCareUser;
+import it.pagopa.selfcare.user_group.connector.api.UserGroupConnector;
+import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.connector.dao.model.UserGroupEntity;
-import it.pagopa.selfcare.user_group.exception.ResourceAlreadyExistsException;
-import it.pagopa.selfcare.user_group.model.UserGroupStatus;
+import it.pagopa.selfcare.user_group.connector.exception.ResourceAlreadyExistsException;
+import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
-import java.time.Instant;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 public class UserGroupConnectorImpl implements UserGroupConnector {
@@ -44,30 +49,41 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
 
     @Override
     public Optional<UserGroupOperations> findById(String id) {
-        //TODO
-        return Optional.empty();
+        return repository.findById(id).map(Function.identity());
     }
 
     @Override
-    public boolean deleteById(String id) {
-        UpdateResult updateResult = mongoTemplate.updateFirst(
-                Query.query(Criteria.where("_id").is(id)
-                        .and("status").ne(UserGroupStatus.DELETED)),
-                Update.update("status", UserGroupStatus.DELETED)
-                        .currentTimestamp("modifiedAt")
-                        .addToSet("modifiedBy", Instant.now()),
-                UserGroupEntity.class);
-        return updateResult.getModifiedCount() == 1;
+    public void activateById(String id) {
+        updateUserById(id, UserGroupStatus.ACTIVE);
     }
 
 
-    public boolean suspendById(String id) {
+    @Override
+    public void deleteById(String id) {
+        repository.deleteById(id);
+    }
+
+    @Override
+    public void suspendById(String id) {
+        updateUserById(id, UserGroupStatus.SUSPENDED);
+    }
+
+    private void updateUserById(String id, UserGroupStatus status) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Assert.state(authentication != null, "Authentication is required");
+        Assert.state(authentication.getPrincipal() instanceof SelfCareUser, "Not SelfCareUser principal");
+        SelfCareUser principal = ((SelfCareUser) authentication.getPrincipal());
+
         UpdateResult updateResult = mongoTemplate.updateFirst(
                 Query.query(Criteria.where("_id").is(id)
-                        .and("status").ne(UserGroupStatus.DELETED)),
-                Update.update("status", UserGroupStatus.SUSPENDED),
+                        .and("status").ne(status)),
+                Update.update("status", status)
+                        .currentTimestamp("modifiedAt")
+                        .addToSet("modifiedBy", principal.getId()),
                 UserGroupEntity.class);
-        return updateResult.getModifiedCount() == 1;
+        if (updateResult.getMatchedCount() != 1) {
+            throw new ResourceNotFoundException();
+        }
     }
 
 }

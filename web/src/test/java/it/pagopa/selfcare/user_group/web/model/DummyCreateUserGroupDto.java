@@ -1,6 +1,6 @@
 package it.pagopa.selfcare.user_group.web.model;
 
-import it.pagopa.selfcare.user_group.model.UserGroupStatus;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.Data;
 
 import java.util.List;

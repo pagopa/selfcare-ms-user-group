@@ -3,7 +3,7 @@ package it.pagopa.selfcare.user_group.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import it.pagopa.selfcare.user_group.api.UserGroupOperations;
+import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.core.UserGroupService;
 import it.pagopa.selfcare.user_group.web.model.CreateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.UserGroupResource;

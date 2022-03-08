@@ -2,7 +2,9 @@ package it.pagopa.selfcare.user_group.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.utils.TestUtils;
-import it.pagopa.selfcare.user_group.api.UserGroupOperations;
+import it.pagopa.selfcare.commons.web.model.ErrorResource;
+import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
+import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.user_group.core.UserGroupService;
 import it.pagopa.selfcare.user_group.web.config.WebTestConfig;
 import it.pagopa.selfcare.user_group.web.handler.GroupExceptionHandler;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -61,6 +64,23 @@ class GroupControllerTest {
         UserGroupResource group = mapper.readValue(result.getResponse().getContentAsString(), UserGroupResource.class);
         assertNotNull(group);
         TestUtils.reflectionEqualsByName(CREATE_USER_GROUP_DTO, group);
+    }
+
+    @Test
+    void deleteGroup_doesNotExists() throws Exception {
+        //given
+        Mockito.doThrow(ResourceNotFoundException.class)
+                .when(groupServiceMock).deleteGroup(Mockito.anyString());
+        //when
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                .delete(BASE_URL + "/id")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().is(HttpStatus.NOT_FOUND.value()))
+                .andReturn();
+        //then
+        ErrorResource error = mapper.readValue(result.getResponse().getContentAsString(), ErrorResource.class);
+        assertNotNull(error);
     }
 
 

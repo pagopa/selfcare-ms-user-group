@@ -2,9 +2,11 @@ package it.pagopa.selfcare.user_group.core;
 
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.utils.TestUtils;
-import it.pagopa.selfcare.user_group.api.UserGroupConnector;
-import it.pagopa.selfcare.user_group.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.connector.DummyGroup;
+import it.pagopa.selfcare.user_group.connector.api.UserGroupConnector;
+import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
+import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,8 +20,9 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.TestSecurityContextHolder;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,6 +37,7 @@ class UserGroupServiceImplTest {
 
     @Mock
     private UserGroupConnector groupConnectorMock;
+
 
     @InjectMocks
     private UserGroupServiceImpl groupService;
@@ -86,8 +90,8 @@ class UserGroupServiceImplTest {
     @Test
     void createGroup_ok() {
         //given
-        OffsetDateTime now = OffsetDateTime.now().minusSeconds(1);
-        SelfCareUser selfCareUser = SelfCareUser.builder("id")
+        Instant now = Instant.now().minusSeconds(1);
+        SelfCareUser selfCareUser = SelfCareUser.builder("userId")
                 .email("test@example.com")
                 .name("name")
                 .surname("surname")
@@ -95,7 +99,8 @@ class UserGroupServiceImplTest {
         TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
         TestSecurityContextHolder.setAuthentication(authenticationToken);
         List<UUID> members = List.of(UUID.randomUUID(), UUID.randomUUID());
-        UserGroupOperations input = TestUtils.mockInstance(new DummyGroup(), "setCreateAt", "setModifiedAt");
+        UserGroupOperations input = TestUtils.mockInstance(new DummyGroup(), "setId", "setCreateAt", "setModifiedAt");
+        input.setId("id");
         input.setMembers(members);
         Mockito.when(groupConnectorMock.insert(Mockito.any(UserGroupOperations.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0, UserGroupOperations.class));
@@ -103,15 +108,82 @@ class UserGroupServiceImplTest {
         UserGroupOperations output = groupService.createGroup(input);
         //then
         assertNotNull(output);
-        assertNotNull(output.getCreatedAt());
-        assertNotNull(output.getModifiedAt());
-        assertEquals(selfCareUser.getId(), output.getCreatedBy());
-        assertEquals(selfCareUser.getId(), output.getModifiedBy());
-        assertTrue(output.getCreatedAt().isAfter(now));
-        assertTrue(output.getModifiedAt().isAfter(now));
+
         Mockito.verify(groupConnectorMock, Mockito.times(1))
                 .insert(Mockito.any(UserGroupOperations.class));
         Mockito.verifyNoMoreInteractions(groupConnectorMock);
     }
 
+    @Test
+    void deleteGRoup_notExists() {
+        //given
+        String id = "id";
+        //when
+        Executable executable = () -> groupService.deleteGroup(id);
+        //then
+        Assertions.assertThrows(ResourceNotFoundException.class, executable);
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .findById(id);
+        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void deleteGroup_statusDeleted() {
+        //given
+        String id = "groupId";
+        SelfCareUser selfCareUser = SelfCareUser.builder("id")
+                .email("test@example.com")
+                .name("name")
+                .surname("surname")
+                .build();
+        TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
+        TestSecurityContextHolder.setAuthentication(authenticationToken);
+
+        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
+                .thenAnswer(invocation -> {
+                    UserGroupOperations input = TestUtils.mockInstance(new DummyGroup(), "setCreateAt", "setModifiedAt");
+                    List<UUID> members = List.of(UUID.randomUUID(), UUID.randomUUID());
+                    input.setMembers(members);
+                    input.setStatus(UserGroupStatus.DELETED);
+                    return Optional.of(input);
+                });
+        //when
+        groupService.deleteGroup(id);
+        //then
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .findById(Mockito.any());
+        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+
+    }
+
+    @Test
+    void deleteGroup_statusNotDeleted() {
+        //given
+        String id = "groupId";
+        SelfCareUser selfCareUser = SelfCareUser.builder("id")
+                .email("test@example.com")
+                .name("name")
+                .surname("surname")
+                .build();
+        TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
+        TestSecurityContextHolder.setAuthentication(authenticationToken);
+
+        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
+                .thenAnswer(invocation -> {
+                    UserGroupOperations input = TestUtils.mockInstance(new DummyGroup(), "setCreateAt", "setModifiedAt");
+                    List<UUID> members = List.of(UUID.randomUUID(), UUID.randomUUID());
+                    input.setMembers(members);
+                    input.setStatus(UserGroupStatus.ACTIVE);
+                    return Optional.of(input);
+                });
+        //when
+        groupService.deleteGroup(id);
+        //then
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .findById(Mockito.any());
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .deleteById(Mockito.any());
+        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+
+    }
 }
