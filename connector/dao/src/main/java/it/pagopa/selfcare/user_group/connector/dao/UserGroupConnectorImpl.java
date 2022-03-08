@@ -2,6 +2,7 @@ package it.pagopa.selfcare.user_group.connector.dao;
 
 
 import com.mongodb.DuplicateKeyException;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupConnector;
@@ -60,6 +61,10 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
 
     @Override
     public void deleteById(String id) {
+        DeleteResult result = mongoTemplate.remove(Query.query(Criteria.where("_id").is(id)), UserGroupEntity.class);
+        if (result.getDeletedCount() == 0) {
+            throw new ResourceNotFoundException();
+        }
         repository.deleteById(id);
     }
 
@@ -75,13 +80,12 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         SelfCareUser principal = ((SelfCareUser) authentication.getPrincipal());
 
         UpdateResult updateResult = mongoTemplate.updateFirst(
-                Query.query(Criteria.where("_id").is(id)
-                        .and("status").ne(status)),
+                Query.query(Criteria.where("_id").is(id)),
                 Update.update("status", status)
                         .currentTimestamp("modifiedAt")
                         .addToSet("modifiedBy", principal.getId()),
                 UserGroupEntity.class);
-        if (updateResult.getMatchedCount() != 1) {
+        if (updateResult.getMatchedCount() == 0) {
             throw new ResourceNotFoundException();
         }
     }

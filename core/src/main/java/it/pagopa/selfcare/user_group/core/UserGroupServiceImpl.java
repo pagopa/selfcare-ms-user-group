@@ -40,18 +40,26 @@ class UserGroupServiceImpl implements UserGroupService {
     public void deleteGroup(String id) {
         log.trace("deleteGroup start");
         log.debug("deleteGroup id = {}", id);
-        Assert.notNull(id, "A user group id is required");
+        Assert.hasText(id, "A user group id is required");
         groupConnector.deleteById(id);
         log.trace("deleteProduct end");
     }
 
     @Override
     public void suspendGroup(String id) {
-
+        log.trace("suspendGroup start");
+        log.debug("suspendGroup id = {}", id);
+        Assert.hasText(id, "A user group id is required");
+        groupConnector.suspendById(id);
+        log.trace("suspendGroup end");
     }
 
     @Override
     public void activateGroup(String id) {
-
+        log.trace("activateGroup start");
+        log.debug("activateGroup id = {}", id);
+        Assert.hasText(id, "A user group id is required");
+        groupConnector.activateById(id);
+        log.trace("activateGroup end");
     }
 }

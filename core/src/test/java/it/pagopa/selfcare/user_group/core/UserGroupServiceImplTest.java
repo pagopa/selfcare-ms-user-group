@@ -5,8 +5,6 @@ import it.pagopa.selfcare.commons.utils.TestUtils;
 import it.pagopa.selfcare.user_group.connector.DummyGroup;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupConnector;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
-import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
-import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +20,6 @@ import org.springframework.security.test.context.TestSecurityContextHolder;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -115,75 +112,77 @@ class UserGroupServiceImplTest {
     }
 
     @Test
-    void deleteGRoup_notExists() {
+    void deleteGroup() {
         //given
         String id = "id";
         //when
+        groupService.deleteGroup(id);
+        //then
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .deleteById(id);
+        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+    }
+
+
+    @Test
+    void deleteGroup_nullId() {
+        //given
+        String id = null;
+        //when
         Executable executable = () -> groupService.deleteGroup(id);
         //then
-        Assertions.assertThrows(ResourceNotFoundException.class, executable);
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("A user group id is required", e.getMessage());
+        Mockito.verifyNoInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void suspendGroup() {
+        //given
+        String id = "id";
+        //when
+        groupService.suspendGroup(id);
+        //then
         Mockito.verify(groupConnectorMock, Mockito.times(1))
-                .findById(id);
+                .suspendById(id);
+        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+    }
+
+
+    @Test
+    void suspendGroup_nullId() {
+        //given
+        String id = null;
+        //when
+        Executable executable = () -> groupService.suspendGroup(id);
+        //then
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("A user group id is required", e.getMessage());
+        Mockito.verifyNoInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void activateGroup() {
+        //given
+        String id = "id";
+        //when
+        groupService.activateGroup(id);
+        //then
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .activateById(id);
         Mockito.verifyNoMoreInteractions(groupConnectorMock);
     }
 
     @Test
-    void deleteGroup_statusDeleted() {
+    void activateGroup_nullId() {
         //given
-        String id = "groupId";
-        SelfCareUser selfCareUser = SelfCareUser.builder("id")
-                .email("test@example.com")
-                .name("name")
-                .surname("surname")
-                .build();
-        TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
-        TestSecurityContextHolder.setAuthentication(authenticationToken);
-
-        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
-                .thenAnswer(invocation -> {
-                    UserGroupOperations input = TestUtils.mockInstance(new DummyGroup(), "setCreateAt", "setModifiedAt");
-                    List<UUID> members = List.of(UUID.randomUUID(), UUID.randomUUID());
-                    input.setMembers(members);
-                    input.setStatus(UserGroupStatus.DELETED);
-                    return Optional.of(input);
-                });
+        String id = null;
         //when
-        groupService.deleteGroup(id);
+        Executable executable = () -> groupService.activateGroup(id);
         //then
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
-                .findById(Mockito.any());
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
-
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("A user group id is required", e.getMessage());
+        Mockito.verifyNoInteractions(groupConnectorMock);
     }
 
-    @Test
-    void deleteGroup_statusNotDeleted() {
-        //given
-        String id = "groupId";
-        SelfCareUser selfCareUser = SelfCareUser.builder("id")
-                .email("test@example.com")
-                .name("name")
-                .surname("surname")
-                .build();
-        TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
-        TestSecurityContextHolder.setAuthentication(authenticationToken);
-
-        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
-                .thenAnswer(invocation -> {
-                    UserGroupOperations input = TestUtils.mockInstance(new DummyGroup(), "setCreateAt", "setModifiedAt");
-                    List<UUID> members = List.of(UUID.randomUUID(), UUID.randomUUID());
-                    input.setMembers(members);
-                    input.setStatus(UserGroupStatus.ACTIVE);
-                    return Optional.of(input);
-                });
-        //when
-        groupService.deleteGroup(id);
-        //then
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
-                .findById(Mockito.any());
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
-                .deleteById(Mockito.any());
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
-
-    }
 }

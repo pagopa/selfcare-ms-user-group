@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.test.context.TestSecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
@@ -82,13 +84,14 @@ class UserGroupRepositoryTest {
         UserGroupEntity savedGroup = repository.insert(group);
         Optional<UserGroupEntity> found = repository.findById(savedGroup.getId());
         //when
-        repository.deleteById(savedGroup.getId());
+        mongoTemplate.remove(Query.query(Criteria.where("_id").is(savedGroup.getId())), UserGroupEntity.class);
         //then
         Optional<UserGroupEntity> deleted = repository.findById(savedGroup.getId());
         assertEquals(Optional.empty(), deleted);
 
     }
 
+    @Test
     void update() {
         //given
         Instant now = Instant.now().minusSeconds(1);

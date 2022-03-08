@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.user_group.connector.dao;
 
 import com.mongodb.DuplicateKeyException;
+import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.utils.TestUtils;
@@ -27,8 +28,7 @@ import org.springframework.security.test.context.TestSecurityContextHolder;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserGroupConnectorImplTest {
@@ -104,20 +104,111 @@ class UserGroupConnectorImplTest {
     void deleteById() {
         //given
         String groupId = "groupId";
-        Mockito.doNothing()
-                .when(repositoryMock)
-                .deleteById(Mockito.any());
+        SelfCareUser selfCareUser = SelfCareUser.builder("id")
+                .email("test@example.com")
+                .name("name")
+                .surname("surname")
+                .build();
+        TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
+        TestSecurityContextHolder.setAuthentication(authenticationToken);
+        DeleteResult result = TestUtils.mockInstance(new DeleteResult() {
+            @Override
+            public boolean wasAcknowledged() {
+                return false;
+            }
+
+            @Override
+            public long getDeletedCount() {
+                return 1;
+            }
+        });
+        Mockito.when(mongoTemplate.remove(Mockito.any(Query.class), (Class<?>) Mockito.any()))
+                .thenReturn(result);
         //when
-        groupConnector.deleteById(groupId);
+        Executable executable = () -> groupConnector.deleteById(groupId);
         //then
-        Mockito.verify(repositoryMock, Mockito.times(1))
-                .deleteById(groupId);
-        Mockito.verifyNoMoreInteractions(repositoryMock);
+        assertDoesNotThrow(executable);
+        Mockito.verify(mongoTemplate, Mockito.times(1))
+                .remove(Mockito.any(Query.class), (Class<?>) Mockito.any());
+        Mockito.verifyNoMoreInteractions(mongoTemplate);
 
     }
 
     @Test
+    void deleteById_resourceNotFound() {
+        //given
+        String groupId = "groupId";
+        SelfCareUser selfCareUser = SelfCareUser.builder("id")
+                .email("test@example.com")
+                .name("name")
+                .surname("surname")
+                .build();
+        TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
+        TestSecurityContextHolder.setAuthentication(authenticationToken);
+        DeleteResult result = TestUtils.mockInstance(new DeleteResult() {
+            @Override
+            public boolean wasAcknowledged() {
+                return false;
+            }
+
+            @Override
+            public long getDeletedCount() {
+                return 0;
+            }
+        });
+        Mockito.when(mongoTemplate.remove(Mockito.any(Query.class), (Class<?>) Mockito.any()))
+                .thenReturn(result);
+        //when
+        Executable executable = () -> groupConnector.deleteById(groupId);
+        //then
+        assertThrows(ResourceNotFoundException.class, executable);
+        Mockito.verify(mongoTemplate, Mockito.times(1))
+                .remove(Mockito.any(Query.class), (Class<?>) Mockito.any());
+        Mockito.verifyNoMoreInteractions(mongoTemplate);
+    }
+
+    @Test
     void updateById() {
+        //given
+        String groupId = "groupId";
+        SelfCareUser selfCareUser = SelfCareUser.builder("id")
+                .email("test@example.com")
+                .name("name")
+                .surname("surname")
+                .build();
+        TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
+        TestSecurityContextHolder.setAuthentication(authenticationToken);
+        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+            @Override
+            public boolean wasAcknowledged() {
+                return false;
+            }
+
+            @Override
+            public long getMatchedCount() {
+                return 1;
+            }
+
+            @Override
+            public long getModifiedCount() {
+                return 1;
+            }
+
+            @Override
+            public BsonValue getUpsertedId() {
+                return null;
+            }
+        });
+        Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+                .thenReturn(result);
+        //when
+        Executable executable = () -> groupConnector.suspendById(groupId);
+        //then
+        assertDoesNotThrow(executable);
+        Mockito.verify(mongoTemplate, Mockito.times(1))
+                .updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any());
+        Mockito.verifyNoMoreInteractions(mongoTemplate);
+
 
     }
 
@@ -158,7 +249,99 @@ class UserGroupConnectorImplTest {
         //when
         Executable executable = () -> groupConnector.suspendById(groupId);
         //then
-        ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class, executable);
+        assertThrows(ResourceNotFoundException.class, executable);
+        Mockito.verify(mongoTemplate, Mockito.times(1))
+                .updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any());
+        Mockito.verifyNoMoreInteractions(mongoTemplate);
+
+    }
+
+    @Test
+    void activateById() {
+        //given
+        String groupId = "groupId";
+        SelfCareUser selfCareUser = SelfCareUser.builder("id")
+                .email("test@example.com")
+                .name("name")
+                .surname("surname")
+                .build();
+        TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
+        TestSecurityContextHolder.setAuthentication(authenticationToken);
+        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+            @Override
+            public boolean wasAcknowledged() {
+                return false;
+            }
+
+            @Override
+            public long getMatchedCount() {
+                return 1;
+            }
+
+            @Override
+            public long getModifiedCount() {
+                return 1;
+            }
+
+            @Override
+            public BsonValue getUpsertedId() {
+                return null;
+            }
+        });
+        Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+                .thenReturn(result);
+        //when
+        Executable executable = () -> groupConnector.activateById(groupId);
+        //then
+        assertDoesNotThrow(executable);
+        Mockito.verify(mongoTemplate, Mockito.times(1))
+                .updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any());
+        Mockito.verifyNoMoreInteractions(mongoTemplate);
+
+
+    }
+
+    @Test
+    void activateById_resourceNotFound() {
+        //given
+        String groupId = "groupId";
+        SelfCareUser selfCareUser = SelfCareUser.builder("id")
+                .email("test@example.com")
+                .name("name")
+                .surname("surname")
+                .build();
+        TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
+        TestSecurityContextHolder.setAuthentication(authenticationToken);
+        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+            @Override
+            public boolean wasAcknowledged() {
+                return false;
+            }
+
+            @Override
+            public long getMatchedCount() {
+                return 0;
+            }
+
+            @Override
+            public long getModifiedCount() {
+                return 1;
+            }
+
+            @Override
+            public BsonValue getUpsertedId() {
+                return null;
+            }
+        });
+        Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+                .thenReturn(result);
+        //when
+        Executable executable = () -> groupConnector.activateById(groupId);
+        //then
+        assertThrows(ResourceNotFoundException.class, executable);
+        Mockito.verify(mongoTemplate, Mockito.times(1))
+                .updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any());
+        Mockito.verifyNoMoreInteractions(mongoTemplate);
 
     }
 }
