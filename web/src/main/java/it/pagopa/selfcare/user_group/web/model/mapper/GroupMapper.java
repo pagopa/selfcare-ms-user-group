@@ -63,7 +63,6 @@ public class GroupMapper {
 
             group.setName(dto.getName());
             group.setDescription(dto.getDescription());
-            group.setStatus(dto.getStatus());
             group.setMembers(dto.getMembers());
         }
         log.debug("fromDto group = {}", group);

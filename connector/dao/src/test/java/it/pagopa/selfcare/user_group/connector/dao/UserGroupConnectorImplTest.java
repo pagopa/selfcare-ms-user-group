@@ -168,7 +168,7 @@ class UserGroupConnectorImplTest {
     }
 
     @Test
-    void updateById() {
+    void suspendById() {
         //given
         String groupId = "groupId";
         SelfCareUser selfCareUser = SelfCareUser.builder("id")
@@ -213,7 +213,7 @@ class UserGroupConnectorImplTest {
     }
 
     @Test
-    void updateById_resourceNotFound() {
+    void suspendById_resourceNotFound() {
         //given
         String groupId = "groupId";
         SelfCareUser selfCareUser = SelfCareUser.builder("id")
@@ -342,6 +342,21 @@ class UserGroupConnectorImplTest {
         Mockito.verify(mongoTemplate, Mockito.times(1))
                 .updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any());
         Mockito.verifyNoMoreInteractions(mongoTemplate);
+    }
 
+    @Test
+    void save() {
+        //given
+        String id = "id";
+        UserGroupEntity entity = TestUtils.mockInstance(new UserGroupEntity());
+        Mockito.when(repositoryMock.save(Mockito.any()))
+                .thenReturn(entity);
+        //when
+        UserGroupOperations saved = groupConnector.save(entity);
+        //then
+        assertEquals(entity, saved);
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .save(entity);
+        Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 }

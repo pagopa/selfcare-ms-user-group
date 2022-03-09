@@ -49,6 +49,11 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
     }
 
     @Override
+    public UserGroupOperations save(UserGroupOperations entity) {
+        return repository.save(new UserGroupEntity(entity));
+    }
+
+    @Override
     public Optional<UserGroupOperations> findById(String id) {
         return repository.findById(id).map(Function.identity());
     }

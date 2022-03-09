@@ -3,6 +3,9 @@ package it.pagopa.selfcare.user_group.core;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupConnector;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
+import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.user_group.connector.exception.ResourceUpdateException;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -65,6 +68,20 @@ class UserGroupServiceImpl implements UserGroupService {
 
     @Override
     public UserGroupOperations updateGroup(String id, UserGroupOperations group) {
-        return null;
+        log.trace("updateGroup start");
+        log.debug("updateGroup id = {}, group = {}", id, group);
+        Assert.hasText(id, "A user group id is required");
+        Assert.notNull(group, "A user group is required");
+        UserGroupOperations foundGroup = groupConnector.findById(id).orElseThrow(ResourceNotFoundException::new);
+        if (UserGroupStatus.SUSPENDED.equals(foundGroup.getStatus())) {
+            throw new ResourceUpdateException("Trying to modify suspended group");
+        }
+        foundGroup.setMembers(group.getMembers());
+        foundGroup.setName(group.getName());
+        foundGroup.setDescription(group.getDescription());
+        UserGroupOperations updatedGroup = groupConnector.save(foundGroup);
+        log.debug("updateGroup updatedGroup = {}", updatedGroup);
+        log.trace("updateGroup end");
+        return updatedGroup;
     }
 }

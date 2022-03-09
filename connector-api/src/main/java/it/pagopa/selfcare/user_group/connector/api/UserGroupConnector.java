@@ -5,6 +5,8 @@ import java.util.Optional;
 public interface UserGroupConnector {
     UserGroupOperations insert(UserGroupOperations entity);
 
+    UserGroupOperations save(UserGroupOperations entity);
+
     Optional<UserGroupOperations> findById(String id);
 
     void activateById(String id);

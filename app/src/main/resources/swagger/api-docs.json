@@ -66,6 +66,66 @@
       }
     },
     "/user-groups/{id}": {
+      "put": {
+        "tags": [
+          "user-group"
+        ],
+        "summary": "updateUserGroup",
+        "description": "${swagger.user-group.groups.api.updateUserGroup}",
+        "operationId": "updateUserGroupUsingPUT",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Users group's unique identifier",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserGroupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserGroupResource"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "global"
+            ]
+          }
+        ]
+      },
       "delete": {
         "tags": [
           "user-group"
@@ -243,6 +303,33 @@
               "ACTIVE",
               "SUSPENDED"
             ]
+          }
+        }
+      },
+      "UpdateUserGroupDto": {
+        "title": "UpdateUserGroupDto",
+        "required": [
+          "description",
+          "members",
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Users group's description"
+          },
+          "members": {
+            "type": "array",
+            "description": "List of all the members of the group",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "name": {
+            "type": "string",
+            "description": "Users group's name"
           }
         }
       },

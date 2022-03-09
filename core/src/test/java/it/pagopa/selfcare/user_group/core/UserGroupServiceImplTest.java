@@ -5,6 +5,9 @@ import it.pagopa.selfcare.commons.utils.TestUtils;
 import it.pagopa.selfcare.user_group.connector.DummyGroup;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupConnector;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
+import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.user_group.connector.exception.ResourceUpdateException;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +23,7 @@ import org.springframework.security.test.context.TestSecurityContextHolder;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -185,4 +189,84 @@ class UserGroupServiceImplTest {
         Mockito.verifyNoInteractions(groupConnectorMock);
     }
 
+    @Test
+    void updateGroup_nullId() {
+        //griven
+        String id = null;
+        UserGroupOperations input = new DummyGroup();
+        //when
+        Executable executable = () -> groupService.updateGroup(id, input);
+        //then
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("A user group id is required", e.getMessage());
+        Mockito.verifyNoInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void updateGroup_nullGroup() {
+        //given
+        String id = "id";
+        UserGroupOperations input = null;
+        //when
+        Executable executable = () -> groupService.updateGroup(id, input);
+        //then
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("A user group is required", e.getMessage());
+        Mockito.verifyNoInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void updateGroup_foundGroupSuspended() {
+        //given
+        String id = "id";
+        UserGroupOperations group = TestUtils.mockInstance(new DummyGroup());
+        group.setStatus(UserGroupStatus.SUSPENDED);
+        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
+                .thenReturn(Optional.of(group));
+        //when
+        Executable executable = () -> groupService.updateGroup(id, group);
+        //then
+        ResourceUpdateException e = assertThrows(ResourceUpdateException.class, executable);
+        assertEquals("Trying to modify suspended group", e.getMessage());
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .findById(id);
+        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void updateGroup_notExists() {
+        //given
+        String id = "id";
+        UserGroupOperations input = new DummyGroup();
+        //when
+        Executable executable = () -> groupService.updateGroup(id, input);
+        //then
+        assertThrows(ResourceNotFoundException.class, executable);
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .findById(id);
+        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void updateGroup_exists() {
+        //given
+        String id = "id";
+        UserGroupOperations group = TestUtils.mockInstance(new DummyGroup(), "setId");
+        UserGroupOperations foundGroup = TestUtils.mockInstance(new DummyGroup());
+        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
+                .thenReturn(Optional.of(foundGroup));
+        Mockito.when(groupConnectorMock.save(Mockito.any()))
+                .thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0, UserGroupOperations.class));
+        //when
+        UserGroupOperations saved = groupService.updateGroup(id, group);
+        //then
+        assertEquals(saved.getDescription(), group.getDescription());
+        assertEquals(saved.getMembers(), group.getMembers());
+        assertEquals(saved.getName(), group.getName());
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .findById(id);
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .save(Mockito.any());
+        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+    }
 }

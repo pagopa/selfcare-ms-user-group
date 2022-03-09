@@ -17,8 +17,8 @@ public class DummyGroup implements UserGroupOperations {
     private String productId;
     private String name;
     private String description;
-    private UserGroupStatus status;
-    private List<UUID> members;
+    private UserGroupStatus status = UserGroupStatus.ACTIVE;
+    private List<UUID> members = List.of(UUID.randomUUID());
     private Instant createdAt;
     private String createdBy;
     private Instant modifiedAt;

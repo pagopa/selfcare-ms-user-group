@@ -108,11 +108,14 @@ class UserGroupRepositoryTest {
                 "setModifiedAt",
                 "setModifiedBy");
         UserGroupEntity savedGroup = repository.insert(group);
-        group.setStatus(UserGroupStatus.SUSPENDED);
+        Optional<UserGroupEntity> groupMod = repository.findById(savedGroup.getId());
+        groupMod.get().setId(savedGroup.getId());
+        groupMod.get().setStatus(UserGroupStatus.SUSPENDED);
         //when
-        UserGroupEntity modifiedGroup = repository.save(group);
+        UserGroupEntity modifiedGroup = repository.save(groupMod.get());
         //then
         assertTrue(modifiedGroup.getModifiedAt().isAfter(savedGroup.getCreatedAt()));
+        assertEquals(UserGroupStatus.ACTIVE, savedGroup.getStatus());
         assertEquals(UserGroupStatus.SUSPENDED, modifiedGroup.getStatus());
     }
 
