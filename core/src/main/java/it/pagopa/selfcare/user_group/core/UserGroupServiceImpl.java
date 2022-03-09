@@ -62,4 +62,9 @@ class UserGroupServiceImpl implements UserGroupService {
         groupConnector.activateById(id);
         log.trace("activateGroup end");
     }
+
+    @Override
+    public UserGroupOperations updateGroup(String id, UserGroupOperations group) {
+        return null;
+    }
 }

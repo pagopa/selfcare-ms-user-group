@@ -3,6 +3,7 @@ package it.pagopa.selfcare.user_group.web.model.mapper;
 import it.pagopa.selfcare.commons.utils.TestUtils;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.web.model.CreateUserGroupDto;
+import it.pagopa.selfcare.user_group.web.model.UpdateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
 import org.junit.jupiter.api.Test;
 
@@ -46,7 +47,7 @@ class GroupMapperTest {
     }
 
     @Test
-    void fromDto_notNull() {
+    void fromDto_notNullCreate() {
         //given
         CreateUserGroupDto dto = TestUtils.mockInstance(new CreateUserGroupDto());
         dto.setMembers(List.of(UUID.randomUUID()));
@@ -58,10 +59,33 @@ class GroupMapperTest {
     }
 
     @Test
-    void fromDto_null() {
+    void fromDto_nullCreate() {
         //given
+        CreateUserGroupDto dto = null;
         //when
-        UserGroupOperations group = GroupMapper.fromDto(null);
+        UserGroupOperations group = GroupMapper.fromDto(dto);
+        //then
+        assertNull(group);
+    }
+
+    @Test
+    void fromDto_notNullUpdate() {
+        //given
+        UpdateUserGroupDto dto = TestUtils.mockInstance(new UpdateUserGroupDto());
+        dto.setMembers(List.of(UUID.randomUUID()));
+        //when
+        UserGroupOperations group = GroupMapper.fromDto(dto);
+        //then
+        assertNotNull(group);
+        TestUtils.reflectionEqualsByName(group, dto);
+    }
+
+    @Test
+    void fromDto_nullUpdate() {
+        //given
+        UpdateUserGroupDto dto = null;
+        //when
+        UserGroupOperations group = GroupMapper.fromDto(dto);
         //then
         assertNull(group);
     }

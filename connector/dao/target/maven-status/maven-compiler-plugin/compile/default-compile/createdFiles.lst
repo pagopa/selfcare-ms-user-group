@@ -1,6 +1,0 @@
-it\pagopa\selfcare\user_group\connector\dao\config\OffsetDateTimeToStringConverter.class
-it\pagopa\selfcare\user_group\connector\dao\config\StringToOffsetDateTimeConverter.class
-it\pagopa\selfcare\user_group\connector\dao\config\DaoConfig.class
-it\pagopa\selfcare\user_group\connector\dao\model\GroupEntity.class
-it\pagopa\selfcare\user_group\connector\dao\UserGroupRepository.class
-it\pagopa\selfcare\user_group\connector\dao\UserGroupConnectorImpl.class

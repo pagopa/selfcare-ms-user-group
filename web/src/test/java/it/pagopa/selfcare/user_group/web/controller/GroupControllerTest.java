@@ -9,6 +9,7 @@ import it.pagopa.selfcare.user_group.core.UserGroupService;
 import it.pagopa.selfcare.user_group.web.config.WebTestConfig;
 import it.pagopa.selfcare.user_group.web.handler.GroupExceptionHandler;
 import it.pagopa.selfcare.user_group.web.model.DummyCreateUserGroupDto;
+import it.pagopa.selfcare.user_group.web.model.DummyUpdateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -24,6 +25,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.util.List;
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -37,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class GroupControllerTest {
 
     private static final DummyCreateUserGroupDto CREATE_USER_GROUP_DTO = TestUtils.mockInstance(new DummyCreateUserGroupDto());
+    private static final DummyUpdateUserGroupDto UPDATE_USER_GROUP_DTO = TestUtils.mockInstance(new DummyUpdateUserGroupDto());
     private static final String BASE_URL = "/user-groups";
 
     @MockBean
@@ -173,6 +178,32 @@ class GroupControllerTest {
         Mockito.verify(groupServiceMock, Mockito.times(1))
                 .suspendGroup(groupId);
         Mockito.verifyNoMoreInteractions(groupServiceMock);
+    }
+
+    @Test
+    void updateGroup_exists() throws Exception {
+        //given
+        Mockito.when(groupServiceMock.updateGroup(Mockito.anyString(), Mockito.any(UserGroupOperations.class)))
+                .thenAnswer(invocationOnMock -> {
+                    String id = invocationOnMock.getArgument(0, String.class);
+                    UserGroupOperations group = invocationOnMock.getArgument(1, UserGroupOperations.class);
+                    group.setId(id);
+                    group.setMembers(List.of(UUID.randomUUID(), UUID.randomUUID()));
+                    return group;
+                });
+        //when
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                .put(BASE_URL + "/id")
+                .content(mapper.writeValueAsString(UPDATE_USER_GROUP_DTO))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andReturn();
+        //then
+        UserGroupResource group = mapper.readValue(result.getResponse().getContentAsString(), UserGroupResource.class);
+
+        assertNotNull(group);
+        TestUtils.reflectionEqualsByName(UPDATE_USER_GROUP_DTO, group);
     }
 
 }

@@ -1,7 +1,0 @@
-it\pagopa\selfcare\user_group\web\controller\GroupControllerTest.class
-it\pagopa\selfcare\user_group\web\model\mapper\GroupMapperTest.class
-it\pagopa\selfcare\user_group\web\controller\DummyController.class
-it\pagopa\selfcare\user_group\web\model\CreateUserGroupDtoTest.class
-it\pagopa\selfcare\user_group\web\model\DummyCreateUserGroupDto.class
-it\pagopa\selfcare\user_group\web\config\WebTestConfig.class
-it\pagopa\selfcare\user_group\web\model\mapper\DummyGroupOperations.class
