@@ -6,7 +6,6 @@ import lombok.Data;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 public class DummyGroup implements UserGroupOperations {
@@ -18,7 +17,7 @@ public class DummyGroup implements UserGroupOperations {
     private String name;
     private String description;
     private UserGroupStatus status = UserGroupStatus.ACTIVE;
-    private List<UUID> members = List.of(UUID.randomUUID());
+    private List<String> members = List.of("string1", "string2");
     private Instant createdAt;
     private String createdBy;
     private Instant modifiedAt;

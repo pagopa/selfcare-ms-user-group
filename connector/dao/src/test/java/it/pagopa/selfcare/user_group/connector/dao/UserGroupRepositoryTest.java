@@ -20,6 +20,7 @@ import org.springframework.security.test.context.TestSecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -141,14 +142,53 @@ class UserGroupRepositoryTest {
         UserGroupEntity savedGroup = repository.insert(group);
         UUID memberUID = UUID.randomUUID();
         //when
-        UpdateResult updateResult = mongoTemplate.updateFirst(
+        UpdateResult updateResult1 = mongoTemplate.updateFirst(
+                Query.query(Criteria.where("_id").is(savedGroup.getId())),
+                new Update().push("members", memberUID.toString()),
+                UserGroupEntity.class);
+        UpdateResult updateResult2 = mongoTemplate.updateFirst(
+                Query.query(Criteria.where("_id").is(savedGroup.getId())),
+                new Update().push("members", UUID.randomUUID()),
+                UserGroupEntity.class);
+        UpdateResult updateResult3 = mongoTemplate.updateFirst(
                 Query.query(Criteria.where("_id").is(savedGroup.getId())),
                 new Update().push("members", memberUID.toString()),
                 UserGroupEntity.class);
         //then
         Optional<UserGroupEntity> groupMod = repository.findById(savedGroup.getId());
-        assertTrue(updateResult.getMatchedCount() == 1);
+        assertTrue(updateResult1.getMatchedCount() == 1);
+        assertTrue(updateResult2.getMatchedCount() == 1);
+        assertTrue(updateResult3.getMatchedCount() == 1);
+        assertEquals(3, groupMod.get().getMembers().size());
     }
 
+    @Test
+    void findByInstitutionIdAndProductId() {
+        //given
+        Instant now = Instant.now().minusSeconds(1);
+        SelfCareUser selfCareUser = SelfCareUser.builder("id")
+                .email("test@example.com")
+                .name("name")
+                .surname("surname")
+                .build();
+        TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
+        TestSecurityContextHolder.setAuthentication(authenticationToken);
+        UserGroupEntity group = TestUtils.mockInstance(new UserGroupEntity(), "setId",
+                "setCreatedAt",
+                "setCreateBy",
+                "setModifiedAt",
+                "setModifiedBy");
+        String productId = "productId";
+        String institutionId = "institutionId";
+        group.setProductId(productId);
+        group.setInstitutionId(institutionId);
+        UserGroupEntity savedGroup = repository.insert(group);
+        //when
+        List<UserGroupEntity> groupMod = repository.findByInstitutionIdAndProductId(institutionId, productId);
+        //then
+        assertEquals(1, groupMod.size());
+
+
+    }
 
 }

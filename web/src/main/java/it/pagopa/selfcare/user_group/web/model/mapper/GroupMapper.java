@@ -7,6 +7,9 @@ import it.pagopa.selfcare.user_group.web.model.UpdateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 @Slf4j
 public class GroupMapper {
 
@@ -23,7 +26,7 @@ public class GroupMapper {
             resource.setProductId(entity.getProductId());
             resource.setName(entity.getName());
             resource.setDescription(entity.getDescription());
-            resource.setMembers(entity.getMembers());
+            resource.setMembers(entity.getMembers().stream().map(UUID::fromString).collect(Collectors.toList()));
             resource.setStatus(entity.getStatus());
             resource.setCreatedAt(entity.getCreatedAt());
             resource.setCreatedBy(entity.getCreatedBy());
@@ -46,7 +49,7 @@ public class GroupMapper {
             group.setName(dto.getName());
             group.setDescription(dto.getDescription());
             group.setStatus(dto.getStatus());
-            group.setMembers(dto.getMembers());
+            group.setMembers(dto.getMembers().stream().map(UUID::toString).collect(Collectors.toList()));
         }
         log.debug("fromDto group = {}", group);
         log.trace("fromDto end");
@@ -63,7 +66,7 @@ public class GroupMapper {
 
             group.setName(dto.getName());
             group.setDescription(dto.getDescription());
-            group.setMembers(dto.getMembers());
+            group.setMembers(dto.getMembers().stream().map(UUID::toString).collect(Collectors.toList()));
         }
         log.debug("fromDto group = {}", group);
         log.trace("fromDto end");

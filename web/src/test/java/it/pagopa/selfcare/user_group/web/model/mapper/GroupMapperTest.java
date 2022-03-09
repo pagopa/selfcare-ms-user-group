@@ -20,7 +20,7 @@ class GroupMapperTest {
         // given
         Instant now = Instant.now().minusSeconds(1);
         UserGroupOperations group = TestUtils.mockInstance(new DummyGroupOperations());
-        group.setMembers(List.of(UUID.randomUUID()));
+        group.setMembers(List.of(UUID.randomUUID().toString()));
         //when
         UserGroupResource resource = GroupMapper.toResource(group);
         //then

@@ -25,6 +25,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -102,7 +103,7 @@ class UserGroupServiceImplTest {
         List<UUID> members = List.of(UUID.randomUUID(), UUID.randomUUID());
         UserGroupOperations input = TestUtils.mockInstance(new DummyGroup(), "setId", "setCreateAt", "setModifiedAt");
         input.setId("id");
-        input.setMembers(members);
+        input.setMembers(members.stream().map(UUID::toString).collect(Collectors.toList()));
         Mockito.when(groupConnectorMock.insert(Mockito.any(UserGroupOperations.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0, UserGroupOperations.class));
         //when

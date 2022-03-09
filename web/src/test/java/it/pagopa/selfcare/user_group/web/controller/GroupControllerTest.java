@@ -189,7 +189,7 @@ class GroupControllerTest {
                     String id = invocationOnMock.getArgument(0, String.class);
                     UserGroupOperations group = invocationOnMock.getArgument(1, UserGroupOperations.class);
                     group.setId(id);
-                    group.setMembers(List.of(UUID.randomUUID(), UUID.randomUUID()));
+                    group.setMembers(List.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()));
                     return group;
                 });
         //when

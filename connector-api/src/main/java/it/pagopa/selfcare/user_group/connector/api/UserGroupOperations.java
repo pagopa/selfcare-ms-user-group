@@ -4,7 +4,6 @@ import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 public interface UserGroupOperations {
 
@@ -32,9 +31,9 @@ public interface UserGroupOperations {
 
     void setStatus(UserGroupStatus status);
 
-    List<UUID> getMembers();
+    List<String> getMembers();
 
-    void setMembers(List<UUID> members);
+    void setMembers(List<String> members);
 
     Instant getCreatedAt();
 
