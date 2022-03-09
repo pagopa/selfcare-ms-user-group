@@ -10,6 +10,7 @@ import it.pagopa.selfcare.user_group.web.config.WebTestConfig;
 import it.pagopa.selfcare.user_group.web.handler.GroupExceptionHandler;
 import it.pagopa.selfcare.user_group.web.model.DummyCreateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.DummyUpdateUserGroupDto;
+import it.pagopa.selfcare.user_group.web.model.MemberUUID;
 import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -204,6 +205,27 @@ class GroupControllerTest {
 
         assertNotNull(group);
         TestUtils.reflectionEqualsByName(UPDATE_USER_GROUP_DTO, group);
+    }
+
+    @Test
+    void addMember() throws Exception {
+        //given
+        String groupId = "groupId";
+        MemberUUID member = new MemberUUID();
+        member.setMember(UUID.randomUUID());
+        //when
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                .patch(BASE_URL + "/groupId/members")
+                .content(mapper.writeValueAsString(member))
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andReturn();
+        //then
+        assertEquals(0, result.getResponse().getContentLength());
+        Mockito.verify(groupServiceMock, Mockito.times(1))
+                .addMember(groupId, member.getMember());
+        Mockito.verifyNoMoreInteractions(groupServiceMock);
     }
 
 }

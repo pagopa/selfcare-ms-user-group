@@ -7,6 +7,8 @@ public interface UserGroupConnector {
 
     UserGroupOperations save(UserGroupOperations entity);
 
+    void insertMember(String id, String memberId);
+
     Optional<UserGroupOperations> findById(String id);
 
     void activateById(String id);

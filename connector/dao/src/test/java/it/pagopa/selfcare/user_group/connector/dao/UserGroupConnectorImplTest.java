@@ -27,6 +27,7 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.test.context.TestSecurityContextHolder;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -339,6 +340,81 @@ class UserGroupConnectorImplTest {
         Executable executable = () -> groupConnector.activateById(groupId);
         //then
         assertThrows(ResourceNotFoundException.class, executable);
+        Mockito.verify(mongoTemplate, Mockito.times(1))
+                .updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any());
+        Mockito.verifyNoMoreInteractions(mongoTemplate);
+    }
+
+    @Test
+    void insertMember_resourceNotFound() {
+        //given
+        String groupId = "groupId";
+        String memberId = UUID.randomUUID().toString();
+        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+            @Override
+            public boolean wasAcknowledged() {
+                return false;
+            }
+
+            @Override
+            public long getMatchedCount() {
+                return 0;
+            }
+
+            @Override
+            public long getModifiedCount() {
+                return 1;
+            }
+
+            @Override
+            public BsonValue getUpsertedId() {
+                return null;
+            }
+        });
+        Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+                .thenReturn(result);
+        //when
+        Executable executable = () -> groupConnector.insertMember(groupId, memberId);
+        //then
+        assertThrows(ResourceNotFoundException.class, executable);
+        Mockito.verify(mongoTemplate, Mockito.times(1))
+                .updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any());
+        Mockito.verifyNoMoreInteractions(mongoTemplate);
+    }
+
+    @Test
+    void insertMember() {
+        //given
+        String groupId = "groupId";
+        String memberId = UUID.randomUUID().toString();
+
+        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+            @Override
+            public boolean wasAcknowledged() {
+                return false;
+            }
+
+            @Override
+            public long getMatchedCount() {
+                return 1;
+            }
+
+            @Override
+            public long getModifiedCount() {
+                return 1;
+            }
+
+            @Override
+            public BsonValue getUpsertedId() {
+                return null;
+            }
+        });
+        Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+                .thenReturn(result);
+        //when
+        Executable executable = () -> groupConnector.insertMember(groupId, memberId);
+        //then
+        assertDoesNotThrow(executable);
         Mockito.verify(mongoTemplate, Mockito.times(1))
                 .updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any());
         Mockito.verifyNoMoreInteractions(mongoTemplate);

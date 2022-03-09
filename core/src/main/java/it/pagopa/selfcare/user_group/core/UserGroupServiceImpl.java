@@ -13,6 +13,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.util.UUID;
+
 @Slf4j
 @Service
 class UserGroupServiceImpl implements UserGroupService {
@@ -37,6 +39,17 @@ class UserGroupServiceImpl implements UserGroupService {
         log.debug("insert = {}", insert);
         log.trace("createGroup end");
         return insert;
+    }
+
+    @Override
+    public UserGroupOperations addMember(String id, UUID memberId) {
+        log.trace("addMember start");
+        log.debug("addMember id = {}", id);
+        Assert.hasText(id, "A user group id is required");
+        Assert.notNull(memberId, "A member id is required");
+        groupConnector.insertMember(id, memberId.toString());
+        log.trace("addMember end");
+        return null;
     }
 
     @Override

@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiParam;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.core.UserGroupService;
 import it.pagopa.selfcare.user_group.web.model.CreateUserGroupDto;
+import it.pagopa.selfcare.user_group.web.model.MemberUUID;
 import it.pagopa.selfcare.user_group.web.model.UpdateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
 import it.pagopa.selfcare.user_group.web.model.mapper.GroupMapper;
@@ -99,6 +100,21 @@ public class GroupController {
         log.debug("updateUserGroup result = {}", result);
         log.trace("updateUserGroup end");
         return result;
+    }
+
+    @PatchMapping(value = "/{id}/members")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.addMember}")
+    public void addMemberToUserGroup(@ApiParam("${swagger.user-group.model.id}")
+                                     @PathVariable("id")
+                                             String id,
+                                     @RequestBody
+                                     @Valid
+                                             MemberUUID member) {
+        log.trace("addMemberToUserGroup start");
+        log.debug("addMemberToUserGroup id = {}", id);
+        groupService.addMember(id, member.getMember());
+        log.trace("addMemberToUserGroup end");
     }
 
 }

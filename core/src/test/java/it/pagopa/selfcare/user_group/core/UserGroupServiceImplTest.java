@@ -191,7 +191,7 @@ class UserGroupServiceImplTest {
 
     @Test
     void updateGroup_nullId() {
-        //griven
+        //given
         String id = null;
         UserGroupOperations input = new DummyGroup();
         //when
@@ -267,6 +267,45 @@ class UserGroupServiceImplTest {
                 .findById(id);
         Mockito.verify(groupConnectorMock, Mockito.times(1))
                 .save(Mockito.any());
+        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void addMember_nullId() {
+        //given
+        String id = null;
+        UUID memberId = UUID.randomUUID();
+        //when
+        Executable executable = () -> groupService.addMember(id, memberId);
+        //then
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("A user group id is required", e.getMessage());
+        Mockito.verifyNoInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void addMember_nullMemberId() {
+        //given
+        String id = "id";
+        UUID memberId = null;
+        //when
+        Executable executable = () -> groupService.addMember(id, memberId);
+        //then
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("A member id is required", e.getMessage());
+        Mockito.verifyNoInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void addMember() {
+        //given
+        String id = "id";
+        UUID memberUUID = UUID.randomUUID();
+        //when
+        groupService.addMember(id, memberUUID);
+        //then
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .insertMember(Mockito.anyString(), Mockito.anyString());
         Mockito.verifyNoMoreInteractions(groupConnectorMock);
     }
 }
