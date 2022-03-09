@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.user_group.connector.dao;
 
+import com.mongodb.client.result.UpdateResult;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.utils.TestUtils;
 import it.pagopa.selfcare.user_group.connector.dao.config.DaoTestConfig;
@@ -13,12 +14,14 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.test.context.TestSecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -117,6 +120,34 @@ class UserGroupRepositoryTest {
         assertTrue(modifiedGroup.getModifiedAt().isAfter(savedGroup.getCreatedAt()));
         assertEquals(UserGroupStatus.ACTIVE, savedGroup.getStatus());
         assertEquals(UserGroupStatus.SUSPENDED, modifiedGroup.getStatus());
+    }
+
+    @Test
+    void addMember() {
+        //given
+        Instant now = Instant.now().minusSeconds(1);
+        SelfCareUser selfCareUser = SelfCareUser.builder("id")
+                .email("test@example.com")
+                .name("name")
+                .surname("surname")
+                .build();
+        TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
+        TestSecurityContextHolder.setAuthentication(authenticationToken);
+        UserGroupEntity group = TestUtils.mockInstance(new UserGroupEntity(), "setId",
+                "setCreatedAt",
+                "setCreateBy",
+                "setModifiedAt",
+                "setModifiedBy");
+        UserGroupEntity savedGroup = repository.insert(group);
+        UUID memberUID = UUID.randomUUID();
+        //when
+        UpdateResult updateResult = mongoTemplate.updateFirst(
+                Query.query(Criteria.where("_id").is(savedGroup.getId())),
+                new Update().push("members", memberUID.toString()),
+                UserGroupEntity.class);
+        //then
+        Optional<UserGroupEntity> groupMod = repository.findById(savedGroup.getId());
+        assertTrue(updateResult.getMatchedCount() == 1);
     }
 
 
