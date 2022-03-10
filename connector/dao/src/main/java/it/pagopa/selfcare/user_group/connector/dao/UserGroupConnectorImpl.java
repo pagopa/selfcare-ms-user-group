@@ -72,7 +72,8 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
                 Query.query(Criteria.where("_id").is(id)
                         .and("status").is(UserGroupStatus.ACTIVE)),
                 new Update().push("members", memberId),
-                UserGroupEntity.class);
+                UserGroupEntity.class);//TODO change logic for adding method, makea control first on the group state
+
 //        UpdateResult updateResult = mongoTemplate.findAndModify(
 //                Query.query(Criteria.where("_id").is(id)
 //                        .and("status").is(UserGroupStatus.ACTIVE)),

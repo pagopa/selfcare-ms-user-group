@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Pageable;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.AuthorizationScope;
@@ -48,7 +49,6 @@ class SwaggerConfig {
         this.environment = environment;
     }
 
-
     @Bean
     public Docket swaggerSpringPlugin() {
         return (new Docket(DocumentationType.OAS_30))
@@ -60,6 +60,7 @@ class SwaggerConfig {
                 .select().apis(RequestHandlerSelectors.basePackage("it.pagopa.selfcare.user_group.web.controller")).build()
                 .tags(new Tag("user-group", environment.getProperty("swagger.user-group.api.description")))
                 .directModelSubstitute(LocalTime.class, String.class)
+                .ignoredParameterTypes(Pageable.class)
                 .securityContexts(Collections.singletonList(SecurityContext.builder()
                         .securityReferences(defaultAuth())
                         .build()))

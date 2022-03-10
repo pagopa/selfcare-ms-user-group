@@ -1,5 +1,8 @@
 package it.pagopa.selfcare.user_group.connector.api;
 
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 import java.util.Optional;
 
 public interface UserGroupConnector {
@@ -10,6 +13,8 @@ public interface UserGroupConnector {
     void insertMember(String id, String memberId);
 
     Optional<UserGroupOperations> findById(String id);
+
+    List<UserGroupOperations> findByInstitutionIdAndProductId(String institutionId, String productId, Pageable pageable);
 
     void activateById(String id);
 
