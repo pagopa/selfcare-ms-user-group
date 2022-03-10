@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,7 +29,7 @@ class GroupMapperTest {
         assertEquals(group.getInstitutionId(), resource.getInstitutionId());
         assertEquals(group.getProductId(), resource.getProductId());
         assertEquals(group.getDescription(), resource.getDescription());
-        assertEquals(group.getMembers(), resource.getMembers());
+        assertIterableEquals(group.getMembers(), resource.getMembers().stream().map(UUID::toString).collect(Collectors.toList()));
         assertEquals(group.getName(), resource.getName());
         assertEquals(group.getCreatedBy(), resource.getCreatedBy());
         assertEquals(group.getModifiedBy(), resource.getModifiedBy());

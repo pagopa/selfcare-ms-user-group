@@ -12,11 +12,14 @@ import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
 import it.pagopa.selfcare.user_group.web.model.mapper.GroupMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -115,6 +118,40 @@ public class GroupController {
         log.debug("addMemberToUserGroup id = {}", id);
         groupService.addMember(id, member.getMember());
         log.trace("addMemberToUserGroup end");
+    }
+
+    @GetMapping(value = "/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.getUserGroup}")
+    public UserGroupResource getUserGroup(@ApiParam("${swagger.user-group.model.id}")
+                                          @PathVariable("id")
+                                                  String id) {
+        log.trace("getUserGroup start");
+        log.debug("getUserGroup id = {}", id);
+        UserGroupOperations group = groupService.getUserGroup(id);
+        UserGroupResource groupResource = GroupMapper.toResource(group);
+        log.debug("getUserGroup result = {}", groupResource);
+        log.trace("getUserGroup end");
+        return groupResource;
+    }
+
+    @GetMapping(value = "/userGroups")
+    @ResponseStatus(HttpStatus.OK)
+    @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.getGroupsByInstitutionAndProduct}")
+    public List<UserGroupResource> getGroupsByInstitutionAndProductIds(@ApiParam("${swagger.user-group.model.institutionId}")
+                                                                       @RequestParam(value = "institutionId")
+                                                                               String institutionId,
+                                                                       @ApiParam("${swagger.user-group.model.productId}")
+                                                                       @RequestParam(value = "productId")
+                                                                               String productId,
+                                                                       Pageable pageable) {
+        log.trace("getGroupsByInstitutionAndProductIds start");
+        log.debug("getGroupsByInstitutionAndProductIds institutionId = {}, productId = {}, pageable = {}", institutionId, productId, pageable);
+        List<UserGroupOperations> userGroups = groupService.getUserGroupByInstitutionAndProduct(institutionId, productId, pageable);
+        List<UserGroupResource> result = userGroups.stream().map(GroupMapper::toResource).collect(Collectors.toList());
+        log.debug("getGroupsByInstitutionAndProductIds result = {}", result);
+        log.trace("getGroupsByInstitutionAndProductIds end");
+        return result;
     }
 
 }

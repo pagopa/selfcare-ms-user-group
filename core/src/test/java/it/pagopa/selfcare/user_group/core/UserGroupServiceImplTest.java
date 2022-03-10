@@ -17,11 +17,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.TestSecurityContextHolder;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -307,6 +310,63 @@ class UserGroupServiceImplTest {
         //then
         Mockito.verify(groupConnectorMock, Mockito.times(1))
                 .insertMember(Mockito.anyString(), Mockito.anyString());
+        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void getGroup() {
+        //given
+        String groupId = "groupId";
+        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
+                .thenAnswer(invocation -> Optional.of(new DummyGroup()));
+        //when
+        UserGroupOperations group = groupService.getUserGroup(groupId);
+        //then
+        assertNotNull(group);
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .findById(groupId);
+        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void getGroup_null() {
+        //given
+        String groupId = "groupId";
+        //when
+        Executable executable = () -> groupService.getUserGroup(groupId);
+        //then
+        assertThrows(ResourceNotFoundException.class, executable);
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .findById(groupId);
+        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void getGroup_nullId() {
+        //given
+        String groupId = null;
+        //when
+        Executable executable = () -> groupService.getUserGroup(groupId);
+        //then
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("A user group id is required", e.getMessage());
+        Mockito.verifyNoInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void getGroupByInstitutionAndProduct() {
+        //given
+        String institutionId = "institutionId";
+        String productId = "productId";
+        Pageable pageable = PageRequest.of(0, 3);
+        Mockito.when(groupConnectorMock.findByInstitutionIdAndProductId(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+                .thenReturn(Collections.singletonList(new DummyGroup()));
+        //when
+        List<UserGroupOperations> groups = groupService.getUserGroupByInstitutionAndProduct(institutionId, productId, pageable);
+        //then
+        assertEquals(1, groups.size());
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .findByInstitutionIdAndProductId(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verifyNoMoreInteractions(groupConnectorMock);
     }
 }

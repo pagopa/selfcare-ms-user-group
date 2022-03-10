@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.user_group.connector.dao;
 
 
-import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupConnector;
@@ -12,14 +11,18 @@ import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundExcepti
 import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -66,9 +69,15 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         log.debug("id = {}, memberId = {}", id, memberId);
 
         UpdateResult updateResult = mongoTemplate.updateFirst(
-                Query.query(Criteria.where("_id").is(id)),
+                Query.query(Criteria.where("_id").is(id)
+                        .and("status").is(UserGroupStatus.ACTIVE)),
                 new Update().push("members", memberId),
                 UserGroupEntity.class);
+//        UpdateResult updateResult = mongoTemplate.findAndModify(
+//                Query.query(Criteria.where("_id").is(id)
+//                        .and("status").is(UserGroupStatus.ACTIVE)),
+//                UpdateDefinition,
+//                UserGroupEntity.class);
 
         if (updateResult.getMatchedCount() == 0) {
             throw new ResourceNotFoundException();
@@ -84,6 +93,17 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         Optional<UserGroupOperations> result = repository.findById(id).map(Function.identity());
         log.debug("result = {}", result);
         log.trace("findById end");
+
+        return result;
+    }
+
+    @Override
+    public List<UserGroupOperations> findByInstitutionIdAndProductId(String institutionId, String productId, Pageable pageable) {
+        log.trace("findByInstitutionIdAndProductId start");
+        log.debug("findByInstitutionIdAndProductId institutionId= {} , productId = {}, pageable = {}", institutionId, productId, pageable);
+        List<UserGroupOperations> result = repository.findByInstitutionIdAndProductId(institutionId, productId, pageable).stream().map(Function.identity()).collect(Collectors.toList());
+        log.debug("findByInstitutionIdAndProductId result = {}", result);
+        log.trace("findByInstitutionIdAndProductId end");
 
         return result;
     }

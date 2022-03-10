@@ -8,11 +8,13 @@ import it.pagopa.selfcare.user_group.connector.exception.ResourceUpdateException
 import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -20,6 +22,7 @@ import java.util.UUID;
 class UserGroupServiceImpl implements UserGroupService {
 
     private final UserGroupConnector groupConnector;
+    private final static String USER_GROUP_ID_REQUIRED_MESSAGE = "A user group id is required";
 
     @Autowired
     UserGroupServiceImpl(UserGroupConnector groupConnector) {
@@ -41,22 +44,47 @@ class UserGroupServiceImpl implements UserGroupService {
         return insert;
     }
 
+
     @Override
-    public UserGroupOperations addMember(String id, UUID memberId) {
+    public void addMember(String id, UUID memberId) {
         log.trace("addMember start");
         log.debug("addMember id = {}", id);
-        Assert.hasText(id, "A user group id is required");
+        Assert.hasText(id, USER_GROUP_ID_REQUIRED_MESSAGE);
         Assert.notNull(memberId, "A member id is required");
         groupConnector.insertMember(id, memberId.toString());
         log.trace("addMember end");
-        return null;
+    }
+
+    @Override
+    public UserGroupOperations getUserGroup(String id) {
+        log.trace("getUserGroup start");
+        log.debug("getUserGroup id = {}", id);
+        Assert.hasText(id, USER_GROUP_ID_REQUIRED_MESSAGE);
+        UserGroupOperations foundProduct = groupConnector.findById(id).orElseThrow(ResourceNotFoundException::new);
+        log.debug("getUserGroup result = {}", foundProduct);
+        log.trace("getUserGroup end");
+
+        return foundProduct;
+    }
+
+    @Override
+    public List<UserGroupOperations> getUserGroupByInstitutionAndProduct(String institutionId, String productId, Pageable pageable) {
+        log.trace("getUserGroup start");
+        log.debug("getUserGroup institutionId = {}, productId = {}", institutionId, productId);
+        Assert.hasText(institutionId, "An institutionId is required");
+        Assert.hasText(productId, "An productId is required");
+        List<UserGroupOperations> foundProduct = groupConnector.findByInstitutionIdAndProductId(institutionId, productId, pageable);
+        log.debug("getUserGroup result = {}", foundProduct);
+        log.trace("getUserGroup end");
+
+        return foundProduct;
     }
 
     @Override
     public void deleteGroup(String id) {
         log.trace("deleteGroup start");
         log.debug("deleteGroup id = {}", id);
-        Assert.hasText(id, "A user group id is required");
+        Assert.hasText(id, USER_GROUP_ID_REQUIRED_MESSAGE);
         groupConnector.deleteById(id);
         log.trace("deleteProduct end");
     }
@@ -65,7 +93,7 @@ class UserGroupServiceImpl implements UserGroupService {
     public void suspendGroup(String id) {
         log.trace("suspendGroup start");
         log.debug("suspendGroup id = {}", id);
-        Assert.hasText(id, "A user group id is required");
+        Assert.hasText(id, USER_GROUP_ID_REQUIRED_MESSAGE);
         groupConnector.suspendById(id);
         log.trace("suspendGroup end");
     }
@@ -74,7 +102,7 @@ class UserGroupServiceImpl implements UserGroupService {
     public void activateGroup(String id) {
         log.trace("activateGroup start");
         log.debug("activateGroup id = {}", id);
-        Assert.hasText(id, "A user group id is required");
+        Assert.hasText(id, USER_GROUP_ID_REQUIRED_MESSAGE);
         groupConnector.activateById(id);
         log.trace("activateGroup end");
     }
@@ -83,7 +111,7 @@ class UserGroupServiceImpl implements UserGroupService {
     public UserGroupOperations updateGroup(String id, UserGroupOperations group) {
         log.trace("updateGroup start");
         log.debug("updateGroup id = {}, group = {}", id, group);
-        Assert.hasText(id, "A user group id is required");
+        Assert.hasText(id, USER_GROUP_ID_REQUIRED_MESSAGE);
         Assert.notNull(group, "A user group is required");
         UserGroupOperations foundGroup = groupConnector.findById(id).orElseThrow(ResourceNotFoundException::new);
         if (UserGroupStatus.SUSPENDED.equals(foundGroup.getStatus())) {

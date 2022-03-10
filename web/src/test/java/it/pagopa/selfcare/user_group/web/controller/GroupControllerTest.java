@@ -1,5 +1,6 @@
 package it.pagopa.selfcare.user_group.web.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.utils.TestUtils;
 import it.pagopa.selfcare.commons.web.model.ErrorResource;
@@ -8,10 +9,7 @@ import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundExcepti
 import it.pagopa.selfcare.user_group.core.UserGroupService;
 import it.pagopa.selfcare.user_group.web.config.WebTestConfig;
 import it.pagopa.selfcare.user_group.web.handler.GroupExceptionHandler;
-import it.pagopa.selfcare.user_group.web.model.DummyCreateUserGroupDto;
-import it.pagopa.selfcare.user_group.web.model.DummyUpdateUserGroupDto;
-import it.pagopa.selfcare.user_group.web.model.MemberUUID;
-import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
+import it.pagopa.selfcare.user_group.web.model.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +24,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -226,6 +225,59 @@ class GroupControllerTest {
         Mockito.verify(groupServiceMock, Mockito.times(1))
                 .addMember(groupId, member.getMember());
         Mockito.verifyNoMoreInteractions(groupServiceMock);
+    }
+
+    @Test
+    void getUserGroup() throws Exception {
+        //given
+        String InstitutionId = "institutionId";
+        String productId = "productId";
+        Mockito.when(groupServiceMock.getUserGroup(Mockito.anyString()))
+                .thenAnswer(invocationOnMock -> {
+                    String id = invocationOnMock.getArgument(0, String.class);
+                    UserGroupOperations group = TestUtils.mockInstance(new GroupDto(), "setId");
+                    group.setId(id);
+                    group.setMembers(List.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()));
+                    return group;
+                });
+        //when
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                .get(BASE_URL + "/groupId")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andReturn();
+        //then
+        UserGroupResource group = mapper.readValue(result.getResponse().getContentAsString(), UserGroupResource.class);
+        assertNotNull(group);
+    }
+
+    @Test
+    void getGroupsByInstitutionAndProductIds() throws Exception {
+        //given
+        String institutionId = "institutionId";
+        String productId = "productId";
+        UserGroupOperations groupOperations = TestUtils.mockInstance(new GroupDto());
+        groupOperations.setMembers(List.of(UUID.randomUUID().toString()));
+        Mockito.when(groupServiceMock.getUserGroupByInstitutionAndProduct(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+                .thenReturn(Collections.singletonList(groupOperations));
+        //when
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                .get(BASE_URL + "/userGroups")
+                .param("institutionId", institutionId)
+                .param("productId", productId)
+                .param("page", "0")
+                .param("size", "1")
+                .param("sort", "name,desc")
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andReturn();
+        //then
+        List<UserGroupResource> groups = mapper.readValue(result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+        assertNotNull(groups);
     }
 
 }

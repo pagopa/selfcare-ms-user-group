@@ -50,23 +50,19 @@ public class UserGroupResource {
     @NotEmpty
     private List<UUID> members;
 
-    @ApiModelProperty(value = "${swagger.user-group.model.createdAt}", required = true)
-    @JsonProperty(required = true)
-    @NotNull
+    @ApiModelProperty(value = "${swagger.user-group.model.createdAt}")
+    @JsonProperty
     private Instant createdAt;
 
-    @ApiModelProperty(value = "${swagger.user-group.model.createdBy}", required = true)
-    @JsonProperty(required = true)
-    @NotBlank
+    @ApiModelProperty(value = "${swagger.user-group.model.createdBy}")
+    @JsonProperty
     private String createdBy;
 
-    @ApiModelProperty(value = "${swagger.user-group.model.modifiedAt}", required = true)
-    @JsonProperty(required = true)
-    @NotNull
+    @ApiModelProperty(value = "${swagger.user-group.model.modifiedAt}")
+    @JsonProperty
     private Instant modifiedAt;
 
-    @ApiModelProperty(value = "${swagger.user-group.model.modifiedBy}", required = true)
-    @JsonProperty(required = true)
-    @NotBlank
+    @ApiModelProperty(value = "${swagger.user-group.model.modifiedBy}")
+    @JsonProperty
     private String modifiedBy;
 }

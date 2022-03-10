@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.user_group.connector.dao;
 
-import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
@@ -20,12 +19,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.test.context.TestSecurityContextHolder;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -98,6 +102,24 @@ class UserGroupConnectorImplTest {
         Assertions.assertEquals(entity, found);
         Mockito.verify(repositoryMock, Mockito.times(1))
                 .findById(id);
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void findByInstitutionIdAndProductId() {
+        //given
+        String institutionId = "institutionId";
+        String productId = "productId";
+        Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
+        List<UserGroupEntity> entities = List.of(TestUtils.mockInstance(new UserGroupEntity()), TestUtils.mockInstance(new UserGroupEntity()), TestUtils.mockInstance(new UserGroupEntity()));
+        Mockito.when(repositoryMock.findByInstitutionIdAndProductId(Mockito.anyString(), Mockito.anyString(), Mockito.any())).
+                thenReturn(entities);
+        //when
+        List<UserGroupEntity> groups = repositoryMock.findByInstitutionIdAndProductId(institutionId, productId, pageable);
+        //then
+        assertEquals(3, groups.size());
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .findByInstitutionIdAndProductId(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 

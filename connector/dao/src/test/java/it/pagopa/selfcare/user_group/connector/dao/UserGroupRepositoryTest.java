@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -173,22 +176,31 @@ class UserGroupRepositoryTest {
                 .build();
         TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
         TestSecurityContextHolder.setAuthentication(authenticationToken);
-        UserGroupEntity group = TestUtils.mockInstance(new UserGroupEntity(), "setId",
+        UserGroupEntity group1 = TestUtils.mockInstance(new UserGroupEntity(), "setId",
                 "setCreatedAt",
                 "setCreateBy",
                 "setModifiedAt",
                 "setModifiedBy");
         String productId = "productId";
         String institutionId = "institutionId";
-        group.setProductId(productId);
-        group.setInstitutionId(institutionId);
-        UserGroupEntity savedGroup = repository.insert(group);
+        group1.setProductId(productId);
+        group1.setName("alfa");
+        group1.setInstitutionId(institutionId);
+        UserGroupEntity savedGroup = repository.insert(group1);
+        UserGroupEntity group2 = TestUtils.mockInstance(new UserGroupEntity(), "setId",
+                "setCreatedAt",
+                "setCreateBy",
+                "setModifiedAt",
+                "setModifiedBy");
+        group2.setProductId(productId);
+        group2.setName("beta");
+        group2.setInstitutionId(institutionId);
+        UserGroupEntity savedGroup1 = repository.insert(group2);
+        Pageable pageable = PageRequest.of(0, 2, Sort.by("name"));
         //when
-        List<UserGroupEntity> groupMod = repository.findByInstitutionIdAndProductId(institutionId, productId);
+        List<UserGroupEntity> groupMod = repository.findByInstitutionIdAndProductId(institutionId, productId, pageable);
         //then
-        assertEquals(1, groupMod.size());
-
-
+        assertEquals(2, groupMod.size());
     }
 
 }
