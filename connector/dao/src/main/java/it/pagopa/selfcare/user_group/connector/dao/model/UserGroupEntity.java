@@ -6,6 +6,7 @@ import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldNameConstants;
 import org.springframework.data.annotation.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -16,6 +17,7 @@ import java.util.Set;
 @NoArgsConstructor
 @EqualsAndHashCode(of = "id")
 @Document("userGroups")
+@FieldNameConstants(onlyExplicitlyIncluded = true)
 public class UserGroupEntity implements UserGroupOperations {
 
     public UserGroupEntity(UserGroupOperations userGroup) {
@@ -39,8 +41,9 @@ public class UserGroupEntity implements UserGroupOperations {
     private String productId;
     private String name;
     private String description;
+    @FieldNameConstants.Include
     private UserGroupStatus status;
-
+    @FieldNameConstants.Include
     private Set<String> members;
     @CreatedDate
     private Instant createdAt;
@@ -50,5 +53,10 @@ public class UserGroupEntity implements UserGroupOperations {
     private Instant modifiedAt;
     @LastModifiedBy
     private String modifiedBy;
+
+
+    public static class Fields {
+        public static String id = org.springframework.data.mongodb.core.aggregation.Fields.UNDERSCORE_ID;
+    }
 
 }

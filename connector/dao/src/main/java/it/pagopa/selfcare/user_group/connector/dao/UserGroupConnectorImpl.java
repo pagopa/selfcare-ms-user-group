@@ -70,8 +70,8 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         log.debug("insertMember id = {}, memberId = {}", id, memberId);
 
         UpdateResult updateResult = mongoTemplate.updateFirst(
-                Query.query(Criteria.where("_id").is(id)
-                        .and("status").is(UserGroupStatus.ACTIVE)),
+                Query.query(Criteria.where(UserGroupEntity.Fields.id).is(id)
+                        .and(UserGroupEntity.Fields.status).is(UserGroupStatus.ACTIVE)),
                 new Update().push("members", memberId),
                 UserGroupEntity.class);
         if (updateResult.getModifiedCount() == 0) {
@@ -87,8 +87,8 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         log.debug("deleteMember id = {}, memberId = {}", id, memberId);
 
         UpdateResult updateResult = mongoTemplate.updateFirst(
-                Query.query(Criteria.where("_id").is(id)
-                        .and("status").is(UserGroupStatus.ACTIVE)),
+                Query.query(Criteria.where(UserGroupEntity.Fields.id).is(id)
+                        .and(UserGroupEntity.Fields.status).is(UserGroupStatus.ACTIVE)),
                 new Update().pull("members", memberId),
                 UserGroupEntity.class);
         if (updateResult.getModifiedCount() == 0) {
@@ -132,7 +132,7 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
     public void deleteById(String id) {
         log.trace("deleteById start");
         log.debug("deleteById id = {} ", id);
-        DeleteResult result = mongoTemplate.remove(Query.query(Criteria.where("_id").is(id)), UserGroupEntity.class);
+        DeleteResult result = mongoTemplate.remove(Query.query(Criteria.where(UserGroupEntity.Fields.id).is(id)), UserGroupEntity.class);
         if (result.getDeletedCount() == 0) {
             throw new ResourceNotFoundException();
         }
@@ -152,8 +152,8 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         log.trace("updateUserById start");
         log.debug("updateUserById id = {}, status = {}", id, status);
         UpdateResult updateResult = mongoTemplate.updateFirst(
-                Query.query(Criteria.where("_id").is(id)),
-                Update.update("status", status),
+                Query.query(Criteria.where(UserGroupEntity.Fields.id).is(id)),
+                Update.update(UserGroupEntity.Fields.status, status),
                 UserGroupEntity.class);
         if (updateResult.getMatchedCount() == 0) {
             throw new ResourceNotFoundException();
