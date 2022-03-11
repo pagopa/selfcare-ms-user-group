@@ -369,7 +369,7 @@ class UserGroupConnectorImplTest {
     }
 
     @Test
-    void insertMember_resourceNotFound() {
+    void insertMember_updateError() {
         //given
         String groupId = "groupId";
         String memberId = UUID.randomUUID().toString();
@@ -381,7 +381,7 @@ class UserGroupConnectorImplTest {
 
             @Override
             public long getMatchedCount() {
-                return 0;
+                return 1;
             }
 
             @Override
@@ -438,6 +438,83 @@ class UserGroupConnectorImplTest {
                 .thenReturn(result);
         //when
         Executable executable = () -> groupConnector.insertMember(groupId, memberId);
+        //then
+        assertDoesNotThrow(executable);
+        Mockito.verify(mongoTemplate, Mockito.times(1))
+                .updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any());
+        Mockito.verifyNoMoreInteractions(mongoTemplate);
+    }
+
+    @Test
+    void deleteMember_updateError() {
+        //given
+        String groupId = "groupId";
+        String memberId = UUID.randomUUID().toString();
+        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+            @Override
+            public boolean wasAcknowledged() {
+                return false;
+            }
+
+            @Override
+            public long getMatchedCount() {
+                return 1;
+            }
+
+            @Override
+            public long getModifiedCount() {
+                return 0;
+            }
+
+            @Override
+            public BsonValue getUpsertedId() {
+                return null;
+            }
+        });
+        Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+                .thenReturn(result);
+        //when
+        Executable executable = () -> groupConnector.deleteMember(groupId, memberId);
+        //then
+        ResourceUpdateException resourceUpdateException = assertThrows(ResourceUpdateException.class, executable);
+        assertEquals("Couldn't update resource", resourceUpdateException.getMessage());
+
+        Mockito.verify(mongoTemplate, Mockito.times(1))
+                .updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any());
+        Mockito.verifyNoMoreInteractions(mongoTemplate);
+    }
+
+    @Test
+    void deleteMember() {
+        //given
+        String groupId = "groupId";
+        String memberId = UUID.randomUUID().toString();
+
+        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+            @Override
+            public boolean wasAcknowledged() {
+                return false;
+            }
+
+            @Override
+            public long getMatchedCount() {
+                return 1;
+            }
+
+            @Override
+            public long getModifiedCount() {
+                return 1;
+            }
+
+            @Override
+            public BsonValue getUpsertedId() {
+                return null;
+            }
+        });
+        Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+                .thenReturn(result);
+        //when
+        Executable executable = () -> groupConnector.deleteMember(groupId, memberId);
         //then
         assertDoesNotThrow(executable);
         Mockito.verify(mongoTemplate, Mockito.times(1))

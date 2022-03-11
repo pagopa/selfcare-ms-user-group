@@ -67,14 +67,14 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
     @Override
     public void insertMember(String id, String memberId) {
         log.trace("insertMember start");
-        log.debug("id = {}, memberId = {}", id, memberId);
+        log.debug("insertMember id = {}, memberId = {}", id, memberId);
 
         UpdateResult updateResult = mongoTemplate.updateFirst(
                 Query.query(Criteria.where("_id").is(id)
                         .and("status").is(UserGroupStatus.ACTIVE)),
                 new Update().push("members", memberId),
                 UserGroupEntity.class);
-        if (updateResult.getModifiedCount() == 0) {
+        if (updateResult.getModifiedCount() == 0 && updateResult.getMatchedCount() == 1) {
             throw new ResourceUpdateException("Couldn't update resource");
         }
         log.trace("insertMember end");
@@ -82,11 +82,27 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
     }
 
     @Override
+    public void deleteMember(String id, String memberId) {
+        log.trace("deleteMember start");
+        log.debug("deleteMember id = {}, memberId = {}", id, memberId);
+
+        UpdateResult updateResult = mongoTemplate.updateFirst(
+                Query.query(Criteria.where("_id").is(id)
+                        .and("status").is(UserGroupStatus.ACTIVE)),
+                new Update().pull("members", memberId),
+                UserGroupEntity.class);
+        if (updateResult.getModifiedCount() == 0 && updateResult.getMatchedCount() == 1) {
+            throw new ResourceUpdateException("Couldn't update resource");
+        }
+        log.trace("insertMember end");
+    }
+
+    @Override
     public Optional<UserGroupOperations> findById(String id) {
         log.trace("findById start");
-        log.debug("id = {} ", id);
+        log.debug("findById id = {} ", id);
         Optional<UserGroupOperations> result = repository.findById(id).map(Function.identity());
-        log.debug("result = {}", result);
+        log.debug("findById result = {}", result);
         log.trace("findById end");
 
         return result;
@@ -106,7 +122,7 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
     @Override
     public void activateById(String id) {
         log.trace("activateById start");
-        log.debug("id = {} ", id);
+        log.debug("activateById id = {} ", id);
         updateUserById(id, UserGroupStatus.ACTIVE);
         log.trace("activateById end");
 
@@ -116,7 +132,7 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
     @Override
     public void deleteById(String id) {
         log.trace("deleteById start");
-        log.debug("id = {} ", id);
+        log.debug("deleteById id = {} ", id);
         DeleteResult result = mongoTemplate.remove(Query.query(Criteria.where("_id").is(id)), UserGroupEntity.class);
         if (result.getDeletedCount() == 0) {
             throw new ResourceNotFoundException();
@@ -127,7 +143,7 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
     @Override
     public void suspendById(String id) {
         log.trace("suspendById start");
-        log.debug("id = {} ", id);
+        log.debug("suspendById id = {} ", id);
         updateUserById(id, UserGroupStatus.SUSPENDED);
         log.trace("suspendById end");
 

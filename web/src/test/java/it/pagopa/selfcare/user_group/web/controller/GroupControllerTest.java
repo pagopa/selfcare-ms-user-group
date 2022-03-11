@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -188,7 +189,7 @@ class GroupControllerTest {
                     String id = invocationOnMock.getArgument(0, String.class);
                     UserGroupOperations group = invocationOnMock.getArgument(1, UserGroupOperations.class);
                     group.setId(id);
-                    group.setMembers(List.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()));
+                    group.setMembers(Set.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()));
                     return group;
                 });
         //when
@@ -228,6 +229,25 @@ class GroupControllerTest {
     }
 
     @Test
+    void deleteMember() throws Exception {
+        //given
+        String groupId = "groupId";
+        UUID memberId = UUID.randomUUID();
+        //when
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                .delete(BASE_URL + "/groupId/members/" + memberId)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().isNoContent())
+                .andReturn();
+        //then
+        assertEquals(0, result.getResponse().getContentLength());
+        Mockito.verify(groupServiceMock, Mockito.times(1))
+                .deleteMember(groupId, memberId);
+        Mockito.verifyNoMoreInteractions(groupServiceMock);
+    }
+
+    @Test
     void getUserGroup() throws Exception {
         //given
         String InstitutionId = "institutionId";
@@ -237,7 +257,7 @@ class GroupControllerTest {
                     String id = invocationOnMock.getArgument(0, String.class);
                     UserGroupOperations group = TestUtils.mockInstance(new GroupDto(), "setId");
                     group.setId(id);
-                    group.setMembers(List.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()));
+                    group.setMembers(Set.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()));
                     return group;
                 });
         //when
@@ -258,7 +278,7 @@ class GroupControllerTest {
         String institutionId = "institutionId";
         String productId = "productId";
         UserGroupOperations groupOperations = TestUtils.mockInstance(new GroupDto());
-        groupOperations.setMembers(List.of(UUID.randomUUID().toString()));
+        groupOperations.setMembers(Set.of(UUID.randomUUID().toString()));
         Mockito.when(groupServiceMock.getUserGroupByInstitutionAndProduct(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
                 .thenReturn(Collections.singletonList(groupOperations));
         //when

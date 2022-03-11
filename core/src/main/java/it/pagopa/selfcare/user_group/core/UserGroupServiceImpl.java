@@ -48,7 +48,7 @@ class UserGroupServiceImpl implements UserGroupService {
     @Override
     public void addMember(String id, UUID memberId) {
         log.trace("addMember start");
-        log.debug("addMember id = {}", id);
+        log.debug("addMember id = {}, memberId ={}", id, memberId);
         Assert.hasText(id, USER_GROUP_ID_REQUIRED_MESSAGE);
         Assert.notNull(memberId, "A member id is required");
         UserGroupOperations foundGroup = groupConnector.findById(id).orElseThrow(ResourceNotFoundException::new);
@@ -57,6 +57,20 @@ class UserGroupServiceImpl implements UserGroupService {
         }
         groupConnector.insertMember(id, memberId.toString());
         log.trace("addMember end");
+    }
+
+    @Override
+    public void deleteMember(String groupId, UUID memberId) {
+        log.trace("deleteMember start");
+        log.debug("deleteMember groupId = {}, memberId = {}", groupId, memberId);
+        Assert.hasText(groupId, USER_GROUP_ID_REQUIRED_MESSAGE);
+        Assert.notNull(memberId, "A member id is required");
+        UserGroupOperations foundGroup = groupConnector.findById(groupId).orElseThrow(ResourceNotFoundException::new);
+        if (UserGroupStatus.SUSPENDED.equals(foundGroup.getStatus())) {
+            throw new ResourceUpdateException("Trying to modify suspended group");
+        }
+        groupConnector.deleteMember(groupId, memberId.toString());
+        log.trace("deleteMember end");
     }
 
     @Override

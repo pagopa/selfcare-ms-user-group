@@ -12,6 +12,8 @@ public interface UserGroupConnector {
 
     void insertMember(String id, String memberId);
 
+    void deleteMember(String id, String memberId);
+
     Optional<UserGroupOperations> findById(String id);
 
     List<UserGroupOperations> findByInstitutionIdAndProductId(String institutionId, String productId, Pageable pageable);

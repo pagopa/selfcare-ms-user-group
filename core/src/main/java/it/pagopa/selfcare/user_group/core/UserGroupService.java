@@ -12,6 +12,8 @@ public interface UserGroupService {
 
     void addMember(String id, UUID memberId);
 
+    void deleteMember(String groupId, UUID memberId);
+
     UserGroupOperations getUserGroup(String id);
 
     List<UserGroupOperations> getUserGroupByInstitutionAndProduct(String institutionId, String productId, Pageable pageable);

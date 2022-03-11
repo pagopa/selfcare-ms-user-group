@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -153,5 +154,21 @@ public class GroupController {
         log.trace("getGroupsByInstitutionAndProductIds end");
         return result;
     }
+
+    @DeleteMapping(value = "/{userGroupId}/members/{memberId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.deleteMember}")
+    public void deleteMemberFromUserGroup(@ApiParam("${swagger.user-group.model.id}")
+                                          @PathVariable("userGroupId")
+                                                  String userGroupId,
+                                          @ApiParam("${swagger.user-group.model.memberId}")
+                                          @PathVariable("memberId")
+                                                  UUID memberId) {
+        log.trace("deleteMemberFromUserGroup start");
+        log.debug("deleteMemberFromUserGroup userGroupId = {}, memberId = {}", userGroupId, memberId);
+        groupService.deleteMember(userGroupId, memberId);
+        log.trace("deleteMemberFromUserGroup end");
+    }
+
 
 }
