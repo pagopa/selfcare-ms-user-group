@@ -22,7 +22,8 @@ import java.util.UUID;
 class UserGroupServiceImpl implements UserGroupService {
 
     private final UserGroupConnector groupConnector;
-    private final static String USER_GROUP_ID_REQUIRED_MESSAGE = "A user group id is required";
+    private static final String USER_GROUP_ID_REQUIRED_MESSAGE = "A user group id is required";
+    private static final String TRYING_TO_MODIFY_SUSPENDED_GROUP = "Trying to modify suspended group";
 
     @Autowired
     UserGroupServiceImpl(UserGroupConnector groupConnector) {
@@ -53,7 +54,7 @@ class UserGroupServiceImpl implements UserGroupService {
         Assert.notNull(memberId, "A member id is required");
         UserGroupOperations foundGroup = groupConnector.findById(id).orElseThrow(ResourceNotFoundException::new);
         if (UserGroupStatus.SUSPENDED.equals(foundGroup.getStatus())) {
-            throw new ResourceUpdateException("Trying to modify suspended group");
+            throw new ResourceUpdateException(TRYING_TO_MODIFY_SUSPENDED_GROUP);
         }
         groupConnector.insertMember(id, memberId.toString());
         log.trace("addMember end");
@@ -67,7 +68,7 @@ class UserGroupServiceImpl implements UserGroupService {
         Assert.notNull(memberId, "A member id is required");
         UserGroupOperations foundGroup = groupConnector.findById(groupId).orElseThrow(ResourceNotFoundException::new);
         if (UserGroupStatus.SUSPENDED.equals(foundGroup.getStatus())) {
-            throw new ResourceUpdateException("Trying to modify suspended group");
+            throw new ResourceUpdateException(TRYING_TO_MODIFY_SUSPENDED_GROUP);
         }
         groupConnector.deleteMember(groupId, memberId.toString());
         log.trace("deleteMember end");
@@ -133,7 +134,7 @@ class UserGroupServiceImpl implements UserGroupService {
         Assert.notNull(group, "A user group is required");
         UserGroupOperations foundGroup = groupConnector.findById(id).orElseThrow(ResourceNotFoundException::new);
         if (UserGroupStatus.SUSPENDED.equals(foundGroup.getStatus())) {
-            throw new ResourceUpdateException("Trying to modify suspended group");
+            throw new ResourceUpdateException(TRYING_TO_MODIFY_SUSPENDED_GROUP);
         }
         foundGroup.setMembers(group.getMembers());
         foundGroup.setName(group.getName());

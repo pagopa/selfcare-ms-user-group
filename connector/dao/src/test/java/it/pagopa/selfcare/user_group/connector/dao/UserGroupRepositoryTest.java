@@ -159,9 +159,9 @@ class UserGroupRepositoryTest {
                 UserGroupEntity.class);
         //then
         Optional<UserGroupEntity> groupMod = repository.findById(savedGroup.getId());
-        assertTrue(updateResult1.getMatchedCount() == 1);
-        assertTrue(updateResult2.getMatchedCount() == 1);
-        assertTrue(updateResult3.getMatchedCount() == 1);
+        assertEquals(1, updateResult1.getMatchedCount());
+        assertEquals(1, updateResult2.getMatchedCount());
+        assertEquals(1, updateResult3.getMatchedCount());
         assertEquals(2, groupMod.get().getMembers().size());
     }
 

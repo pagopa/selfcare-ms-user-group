@@ -115,7 +115,6 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         List<UserGroupOperations> result = repository.findByInstitutionIdAndProductId(institutionId, productId, pageable).stream().map(Function.identity()).collect(Collectors.toList());
         log.debug("findByInstitutionIdAndProductId result = {}", result);
         log.trace("findByInstitutionIdAndProductId end");
-
         return result;
     }
 

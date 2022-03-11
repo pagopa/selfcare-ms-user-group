@@ -116,7 +116,7 @@ class UserGroupConnectorImplTest {
         Mockito.when(repositoryMock.findByInstitutionIdAndProductId(Mockito.anyString(), Mockito.anyString(), Mockito.any())).
                 thenReturn(entities);
         //when
-        List<UserGroupEntity> groups = repositoryMock.findByInstitutionIdAndProductId(institutionId, productId, pageable);
+        List<UserGroupOperations> groups = groupConnector.findByInstitutionIdAndProductId(institutionId, productId, pageable);
         //then
         assertEquals(3, groups.size());
         Mockito.verify(repositoryMock, Mockito.times(1))
@@ -537,4 +537,6 @@ class UserGroupConnectorImplTest {
                 .save(entity);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
+
+
 }
