@@ -86,13 +86,13 @@ class SwaggerConfig {
 
     @Component
     @Order
-    static class PageableParameterReader implements OperationBuilderPlugin {
+    static class PageableParameterReaderConfig implements OperationBuilderPlugin {
         private final Environment environment;
         private final TypeResolver resolver;
 
         @Autowired
-        public PageableParameterReader(Environment environment,
-                                       TypeResolver resolver) {
+        public PageableParameterReaderConfig(Environment environment,
+                                             TypeResolver resolver) {
             this.environment = environment;
             this.resolver = resolver;
         }

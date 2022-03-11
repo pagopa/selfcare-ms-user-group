@@ -74,7 +74,7 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
                         .and("status").is(UserGroupStatus.ACTIVE)),
                 new Update().push("members", memberId),
                 UserGroupEntity.class);
-        if (updateResult.getModifiedCount() == 0 && updateResult.getMatchedCount() == 1) {
+        if (updateResult.getModifiedCount() == 0) {
             throw new ResourceUpdateException("Couldn't update resource");
         }
         log.trace("insertMember end");
@@ -91,7 +91,7 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
                         .and("status").is(UserGroupStatus.ACTIVE)),
                 new Update().pull("members", memberId),
                 UserGroupEntity.class);
-        if (updateResult.getModifiedCount() == 0 && updateResult.getMatchedCount() == 1) {
+        if (updateResult.getModifiedCount() == 0) {
             throw new ResourceUpdateException("Couldn't update resource");
         }
         log.trace("insertMember end");
