@@ -162,7 +162,7 @@ class UserGroupRepositoryTest {
         assertTrue(updateResult1.getMatchedCount() == 1);
         assertTrue(updateResult2.getMatchedCount() == 1);
         assertTrue(updateResult3.getMatchedCount() == 1);
-        assertEquals(3, groupMod.get().getMembers().size());
+        assertEquals(2, groupMod.get().getMembers().size());
     }
 
     @Test

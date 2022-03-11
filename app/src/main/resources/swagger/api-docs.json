@@ -419,6 +419,57 @@
           }
         ]
       }
+    },
+    "/user-groups/{userGroupId}/members/{memberId}": {
+      "delete": {
+        "tags": [
+          "user-group"
+        ],
+        "summary": "deleteMemberFromUserGroup",
+        "description": "${swagger.user-group.groups.api.deleteMember}",
+        "operationId": "deleteMemberFromUserGroupUsingDELETE",
+        "parameters": [
+          {
+            "name": "userGroupId",
+            "in": "path",
+            "description": "Users group's unique identifier",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "in": "path",
+            "description": "Member's unique identifier",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "global"
+            ]
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -444,6 +495,7 @@
             "description": "Users group's institutionId"
           },
           "members": {
+            "uniqueItems": true,
             "type": "array",
             "description": "List of all the members of the group",
             "items": {
@@ -497,6 +549,7 @@
             "description": "Users group's description"
           },
           "members": {
+            "uniqueItems": true,
             "type": "array",
             "description": "List of all the members of the group",
             "items": {
