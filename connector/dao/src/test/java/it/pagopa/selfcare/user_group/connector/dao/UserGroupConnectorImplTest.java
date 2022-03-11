@@ -8,6 +8,7 @@ import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.connector.dao.model.UserGroupEntity;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceAlreadyExistsException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.user_group.connector.exception.ResourceUpdateException;
 import org.bson.BsonValue;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -385,7 +386,7 @@ class UserGroupConnectorImplTest {
 
             @Override
             public long getModifiedCount() {
-                return 1;
+                return 0;
             }
 
             @Override
@@ -398,7 +399,9 @@ class UserGroupConnectorImplTest {
         //when
         Executable executable = () -> groupConnector.insertMember(groupId, memberId);
         //then
-        assertThrows(ResourceNotFoundException.class, executable);
+        ResourceUpdateException resourceUpdateException = assertThrows(ResourceUpdateException.class, executable);
+        assertEquals("Couldn't update resource", resourceUpdateException.getMessage());
+
         Mockito.verify(mongoTemplate, Mockito.times(1))
                 .updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any());
         Mockito.verifyNoMoreInteractions(mongoTemplate);

@@ -301,13 +301,52 @@ class UserGroupServiceImplTest {
     }
 
     @Test
+    void addMember_doesNotExist() {
+        //given
+        String id = "id";
+        UUID memberId = UUID.randomUUID();
+        //when
+        Executable executable = () -> groupService.addMember(id, memberId);
+        //then
+        assertThrows(ResourceNotFoundException.class, executable);
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .findById(id);
+        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+
+    }
+
+    @Test
+    void addMember_groupSuspended() {
+        //given
+        String id = "id";
+        UUID memberId = UUID.randomUUID();
+        UserGroupOperations group = TestUtils.mockInstance(new DummyGroup());
+        group.setStatus(UserGroupStatus.SUSPENDED);
+        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
+                .thenReturn(Optional.of(group));
+        //when
+        Executable executable = () -> groupService.addMember(id, memberId);
+        //then
+        ResourceUpdateException e = assertThrows(ResourceUpdateException.class, executable);
+        assertEquals("Trying to modify suspended group", e.getMessage());
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .findById(id);
+        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+    }
+
+    @Test
     void addMember() {
         //given
         String id = "id";
         UUID memberUUID = UUID.randomUUID();
+        UserGroupOperations group = TestUtils.mockInstance(new DummyGroup());
+        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
+                .thenReturn(Optional.of(group));
         //when
         groupService.addMember(id, memberUUID);
         //then
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .findById(id);
         Mockito.verify(groupConnectorMock, Mockito.times(1))
                 .insertMember(Mockito.anyString(), Mockito.anyString());
         Mockito.verifyNoMoreInteractions(groupConnectorMock);

@@ -51,6 +51,10 @@ class UserGroupServiceImpl implements UserGroupService {
         log.debug("addMember id = {}", id);
         Assert.hasText(id, USER_GROUP_ID_REQUIRED_MESSAGE);
         Assert.notNull(memberId, "A member id is required");
+        UserGroupOperations foundGroup = groupConnector.findById(id).orElseThrow(ResourceNotFoundException::new);
+        if (UserGroupStatus.SUSPENDED.equals(foundGroup.getStatus())) {
+            throw new ResourceUpdateException("Trying to modify suspended group");
+        }
         groupConnector.insertMember(id, memberId.toString());
         log.trace("addMember end");
     }
@@ -60,11 +64,11 @@ class UserGroupServiceImpl implements UserGroupService {
         log.trace("getUserGroup start");
         log.debug("getUserGroup id = {}", id);
         Assert.hasText(id, USER_GROUP_ID_REQUIRED_MESSAGE);
-        UserGroupOperations foundProduct = groupConnector.findById(id).orElseThrow(ResourceNotFoundException::new);
-        log.debug("getUserGroup result = {}", foundProduct);
+        UserGroupOperations foundGroup = groupConnector.findById(id).orElseThrow(ResourceNotFoundException::new);
+        log.debug("getUserGroup result = {}", foundGroup);
         log.trace("getUserGroup end");
 
-        return foundProduct;
+        return foundGroup;
     }
 
     @Override

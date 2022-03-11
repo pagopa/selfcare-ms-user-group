@@ -8,6 +8,7 @@ import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.connector.dao.model.UserGroupEntity;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceAlreadyExistsException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.user_group.connector.exception.ResourceUpdateException;
 import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,16 +73,9 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
                 Query.query(Criteria.where("_id").is(id)
                         .and("status").is(UserGroupStatus.ACTIVE)),
                 new Update().push("members", memberId),
-                UserGroupEntity.class);//TODO change logic for adding method, makea control first on the group state
-
-//        UpdateResult updateResult = mongoTemplate.findAndModify(
-//                Query.query(Criteria.where("_id").is(id)
-//                        .and("status").is(UserGroupStatus.ACTIVE)),
-//                UpdateDefinition,
-//                UserGroupEntity.class);
-
-        if (updateResult.getMatchedCount() == 0) {
-            throw new ResourceNotFoundException();
+                UserGroupEntity.class);
+        if (updateResult.getModifiedCount() == 0) {
+            throw new ResourceUpdateException("Couldn't update resource");
         }
         log.trace("insertMember end");
 
