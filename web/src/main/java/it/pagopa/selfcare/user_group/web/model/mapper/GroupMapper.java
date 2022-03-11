@@ -49,7 +49,7 @@ public class GroupMapper {
             group.setName(dto.getName());
             group.setDescription(dto.getDescription());
             group.setStatus(dto.getStatus());
-            group.setMembers(dto.getMembers().stream().map(UUID::toString).collect(Collectors.toList()));
+            group.setMembers(dto.getMembers().stream().map(UUID::toString).collect(Collectors.toSet()));
         }
         log.debug("fromDto group = {}", group);
         log.trace("fromDto end");
@@ -66,7 +66,7 @@ public class GroupMapper {
 
             group.setName(dto.getName());
             group.setDescription(dto.getDescription());
-            group.setMembers(dto.getMembers().stream().map(UUID::toString).collect(Collectors.toList()));
+            group.setMembers(dto.getMembers().stream().map(UUID::toString).collect(Collectors.toSet()));
         }
         log.debug("fromDto group = {}", group);
         log.trace("fromDto end");

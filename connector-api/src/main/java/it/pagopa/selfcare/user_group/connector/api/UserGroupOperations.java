@@ -3,7 +3,7 @@ package it.pagopa.selfcare.user_group.connector.api;
 import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.Set;
 
 public interface UserGroupOperations {
 
@@ -31,9 +31,9 @@ public interface UserGroupOperations {
 
     void setStatus(UserGroupStatus status);
 
-    List<String> getMembers();
+    Set<String> getMembers();
 
-    void setMembers(List<String> members);
+    void setMembers(Set<String> members);
 
     Instant getCreatedAt();
 

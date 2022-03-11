@@ -5,7 +5,7 @@ import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.Data;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.Set;
 
 @Data
 public class DummyGroup implements UserGroupOperations {
@@ -17,7 +17,7 @@ public class DummyGroup implements UserGroupOperations {
     private String name;
     private String description;
     private UserGroupStatus status = UserGroupStatus.ACTIVE;
-    private List<String> members = List.of("string1", "string2");
+    private Set<String> members = Set.of("string1", "string2");
     private Instant createdAt;
     private String createdBy;
     private Instant modifiedAt;

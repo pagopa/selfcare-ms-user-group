@@ -8,7 +8,7 @@ import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -21,7 +21,7 @@ class GroupMapperTest {
         // given
         Instant now = Instant.now().minusSeconds(1);
         UserGroupOperations group = TestUtils.mockInstance(new DummyGroupOperations());
-        group.setMembers(List.of(UUID.randomUUID().toString()));
+        group.setMembers(Set.of(UUID.randomUUID().toString()));
         //when
         UserGroupResource resource = GroupMapper.toResource(group);
         //then
@@ -51,7 +51,7 @@ class GroupMapperTest {
     void fromDto_notNullCreate() {
         //given
         CreateUserGroupDto dto = TestUtils.mockInstance(new CreateUserGroupDto());
-        dto.setMembers(List.of(UUID.randomUUID()));
+        dto.setMembers(Set.of(UUID.randomUUID()));
         //when
         UserGroupOperations group = GroupMapper.fromDto(dto);
         //then
@@ -73,7 +73,7 @@ class GroupMapperTest {
     void fromDto_notNullUpdate() {
         //given
         UpdateUserGroupDto dto = TestUtils.mockInstance(new UpdateUserGroupDto());
-        dto.setMembers(List.of(UUID.randomUUID()));
+        dto.setMembers(Set.of(UUID.randomUUID()));
         //when
         UserGroupOperations group = GroupMapper.fromDto(dto);
         //then

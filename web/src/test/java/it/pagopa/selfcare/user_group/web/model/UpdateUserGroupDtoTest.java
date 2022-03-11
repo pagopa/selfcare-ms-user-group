@@ -58,7 +58,7 @@ class UpdateUserGroupDtoTest {
     void validateNotNullFields() {
         // given
         UpdateUserGroupDto userGroupDto = TestUtils.mockInstance(new UpdateUserGroupDto());
-        userGroupDto.setMembers(List.of(UUID.randomUUID()));
+        userGroupDto.setMembers(Set.of(UUID.randomUUID()));
         // when
         Set<ConstraintViolation<Object>> violations = validator.validate(userGroupDto);
         // then

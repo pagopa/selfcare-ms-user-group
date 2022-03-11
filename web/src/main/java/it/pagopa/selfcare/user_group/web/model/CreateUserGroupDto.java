@@ -8,7 +8,7 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -43,6 +43,6 @@ public class CreateUserGroupDto {
     @ApiModelProperty(value = "${swagger.user-group.model.members}", required = true)
     @JsonProperty(required = true)
     @NotEmpty
-    private List<UUID> members;
+    private Set<UUID> members;
 
 }
