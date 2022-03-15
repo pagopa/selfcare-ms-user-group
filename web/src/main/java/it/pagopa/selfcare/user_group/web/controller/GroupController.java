@@ -113,10 +113,10 @@ public class GroupController {
                                              String id,
                                      @ApiParam("${swagger.dashboard.user.model.id}")
                                      @PathVariable("userId")
-                                             String userId) {
+                                             UUID userId) {
         log.trace("addMemberToUserGroup start");
         log.debug("addMemberToUserGroup id = {}", id);
-//        groupService.addMember(id, member.getMember());
+        groupService.addMember(id, userId);
         log.trace("addMemberToUserGroup end");
     }
 
