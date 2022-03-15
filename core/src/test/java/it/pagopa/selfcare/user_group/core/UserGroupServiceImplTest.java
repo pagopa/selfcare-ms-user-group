@@ -8,28 +8,37 @@ import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceUpdateException;
 import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
+import it.pagopa.selfcare.user_group.core.config.CoreTestConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.test.context.TestSecurityContextHolder;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.validation.ValidationException;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {UserGroupServiceImpl.class, CoreTestConfig.class})
+@TestPropertySource(properties = {
+        "ALLOWED_SORTING_PARAMETERS=name"
+})
 class UserGroupServiceImplTest {
 
     @BeforeEach
@@ -37,11 +46,10 @@ class UserGroupServiceImplTest {
         TestSecurityContextHolder.clearContext();
     }
 
-    @Mock
+    @MockBean
     private UserGroupConnector groupConnectorMock;
 
-
-    @InjectMocks
+    @Autowired
     private UserGroupServiceImpl groupService;
 
     @Test
@@ -472,7 +480,7 @@ class UserGroupServiceImplTest {
         //given
         String institutionId = "institutionId";
         String productId = "productId";
-        Pageable pageable = PageRequest.of(0, 3);
+        Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
         Mockito.when(groupConnectorMock.findByInstitutionIdAndProductId(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
                 .thenReturn(Collections.singletonList(new DummyGroup()));
         //when
@@ -483,4 +491,21 @@ class UserGroupServiceImplTest {
                 .findByInstitutionIdAndProductId(Mockito.anyString(), Mockito.anyString(), Mockito.any());
         Mockito.verifyNoMoreInteractions(groupConnectorMock);
     }
+
+    @Test
+    void getGroupByInstitutionAndProduct_invalidSortParams() {
+        //given
+        String institutionId = "institutionId";
+        String productId = "productId";
+        Pageable pageable = PageRequest.of(0, 3, Sort.by("description"));
+        Mockito.when(groupConnectorMock.findByInstitutionIdAndProductId(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+                .thenReturn(Collections.singletonList(new DummyGroup()));
+        //when
+        Executable executable = () -> groupService.getUserGroupByInstitutionAndProduct(institutionId, productId, pageable);
+        //then
+        ValidationException e = assertThrows(ValidationException.class, executable);
+        assertEquals("Given sort parameters aren't valid", e.getMessage());
+        Mockito.verifyNoInteractions(groupConnectorMock);
+    }
+
 }

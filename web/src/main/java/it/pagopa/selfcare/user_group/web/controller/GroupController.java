@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
-@RequestMapping(value = "/user-groups", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/user-groups/v1", produces = MediaType.APPLICATION_JSON_VALUE)
 @Api(tags = "user-group")
 public class GroupController {
 
@@ -136,7 +136,7 @@ public class GroupController {
         return groupResource;
     }
 
-    @GetMapping(value = "/userGroups")
+    @GetMapping(value = "/")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.getGroupsByInstitutionAndProduct}")
     public List<UserGroupResource> getGroupsByInstitutionAndProductIds(@ApiParam("${swagger.user-group.model.institutionId}")

@@ -43,7 +43,7 @@ class GroupControllerTest {
 
     private static final DummyCreateUserGroupDto CREATE_USER_GROUP_DTO = TestUtils.mockInstance(new DummyCreateUserGroupDto());
     private static final DummyUpdateUserGroupDto UPDATE_USER_GROUP_DTO = TestUtils.mockInstance(new DummyUpdateUserGroupDto());
-    private static final String BASE_URL = "/user-groups";
+    private static final String BASE_URL = "/user-groups/v1";
 
     @MockBean
     private UserGroupService groupServiceMock;
@@ -283,7 +283,7 @@ class GroupControllerTest {
                 .thenReturn(Collections.singletonList(groupOperations));
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
-                .get(BASE_URL + "/userGroups")
+                .get(BASE_URL + "/")
                 .param("institutionId", institutionId)
                 .param("productId", productId)
                 .param("page", "0")

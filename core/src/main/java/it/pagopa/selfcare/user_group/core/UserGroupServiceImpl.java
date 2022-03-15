@@ -8,12 +8,15 @@ import it.pagopa.selfcare.user_group.connector.exception.ResourceUpdateException
 import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import javax.validation.ValidationException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,10 +27,13 @@ class UserGroupServiceImpl implements UserGroupService {
     private final UserGroupConnector groupConnector;
     private static final String USER_GROUP_ID_REQUIRED_MESSAGE = "A user group id is required";
     private static final String TRYING_TO_MODIFY_SUSPENDED_GROUP = "Trying to modify suspended group";
+    private final List<String> allowedSortingParams;
 
     @Autowired
-    UserGroupServiceImpl(UserGroupConnector groupConnector) {
+    UserGroupServiceImpl(UserGroupConnector groupConnector,
+                         @Value("${user-group.allowed.sorting.parameters}") String[] allowedSortingParams) {
         this.groupConnector = groupConnector;
+        this.allowedSortingParams = Arrays.asList(allowedSortingParams);
     }
 
     @Override
@@ -89,9 +95,13 @@ class UserGroupServiceImpl implements UserGroupService {
     @Override
     public List<UserGroupOperations> getUserGroupByInstitutionAndProduct(String institutionId, String productId, Pageable pageable) {
         log.trace("getUserGroup start");
-        log.debug("getUserGroup institutionId = {}, productId = {}", institutionId, productId);
+        log.debug("getUserGroup institutionId = {}, productId = {}, pageable = {}", institutionId, productId, pageable);
         Assert.hasText(institutionId, "An institutionId is required");
         Assert.hasText(productId, "An productId is required");
+        boolean match = pageable.getSort().stream().allMatch(order -> allowedSortingParams.contains(order.getProperty()));
+        if (!match) {
+            throw new ValidationException("Given sort parameters aren't valid");
+        }
         List<UserGroupOperations> foundProduct = groupConnector.findByInstitutionIdAndProductId(institutionId, productId, pageable);
         log.debug("getUserGroup result = {}", foundProduct);
         log.trace("getUserGroup end");
