@@ -215,8 +215,7 @@ class GroupControllerTest {
         member.setMember(UUID.randomUUID());
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
-                .patch(BASE_URL + "/groupId/members")
-                .content(mapper.writeValueAsString(member))
+                .put(BASE_URL + "/groupId/members/" + member.getMember())
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
