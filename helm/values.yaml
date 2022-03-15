@@ -50,7 +50,7 @@ ingress:
   hosts:
     - host: ""
       paths:
-        - path: /ms-user-group/v1/(.*)
+        - path: /ms-user-group/(.*)
           pathType: ImplementationSpecific
   tls: []
   #  - secretName: chart-example-tls
@@ -76,12 +76,13 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
-nodeSelector: {}
+nodeSelector: { }
 
-tolerations: []
+tolerations: [ ]
 
-affinity: {}
+affinity: { }
 
 config:
   MONGODB_NAME: selcUserGroup
   APPLICATIONINSIGHTS_ROLE_NAME: "ms-user-group"
+  ALLOWED_SORTING_PARAMETERS: "name"
