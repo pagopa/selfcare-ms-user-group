@@ -8,14 +8,17 @@ import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.user_group.core.UserGroupService;
 import it.pagopa.selfcare.user_group.web.config.WebTestConfig;
-import it.pagopa.selfcare.user_group.web.handler.GroupExceptionHandler;
+import it.pagopa.selfcare.user_group.web.handler.UserGroupExceptionHandler;
 import it.pagopa.selfcare.user_group.web.model.*;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -29,17 +32,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 
-@WebMvcTest(value = {GroupController.class}, excludeAutoConfiguration = SecurityAutoConfiguration.class)
+@WebMvcTest(value = {UserGroupController.class}, excludeAutoConfiguration = SecurityAutoConfiguration.class)
 @ContextConfiguration(classes = {
-        GroupController.class,
-        GroupExceptionHandler.class,
+        UserGroupController.class,
+        UserGroupExceptionHandler.class,
         WebTestConfig.class
 })
-class GroupControllerTest {
+class UserGroupControllerTest {
 
     private static final DummyCreateUserGroupDto CREATE_USER_GROUP_DTO = TestUtils.mockInstance(new DummyCreateUserGroupDto());
     private static final DummyUpdateUserGroupDto UPDATE_USER_GROUP_DTO = TestUtils.mockInstance(new DummyUpdateUserGroupDto());
@@ -53,6 +55,9 @@ class GroupControllerTest {
 
     @Autowired
     protected ObjectMapper mapper;
+
+    @Captor
+    private ArgumentCaptor<Pageable> pageableCaptor;
 
     @Test
     void createGroup() throws Exception {
@@ -272,22 +277,19 @@ class GroupControllerTest {
     }
 
     @Test
-    void getGroupsByInstitutionAndProductIds() throws Exception {
+    void getUserGroups() throws Exception {
         //given
         String institutionId = "institutionId";
         String productId = "productId";
         UserGroupOperations groupOperations = TestUtils.mockInstance(new GroupDto());
         groupOperations.setMembers(Set.of(UUID.randomUUID().toString()));
-        Mockito.when(groupServiceMock.getUserGroupByInstitutionAndProduct(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+        Mockito.when(groupServiceMock.getUserGroups(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(Collections.singletonList(groupOperations));
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .get(BASE_URL + "/")
                 .param("institutionId", institutionId)
                 .param("productId", productId)
-                .param("page", "0")
-                .param("size", "1")
-                .param("sort", "name,desc")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
@@ -297,6 +299,10 @@ class GroupControllerTest {
                 new TypeReference<>() {
                 });
         assertNotNull(groups);
+        Mockito.verify(groupServiceMock, Mockito.times(1))
+                .getUserGroups(Mockito.any(), Mockito.any(), Mockito.any(), pageableCaptor.capture());
+        Pageable capturedPageable = pageableCaptor.getValue();
+        assertTrue(capturedPageable.getSort().isUnsorted());
     }
 
 }

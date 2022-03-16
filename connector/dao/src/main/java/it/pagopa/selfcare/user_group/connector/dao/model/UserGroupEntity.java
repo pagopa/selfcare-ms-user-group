@@ -37,7 +37,9 @@ public class UserGroupEntity implements UserGroupOperations {
 
     @Id
     private String id;
+    @FieldNameConstants.Include
     private String institutionId;
+    @FieldNameConstants.Include
     private String productId;
     private String name;
     private String description;

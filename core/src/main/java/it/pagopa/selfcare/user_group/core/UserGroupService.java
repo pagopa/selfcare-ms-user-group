@@ -4,6 +4,7 @@ import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface UserGroupService {
@@ -16,7 +17,7 @@ public interface UserGroupService {
 
     UserGroupOperations getUserGroup(String id);
 
-    List<UserGroupOperations> getUserGroupByInstitutionAndProduct(String institutionId, String productId, Pageable pageable);
+    List<UserGroupOperations> getUserGroups(Optional<String> institutionId, Optional<String> productId, Optional<UUID> userId, Pageable pageable);
 
     void deleteGroup(String id);
 

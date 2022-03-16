@@ -9,6 +9,7 @@ import it.pagopa.selfcare.user_group.connector.dao.model.UserGroupEntity;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceAlreadyExistsException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceUpdateException;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupFilter;
 import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +21,11 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import javax.validation.ValidationException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -109,12 +111,19 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
     }
 
     @Override
-    public List<UserGroupOperations> findByInstitutionIdAndProductId(String institutionId, String productId, Pageable pageable) {
-        log.trace("findByInstitutionIdAndProductId start");
-        log.debug("findByInstitutionIdAndProductId institutionId= {} , productId = {}, pageable = {}", institutionId, productId, pageable);
-        List<UserGroupOperations> result = repository.findByInstitutionIdAndProductId(institutionId, productId, pageable).stream().map(Function.identity()).collect(Collectors.toList());
-        log.debug("findByInstitutionIdAndProductId result = {}", result);
-        log.trace("findByInstitutionIdAndProductId end");
+    public List<UserGroupOperations> findAll(UserGroupFilter filter, Pageable pageable) {
+        log.trace("findAll start");
+        log.debug("findAll institutionId= {} , productId = {}, userId = {}, pageable = {}", filter.getInstitutionId(), filter.getProductId(), filter.getUserId(), pageable);
+        Query query = new Query();
+        if (pageable.getSort().isSorted() && filter.getProductId().isEmpty() && filter.getInstitutionId().isEmpty()) {
+            throw new ValidationException();
+        }
+        filter.getInstitutionId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.institutionId).is(value)));
+        filter.getProductId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.productId).is(value)));
+        filter.getUserId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.members).is(value)));
+        List<UserGroupOperations> result = new ArrayList<>(mongoTemplate.find(query.with(pageable), UserGroupEntity.class));
+        log.debug("findAll result = {}", result);
+        log.trace("findAll end");
         return result;
     }
 

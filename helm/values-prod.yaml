@@ -1,6 +1,6 @@
 image:
   repository: selcpacr.azurecr.io/selfcaremsusergroup
-  pullPolicy: Always
+  pullPolicy: Always  # TODO change me in IfNotPresent when each build will have a different tag
   tag: 0.0.1-SNAPSHOT
 
 autoscaling:

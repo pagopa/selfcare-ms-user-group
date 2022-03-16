@@ -10,9 +10,9 @@ import org.mockito.Mockito;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class GroupExceptionHandlerTest {
+class UserGroupExceptionHandlerTest {
     private static final String DETAIL_MESSAGE = "detail message";
-    private final GroupExceptionHandler handler = new GroupExceptionHandler();
+    private final UserGroupExceptionHandler handler = new UserGroupExceptionHandler();
 
 
     @Test

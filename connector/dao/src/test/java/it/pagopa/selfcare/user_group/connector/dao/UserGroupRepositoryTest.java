@@ -5,6 +5,7 @@ import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.commons.utils.TestUtils;
 import it.pagopa.selfcare.user_group.connector.dao.config.DaoTestConfig;
 import it.pagopa.selfcare.user_group.connector.dao.model.UserGroupEntity;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupFilter;
 import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -22,9 +22,11 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.test.context.TestSecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 
+import javax.validation.ValidationException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -166,7 +168,7 @@ class UserGroupRepositoryTest {
     }
 
     @Test
-    void findByInstitutionIdAndProductId() {
+    void findAll() {
         //given
         Instant now = Instant.now().minusSeconds(1);
         SelfCareUser selfCareUser = SelfCareUser.builder("id")
@@ -185,6 +187,7 @@ class UserGroupRepositoryTest {
         String institutionId = "institutionId";
         group1.setProductId(productId);
         group1.setName("alfa");
+        group1.setMembers(Set.of("userId", "userId2"));
         group1.setInstitutionId(institutionId);
         UserGroupEntity savedGroup = repository.insert(group1);
         UserGroupEntity group2 = TestUtils.mockInstance(new UserGroupEntity(), "setId",
@@ -195,12 +198,27 @@ class UserGroupRepositoryTest {
         group2.setProductId(productId);
         group2.setName("beta");
         group2.setInstitutionId(institutionId);
+        group2.setMembers(Set.of("userId"));
         UserGroupEntity savedGroup1 = repository.insert(group2);
-        Pageable pageable = PageRequest.of(0, 2, Sort.by("name"));
+
+        String userId = "userId";
+        Pageable pageable = PageRequest.of(0, 3);
+        UserGroupFilter filter = new UserGroupFilter();
+        filter.setUserId(Optional.of(userId));
+        filter.setInstitutionId(Optional.of(institutionId));
+        filter.setProductId(Optional.of(productId));
+        Query query = new Query();
+        if (pageable.getSort().isSorted() && filter.getProductId().isEmpty() && filter.getInstitutionId().isEmpty()) {
+            throw new ValidationException();
+        }
+        filter.getInstitutionId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.institutionId).is(value)));
+        filter.getProductId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.productId).is(value)));
+        filter.getUserId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.members).is(value)));
+
         //when
-        List<UserGroupEntity> groupMod = repository.findByInstitutionIdAndProductId(institutionId, productId, pageable);
+        List<UserGroupEntity> foundGroups = mongoTemplate.find(query.with(pageable), UserGroupEntity.class);
         //then
-        assertEquals(2, groupMod.size());
+        assertEquals(2, foundGroups.size());
     }
 
 }

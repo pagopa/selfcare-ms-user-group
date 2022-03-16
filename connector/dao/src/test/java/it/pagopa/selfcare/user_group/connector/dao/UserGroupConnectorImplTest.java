@@ -9,6 +9,7 @@ import it.pagopa.selfcare.user_group.connector.dao.model.UserGroupEntity;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceAlreadyExistsException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceUpdateException;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupFilter;
 import org.bson.BsonValue;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -16,9 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +29,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.test.context.TestSecurityContextHolder;
 
+import javax.validation.ValidationException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -58,6 +58,8 @@ class UserGroupConnectorImplTest {
     @InjectMocks
     private UserGroupConnectorImpl groupConnector;
 
+    @Captor
+    private ArgumentCaptor<Query> queryCaptor;
 
     @Test
     void insert_duplicateKey() {
@@ -107,21 +109,62 @@ class UserGroupConnectorImplTest {
     }
 
     @Test
-    void findByInstitutionIdAndProductId() {
+    void findAll_fullyValued() {
         //given
         String institutionId = "institutionId";
         String productId = "productId";
+        String userId = "userId";
         Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
-        List<UserGroupEntity> entities = List.of(TestUtils.mockInstance(new UserGroupEntity()), TestUtils.mockInstance(new UserGroupEntity()), TestUtils.mockInstance(new UserGroupEntity()));
-        Mockito.when(repositoryMock.findByInstitutionIdAndProductId(Mockito.anyString(), Mockito.anyString(), Mockito.any())).
-                thenReturn(entities);
+        UserGroupFilter groupFilter = new UserGroupFilter();
+        groupFilter.setUserId(Optional.of(userId));
+        groupFilter.setInstitutionId(Optional.of(institutionId));
+        groupFilter.setProductId(Optional.of(productId));
+        List<UserGroupEntity> entities = List.of(TestUtils.mockInstance(new UserGroupEntity()));
+
+        Mockito.when(mongoTemplate.find(Mockito.any(Query.class), (Class<UserGroupEntity>) Mockito.any()))
+                .thenReturn(entities);
         //when
-        List<UserGroupOperations> groups = groupConnector.findByInstitutionIdAndProductId(institutionId, productId, pageable);
+        List<UserGroupOperations> groups = groupConnector.findAll(groupFilter, pageable);
         //then
-        assertEquals(3, groups.size());
-        Mockito.verify(repositoryMock, Mockito.times(1))
-                .findByInstitutionIdAndProductId(Mockito.anyString(), Mockito.anyString(), Mockito.any());
-        Mockito.verifyNoMoreInteractions(repositoryMock);
+        assertEquals(1, groups.size());
+        Mockito.verify(mongoTemplate, Mockito.times(1))
+                .find(queryCaptor.capture(), Mockito.any());
+        Query query = queryCaptor.getValue();
+        assertTrue(query.toString().contains(institutionId));
+        assertTrue(query.toString().contains(userId));
+        assertTrue(query.toString().contains(productId));
+        Mockito.verifyNoMoreInteractions(mongoTemplate);
+    }
+
+    @Test
+    void findAll_fullyNull() {
+        //given
+        Pageable pageable = Pageable.unpaged();
+        UserGroupFilter groupFilter = new UserGroupFilter();
+        List<UserGroupEntity> entities = List.of(TestUtils.mockInstance(new UserGroupEntity()));
+        Mockito.when(mongoTemplate.find(Mockito.any(Query.class), (Class<UserGroupEntity>) Mockito.any()))
+                .thenReturn(entities);
+        //when
+        List<UserGroupOperations> groups = groupConnector.findAll(groupFilter, pageable);
+        //then
+        assertEquals(1, groups.size());
+        Mockito.verify(mongoTemplate, Mockito.times(1))
+                .find(queryCaptor.capture(), Mockito.any());
+        Query query = queryCaptor.getValue();
+        assertTrue(query.getFieldsObject().isEmpty());
+        Mockito.verifyNoMoreInteractions(mongoTemplate);
+    }
+
+    @Test
+    void findAll_sortNotAllowedException() {
+        //given
+        Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
+        UserGroupFilter groupFilter = new UserGroupFilter();
+        //when
+        Executable executable = () -> groupConnector.findAll(groupFilter, pageable);
+        //then
+        assertThrows(ValidationException.class, executable);
+        Mockito.verifyNoInteractions(mongoTemplate);
     }
 
     @Test

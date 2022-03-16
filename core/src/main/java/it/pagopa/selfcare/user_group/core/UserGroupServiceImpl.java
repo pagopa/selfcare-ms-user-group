@@ -5,6 +5,7 @@ import it.pagopa.selfcare.user_group.connector.api.UserGroupConnector;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceUpdateException;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupFilter;
 import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.util.Assert;
 import javax.validation.ValidationException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -93,21 +95,27 @@ class UserGroupServiceImpl implements UserGroupService {
     }
 
     @Override
-    public List<UserGroupOperations> getUserGroupByInstitutionAndProduct(String institutionId, String productId, Pageable pageable) {
-        log.trace("getUserGroup start");
-        log.debug("getUserGroup institutionId = {}, productId = {}, pageable = {}", institutionId, productId, pageable);
-        Assert.hasText(institutionId, "An institutionId is required");
-        Assert.hasText(productId, "An productId is required");
+    public List<UserGroupOperations> getUserGroups(Optional<String> institutionId, Optional<String> productId, Optional<UUID> userId, Pageable pageable) {
+        log.trace("getUserGroups start");
+        log.debug("getUserGroups institutionId = {}, productId = {},userId = {}, pageable = {}", institutionId, productId, userId, pageable);
+        Assert.notNull(institutionId, "An Optional institutionId is required");
+        Assert.notNull(productId, "An Optional productId is required");
+        Assert.notNull(userId, "An Optional userId is required");
+
+        UserGroupFilter filter = new UserGroupFilter();
+        filter.setUserId(Optional.of(userId.toString()));
+        filter.setInstitutionId(institutionId);
+        filter.setProductId(productId);
         boolean match = pageable.getSort().stream().allMatch(order -> allowedSortingParams.contains(order.getProperty()));
         if (!match) {
             throw new ValidationException("Given sort parameters aren't valid");
         }
-        List<UserGroupOperations> foundProduct = groupConnector.findByInstitutionIdAndProductId(institutionId, productId, pageable);
-        log.debug("getUserGroup result = {}", foundProduct);
-        log.trace("getUserGroup end");
-
-        return foundProduct;
+        List<UserGroupOperations> result = groupConnector.findAll(filter, pageable);
+        log.debug("getUserGroups result = {}", result);
+        log.trace("getUserGroups end");
+        return result;
     }
+
 
     @Override
     public void deleteGroup(String id) {
