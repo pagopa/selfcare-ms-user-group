@@ -45,7 +45,7 @@ spec:
             - configMapRef:
                 name: jwt
             - configMapRef:
-                name: { { include "this.fullname" . } }
+                name: {{ include "this.fullname" . }}
           ports:
             - name: http
               containerPort: {{ .Values.containers.portNumber }}
