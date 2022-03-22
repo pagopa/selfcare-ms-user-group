@@ -480,7 +480,7 @@ class UserGroupServiceImplTest {
         //given
         String institutionId = "institutionId";
         String productId = "productId";
-        UUID userId = UUID.randomUUID();
+        String userId = UUID.randomUUID().toString();
         Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
         Mockito.when(groupConnectorMock.findAll(Mockito.any(), Mockito.any()))
                 .thenReturn(Collections.singletonList(new DummyGroup()));
@@ -498,7 +498,7 @@ class UserGroupServiceImplTest {
         //given
         String institutionId = "institutionId";
         String productId = "productId";
-        UUID userId = UUID.randomUUID();
+        String userId = UUID.randomUUID().toString();
         Pageable pageable = PageRequest.of(0, 3, Sort.by("description"));
         Mockito.when(groupConnectorMock.findAll(Mockito.any(), Mockito.any()))
                 .thenReturn(Collections.singletonList(new DummyGroup()));
@@ -516,7 +516,7 @@ class UserGroupServiceImplTest {
         //given
         Optional<String> institutionId = null;
         Optional<String> productId = Optional.of("productId");
-        Optional<UUID> userId = Optional.of(UUID.randomUUID());
+        Optional<String> userId = Optional.of(UUID.randomUUID().toString());
         Pageable pageable = PageRequest.of(0, 3, Sort.by("description"));
         Mockito.when(groupConnectorMock.findAll(Mockito.any(), Mockito.any()))
                 .thenReturn(Collections.singletonList(new DummyGroup()));
@@ -534,7 +534,7 @@ class UserGroupServiceImplTest {
         //given
         Optional<String> institutionId = Optional.of("institutionID");
         Optional<String> productId = null;
-        Optional<UUID> userId = Optional.of(UUID.randomUUID());
+        Optional<String> userId = Optional.of(UUID.randomUUID().toString());
         Pageable pageable = PageRequest.of(0, 3, Sort.by("description"));
         Mockito.when(groupConnectorMock.findAll(Mockito.any(), Mockito.any()))
                 .thenReturn(Collections.singletonList(new DummyGroup()));
@@ -552,7 +552,7 @@ class UserGroupServiceImplTest {
         //given
         Optional<String> institutionId = Optional.of("institutionID");
         Optional<String> productId = Optional.of("productId");
-        Optional<UUID> userId = null;
+        Optional<String> userId = null;
         Pageable pageable = PageRequest.of(0, 3, Sort.by("description"));
         Mockito.when(groupConnectorMock.findAll(Mockito.any(), Mockito.any()))
                 .thenReturn(Collections.singletonList(new DummyGroup()));

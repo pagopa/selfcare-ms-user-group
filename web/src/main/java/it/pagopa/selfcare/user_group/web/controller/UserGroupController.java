@@ -151,7 +151,7 @@ public class UserGroupController {
                                                  Pageable pageable) {
         log.trace("getGroupsByInstitutionAndProductIds start");
         log.debug("getGroupsByInstitutionAndProductIds institutionId = {}, productId = {}, pageable = {}", institutionId, productId, pageable);
-        List<UserGroupOperations> userGroups = groupService.getUserGroups(institutionId, productId, memberId, pageable);
+        List<UserGroupOperations> userGroups = groupService.getUserGroups(institutionId, productId, memberId.map(UUID::toString), pageable);
         List<UserGroupResource> result = userGroups.stream().map(GroupMapper::toResource).collect(Collectors.toList());
         log.debug("getGroupsByInstitutionAndProductIds result = {}", result);
         log.trace("getGroupsByInstitutionAndProductIds end");
