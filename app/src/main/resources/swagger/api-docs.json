@@ -175,6 +175,67 @@
         ]
       }
     },
+    "/user-groups/v1/members/{memberId}": {
+      "delete": {
+        "tags": [
+          "user-group"
+        ],
+        "summary": "deleteMemberFromUserGroups",
+        "description": "Service to delete a member from a specific UserGroup entity",
+        "operationId": "deleteMemberFromUserGroupsUsingDELETE",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "description": "Member's unique identifier",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "institutionId",
+            "in": "query",
+            "description": "institutionId",
+            "required": true,
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "productId",
+            "required": true,
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "global"
+            ]
+          }
+        ]
+      }
+    },
     "/user-groups/v1/{id}": {
       "get": {
         "tags": [
@@ -369,6 +430,57 @@
         ]
       }
     },
+    "/user-groups/v1/{id}/members/{memberId}": {
+      "delete": {
+        "tags": [
+          "user-group"
+        ],
+        "summary": "deleteMemberFromUserGroup",
+        "description": "Service to delete a member from a specific UserGroup entity",
+        "operationId": "deleteMemberFromUserGroupUsingDELETE",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Users group's unique identifier",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memberId",
+            "in": "path",
+            "description": "Member's unique identifier",
+            "required": true,
+            "style": "simple",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "global"
+            ]
+          }
+        ]
+      }
+    },
     "/user-groups/v1/{id}/members/{userId}": {
       "put": {
         "tags": [
@@ -391,7 +503,7 @@
           {
             "name": "userId",
             "in": "path",
-            "description": "${swagger.dashboard.user.model.id}",
+            "description": "Member's unique identifier",
             "required": true,
             "style": "simple",
             "schema": {
@@ -461,57 +573,6 @@
           },
           "404": {
             "description": "Not Found"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": [
-              "global"
-            ]
-          }
-        ]
-      }
-    },
-    "/user-groups/v1/{userGroupId}/members/{memberId}": {
-      "delete": {
-        "tags": [
-          "user-group"
-        ],
-        "summary": "deleteMemberFromUserGroup",
-        "description": "Service to delete a member from a specific UserGroup entity",
-        "operationId": "deleteMemberFromUserGroupUsingDELETE",
-        "parameters": [
-          {
-            "name": "userGroupId",
-            "in": "path",
-            "description": "Users group's unique identifier",
-            "required": true,
-            "style": "simple",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "memberId",
-            "in": "path",
-            "description": "Member's unique identifier",
-            "required": true,
-            "style": "simple",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden"
           }
         },
         "security": [

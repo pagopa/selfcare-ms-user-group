@@ -96,7 +96,23 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         if (updateResult.getModifiedCount() == 0) {
             throw new ResourceUpdateException("Couldn't update resource");
         }
-        log.trace("insertMember end");
+        log.trace("deleteMember end");
+    }
+
+    public void deleteMembers(String memberId, String institutionId, String productId) {
+        log.trace("deleteMembers start");
+        log.debug("deleteMembers id = {}, institutionId = {}, productId= {}", memberId, institutionId, productId);
+
+        UpdateResult updateResult = mongoTemplate.updateMulti(
+                Query.query(Criteria.where(UserGroupEntity.Fields.members).is(memberId)
+                        .and(UserGroupEntity.Fields.institutionId).is(institutionId)
+                        .and(UserGroupEntity.Fields.productId).is(productId)),
+                new Update().pull("members", memberId),
+                UserGroupEntity.class);
+        if (updateResult.getModifiedCount() == 0) {
+            throw new ResourceUpdateException("Couldn't update resource");
+        }
+        log.trace("deleteMembers end");
     }
 
     @Override

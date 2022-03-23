@@ -221,4 +221,67 @@ class UserGroupRepositoryTest {
         assertEquals(2, foundGroups.size());
     }
 
+    @Test
+    void deleteMembers() {
+        //given
+        Instant now = Instant.now().minusSeconds(1);
+        SelfCareUser selfCareUser = SelfCareUser.builder("id")
+                .email("test@example.com")
+                .name("name")
+                .surname("surname")
+                .build();
+        TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
+        TestSecurityContextHolder.setAuthentication(authenticationToken);
+        UserGroupEntity group1 = TestUtils.mockInstance(new UserGroupEntity(), "setId",
+                "setCreatedAt",
+                "setCreateBy",
+                "setModifiedAt",
+                "setModifiedBy");
+        String productId = "productId";
+        String institutionId = "institutionId";
+        group1.setProductId(productId);
+        group1.setName("alfa");
+        group1.setMembers(Set.of("userId", "userId2"));
+        group1.setInstitutionId(institutionId);
+        UserGroupEntity savedGroup = repository.insert(group1);
+        UserGroupEntity group2 = TestUtils.mockInstance(new UserGroupEntity(), "setId",
+                "setCreatedAt",
+                "setCreateBy",
+                "setModifiedAt",
+                "setModifiedBy");
+        group2.setProductId(productId);
+        group2.setName("beta");
+        group2.setInstitutionId(institutionId);
+        group2.setMembers(Set.of("userId"));
+        UserGroupEntity savedGroup1 = repository.insert(group2);
+        Pageable pageable = PageRequest.of(0, 3);
+        UserGroupFilter filter = new UserGroupFilter();
+        String userId = "userId";
+//        filter.setUserId(Optional.of(userId));
+        filter.setInstitutionId(Optional.of(institutionId));
+        filter.setProductId(Optional.of(productId));
+        Query query = new Query();
+        if (pageable.getSort().isSorted() && filter.getProductId().isEmpty() && filter.getInstitutionId().isEmpty()) {
+            throw new ValidationException();
+        }
+
+        //when
+        UpdateResult updateResult = mongoTemplate.updateMulti(
+                Query.query(Criteria.where(UserGroupEntity.Fields.members).is("userId2")
+                        .and(UserGroupEntity.Fields.institutionId).is(institutionId)
+                        .and(UserGroupEntity.Fields.productId).is(productId)),
+                new Update().pull("members", "userId2"),
+                UserGroupEntity.class);
+
+        //then
+        filter.getInstitutionId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.institutionId).is(value)));
+        filter.getProductId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.productId).is(value)));
+        filter.getUserId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.members).is(value)));
+        List<UserGroupEntity> foundGroups = mongoTemplate.find(query.with(pageable), UserGroupEntity.class);
+
+        assertEquals(1, foundGroups.get(1).getMembers().size());
+        assertEquals(1, foundGroups.get(0).getMembers().size());
+        assertEquals(1, updateResult.getModifiedCount());
+    }
+
 }

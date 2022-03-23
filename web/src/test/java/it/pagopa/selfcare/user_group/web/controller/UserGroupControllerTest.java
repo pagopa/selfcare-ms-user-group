@@ -247,7 +247,7 @@ class UserGroupControllerTest {
         //then
         assertEquals(0, result.getResponse().getContentLength());
         Mockito.verify(groupServiceMock, Mockito.times(1))
-                .deleteMember(groupId, memberId);
+                .deleteMember(groupId, memberId.toString());
         Mockito.verifyNoMoreInteractions(groupServiceMock);
     }
 
@@ -303,6 +303,29 @@ class UserGroupControllerTest {
                 .getUserGroups(Mockito.any(), Mockito.any(), Mockito.any(), pageableCaptor.capture());
         Pageable capturedPageable = pageableCaptor.getValue();
         assertTrue(capturedPageable.getSort().isUnsorted());
+    }
+
+    @Test
+    void deleteMembers() throws Exception {
+        //given
+        String groupId = "groupId";
+        UUID memberId = UUID.randomUUID();
+        String institutionId = "institutionId";
+        String productId = "productId";
+        //when
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                .delete(BASE_URL + "/members/" + memberId)
+                .param("institutionId", institutionId)
+                .param("productId", productId)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().isNoContent())
+                .andReturn();
+        //then
+        assertEquals(0, result.getResponse().getContentLength());
+        Mockito.verify(groupServiceMock, Mockito.times(1))
+                .deleteMembers(memberId.toString(), institutionId, productId);
+        Mockito.verifyNoMoreInteractions(groupServiceMock);
     }
 
 }

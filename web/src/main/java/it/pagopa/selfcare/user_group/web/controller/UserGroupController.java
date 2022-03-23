@@ -112,7 +112,7 @@ public class UserGroupController {
     public void addMemberToUserGroup(@ApiParam("${swagger.user-group.model.id}")
                                      @PathVariable("id")
                                              String id,
-                                     @ApiParam("${swagger.dashboard.user.model.id}")
+                                     @ApiParam("${swagger.user-group.model.memberId}")
                                      @PathVariable("userId")
                                              UUID userId) {
         log.trace("addMemberToUserGroup start");
@@ -158,18 +158,32 @@ public class UserGroupController {
         return result;
     }
 
-    @DeleteMapping(value = "/{userGroupId}/members/{memberId}")
+    @DeleteMapping(value = "/{id}/members/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.deleteMember}")
     public void deleteMemberFromUserGroup(@ApiParam("${swagger.user-group.model.id}")
-                                          @PathVariable("userGroupId")
+                                          @PathVariable("id")
                                                   String userGroupId,
                                           @ApiParam("${swagger.user-group.model.memberId}")
                                           @PathVariable("memberId")
                                                   UUID memberId) {
         log.trace("deleteMemberFromUserGroup start");
         log.debug("deleteMemberFromUserGroup userGroupId = {}, memberId = {}", userGroupId, memberId);
-        groupService.deleteMember(userGroupId, memberId);
+        groupService.deleteMember(userGroupId, memberId.toString());
+        log.trace("deleteMemberFromUserGroup end");
+    }
+
+    @DeleteMapping(value = "/members/{memberId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.deleteMember}")
+    public void deleteMemberFromUserGroups(@ApiParam("${swagger.user-group.model.memberId}")
+                                           @PathVariable("memberId")
+                                                   UUID memberId,
+                                           @RequestParam String institutionId,
+                                           @RequestParam String productId) {
+        log.trace("deleteMemberFromUserGroup start");
+        log.debug("deleteMemberFromUserGroup memberId = {}, institutionId = {}, productId = {}", memberId, institutionId, productId);
+        groupService.deleteMembers(memberId.toString(), institutionId, productId);
         log.trace("deleteMemberFromUserGroup end");
     }
 

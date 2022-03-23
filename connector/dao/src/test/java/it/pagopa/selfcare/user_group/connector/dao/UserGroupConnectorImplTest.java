@@ -566,6 +566,86 @@ class UserGroupConnectorImplTest {
     }
 
     @Test
+    void deleteMembers_updateError() {
+        //given
+        String groupId = "groupId";
+        String memberId = UUID.randomUUID().toString();
+        String institutionId = "institutionId";
+        String productId = "productId";
+        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+            @Override
+            public boolean wasAcknowledged() {
+                return false;
+            }
+
+            @Override
+            public long getMatchedCount() {
+                return 1;
+            }
+
+            @Override
+            public long getModifiedCount() {
+                return 0;
+            }
+
+            @Override
+            public BsonValue getUpsertedId() {
+                return null;
+            }
+        });
+        Mockito.when(mongoTemplate.updateMulti(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+                .thenReturn(result);
+        //when
+        Executable executable = () -> groupConnector.deleteMembers(memberId, institutionId, productId);
+        //then
+        ResourceUpdateException resourceUpdateException = assertThrows(ResourceUpdateException.class, executable);
+        assertEquals("Couldn't update resource", resourceUpdateException.getMessage());
+
+        Mockito.verify(mongoTemplate, Mockito.times(1))
+                .updateMulti(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any());
+        Mockito.verifyNoMoreInteractions(mongoTemplate);
+    }
+
+    @Test
+    void deleteMembers() {
+        //given
+        String groupId = "groupId";
+        String memberId = UUID.randomUUID().toString();
+        String institutionId = "institutionId";
+        String productId = "productId";
+        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+            @Override
+            public boolean wasAcknowledged() {
+                return false;
+            }
+
+            @Override
+            public long getMatchedCount() {
+                return 1;
+            }
+
+            @Override
+            public long getModifiedCount() {
+                return 1;
+            }
+
+            @Override
+            public BsonValue getUpsertedId() {
+                return null;
+            }
+        });
+        Mockito.when(mongoTemplate.updateMulti(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+                .thenReturn(result);
+        //when
+        Executable executable = () -> groupConnector.deleteMembers(memberId, institutionId, productId);
+        //then
+        assertDoesNotThrow(executable);
+        Mockito.verify(mongoTemplate, Mockito.times(1))
+                .updateMulti(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any());
+        Mockito.verifyNoMoreInteractions(mongoTemplate);
+    }
+
+    @Test
     void save() {
         //given
         String id = "id";

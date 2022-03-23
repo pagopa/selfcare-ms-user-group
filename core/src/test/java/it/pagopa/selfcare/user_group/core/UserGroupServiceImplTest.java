@@ -7,6 +7,7 @@ import it.pagopa.selfcare.user_group.connector.api.UserGroupConnector;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceUpdateException;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupFilter;
 import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import it.pagopa.selfcare.user_group.core.config.CoreTestConfig;
 import org.junit.jupiter.api.Assertions;
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -51,6 +54,9 @@ class UserGroupServiceImplTest {
 
     @Autowired
     private UserGroupServiceImpl groupService;
+
+    @Captor
+    private ArgumentCaptor<UserGroupFilter> filter;
 
     @Test
     void createGroup_nullAuth() {
@@ -361,7 +367,7 @@ class UserGroupServiceImplTest {
     void deleteMember_nullId() {
         //given
         String id = null;
-        UUID memberId = UUID.randomUUID();
+        String memberId = UUID.randomUUID().toString();
         //when
         Executable executable = () -> groupService.deleteMember(id, memberId);
         //then
@@ -374,7 +380,7 @@ class UserGroupServiceImplTest {
     void deleteMember_nullMemberId() {
         //given
         String id = "id";
-        UUID memberId = null;
+        String memberId = null;
         //when
         Executable executable = () -> groupService.deleteMember(id, memberId);
         //then
@@ -387,7 +393,7 @@ class UserGroupServiceImplTest {
     void deleteMember_doesNotExist() {
         //given
         String id = "id";
-        UUID memberId = UUID.randomUUID();
+        String memberId = UUID.randomUUID().toString();
         //when
         Executable executable = () -> groupService.deleteMember(id, memberId);
         //then
@@ -402,7 +408,7 @@ class UserGroupServiceImplTest {
     void deleteMember_groupSuspended() {
         //given
         String id = "id";
-        UUID memberId = UUID.randomUUID();
+        String memberId = UUID.randomUUID().toString();
         UserGroupOperations group = TestUtils.mockInstance(new DummyGroup());
         group.setStatus(UserGroupStatus.SUSPENDED);
         Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
@@ -421,18 +427,61 @@ class UserGroupServiceImplTest {
     void deleteMember() {
         //given
         String id = "id";
-        UUID memberUUID = UUID.randomUUID();
+        String memberId = UUID.randomUUID().toString();
+
         UserGroupOperations group = TestUtils.mockInstance(new DummyGroup());
         Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
                 .thenReturn(Optional.of(group));
         //when
-        groupService.deleteMember(id, memberUUID);
+        groupService.deleteMember(id, memberId);
         //then
         Mockito.verify(groupConnectorMock, Mockito.times(1))
                 .findById(id);
         Mockito.verify(groupConnectorMock, Mockito.times(1))
                 .deleteMember(Mockito.anyString(), Mockito.anyString());
         Mockito.verifyNoMoreInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void deleteMembers_nullMemberId() {
+        //given
+        String memberId = null;
+        String institutionId = "institutionId";
+        String productId = "productId";
+        //when
+        Executable executable = () -> groupService.deleteMembers(memberId, institutionId, productId);
+        //then
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("A member id is required", e.getMessage());
+        Mockito.verifyNoInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void deleteMembers_nullInstitutionId() {
+        //given
+        String memberId = "memberid";
+        String institutionId = null;
+        String productId = "productId";
+        //when
+        Executable executable = () -> groupService.deleteMembers(memberId, institutionId, productId);
+        //then
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("A institution id is required", e.getMessage());
+        Mockito.verifyNoInteractions(groupConnectorMock);
+    }
+
+    @Test
+    void deleteMembers_nullProductId() {
+        //given
+        String memberId = "memberid";
+        String institutionId = "institutionId";
+        String productId = null;
+        //when
+        Executable executable = () -> groupService.deleteMembers(memberId, institutionId, productId);
+        //then
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("A product id is required", e.getMessage());
+        Mockito.verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
@@ -489,7 +538,11 @@ class UserGroupServiceImplTest {
         //then
         assertEquals(1, groups.size());
         Mockito.verify(groupConnectorMock, Mockito.times(1))
-                .findAll(Mockito.any(), Mockito.any());
+                .findAll(filter.capture(), Mockito.any());
+        UserGroupFilter capturedFilter = filter.getValue();
+        assertEquals(capturedFilter.getInstitutionId().get(), institutionId);
+        assertEquals(capturedFilter.getProductId().get(), productId);
+        assertEquals(capturedFilter.getUserId().get(), userId);
         Mockito.verifyNoMoreInteractions(groupConnectorMock);
     }
 

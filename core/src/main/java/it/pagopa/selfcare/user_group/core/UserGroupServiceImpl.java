@@ -69,17 +69,28 @@ class UserGroupServiceImpl implements UserGroupService {
     }
 
     @Override
-    public void deleteMember(String groupId, UUID memberId) {
+    public void deleteMember(String groupId, String memberId) {
         log.trace("deleteMember start");
         log.debug("deleteMember groupId = {}, memberId = {}", groupId, memberId);
         Assert.hasText(groupId, USER_GROUP_ID_REQUIRED_MESSAGE);
-        Assert.notNull(memberId, "A member id is required");
+        Assert.hasText(memberId, "A member id is required");
         UserGroupOperations foundGroup = groupConnector.findById(groupId).orElseThrow(ResourceNotFoundException::new);
         if (UserGroupStatus.SUSPENDED.equals(foundGroup.getStatus())) {
             throw new ResourceUpdateException(TRYING_TO_MODIFY_SUSPENDED_GROUP);
         }
-        groupConnector.deleteMember(groupId, memberId.toString());
+        groupConnector.deleteMember(groupId, memberId);
         log.trace("deleteMember end");
+    }
+
+    @Override
+    public void deleteMembers(String memberId, String institutionId, String productId) {
+        log.trace("deleteMembers start");
+        log.debug("deleteMembers memberId = {}, institutionId = {}, productId= {}", memberId, institutionId, productId);
+        Assert.hasText(memberId, "A member id is required");
+        Assert.hasText(institutionId, "A institution id is required");
+        Assert.hasText(productId, "A product id is required");
+        groupConnector.deleteMembers(memberId, institutionId, productId);
+        log.trace("deleteMembers end");
     }
 
     @Override
