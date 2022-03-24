@@ -6,7 +6,6 @@ import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.List;
@@ -46,8 +45,7 @@ public class UserGroupResource {
     private UserGroupStatus status;
 
     @ApiModelProperty(value = "${swagger.user-group.model.members}", required = true)
-    @JsonProperty(required = true)
-    @NotEmpty
+    @JsonProperty
     private List<UUID> members;
 
     @ApiModelProperty(value = "${swagger.user-group.model.createdAt}")
