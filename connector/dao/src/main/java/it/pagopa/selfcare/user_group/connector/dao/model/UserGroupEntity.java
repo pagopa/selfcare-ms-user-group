@@ -52,8 +52,10 @@ public class UserGroupEntity implements UserGroupOperations {
     @CreatedBy
     private String createdBy;
     @LastModifiedDate
+    @FieldNameConstants.Include
     private Instant modifiedAt;
     @LastModifiedBy
+    @FieldNameConstants.Include
     private String modifiedBy;
 
 

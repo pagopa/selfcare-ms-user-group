@@ -14,6 +14,7 @@ import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -33,12 +34,14 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
 
     private final UserGroupRepository repository;
     private final MongoTemplate mongoTemplate;
+    private final AuditorAware<String> auditorAware;
 
 
     @Autowired
-    public UserGroupConnectorImpl(UserGroupRepository repository, MongoTemplate mongoTemplate) {
+    public UserGroupConnectorImpl(UserGroupRepository repository, MongoTemplate mongoTemplate, AuditorAware<String> auditorAware) {
         this.repository = repository;
         this.mongoTemplate = mongoTemplate;
+        this.auditorAware = auditorAware;
     }
 
     @Override
@@ -74,7 +77,9 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         UpdateResult updateResult = mongoTemplate.updateFirst(
                 Query.query(Criteria.where(UserGroupEntity.Fields.id).is(id)
                         .and(UserGroupEntity.Fields.status).is(UserGroupStatus.ACTIVE)),
-                new Update().push("members", memberId),
+                new Update().push("members", memberId)
+                        .set(UserGroupEntity.Fields.modifiedBy, auditorAware.getCurrentAuditor().orElse(null))
+                        .currentDate(UserGroupEntity.Fields.modifiedAt),
                 UserGroupEntity.class);
         if (updateResult.getModifiedCount() == 0) {
             throw new ResourceUpdateException("Couldn't update resource");
@@ -91,7 +96,9 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         UpdateResult updateResult = mongoTemplate.updateFirst(
                 Query.query(Criteria.where(UserGroupEntity.Fields.id).is(id)
                         .and(UserGroupEntity.Fields.status).is(UserGroupStatus.ACTIVE)),
-                new Update().pull("members", memberId),
+                new Update().pull("members", memberId)
+                        .set(UserGroupEntity.Fields.modifiedBy, auditorAware.getCurrentAuditor().orElse(null))
+                        .currentTimestamp(UserGroupEntity.Fields.modifiedAt),
                 UserGroupEntity.class);
         if (updateResult.getModifiedCount() == 0) {
             throw new ResourceUpdateException("Couldn't update resource");
@@ -107,7 +114,9 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
                 Query.query(Criteria.where(UserGroupEntity.Fields.members).is(memberId)
                         .and(UserGroupEntity.Fields.institutionId).is(institutionId)
                         .and(UserGroupEntity.Fields.productId).is(productId)),
-                new Update().pull("members", memberId),
+                new Update().pull("members", memberId)
+                        .set(UserGroupEntity.Fields.modifiedBy, auditorAware.getCurrentAuditor().orElse(null))
+                        .currentTimestamp(UserGroupEntity.Fields.modifiedAt),
                 UserGroupEntity.class);
         if (updateResult.getModifiedCount() == 0) {
             throw new ResourceUpdateException("Couldn't update resource");
@@ -178,7 +187,9 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         log.debug("updateUserById id = {}, status = {}", id, status);
         UpdateResult updateResult = mongoTemplate.updateFirst(
                 Query.query(Criteria.where(UserGroupEntity.Fields.id).is(id)),
-                Update.update(UserGroupEntity.Fields.status, status),
+                Update.update(UserGroupEntity.Fields.status, status)
+                        .set(UserGroupEntity.Fields.modifiedBy, auditorAware.getCurrentAuditor().orElse(null))
+                        .currentTimestamp(UserGroupEntity.Fields.modifiedAt),
                 UserGroupEntity.class);
         if (updateResult.getMatchedCount() == 0) {
             throw new ResourceNotFoundException();

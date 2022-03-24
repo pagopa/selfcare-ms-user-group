@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -41,6 +42,9 @@ class UserGroupRepositoryTest {
 
     @Autowired
     private MongoTemplate mongoTemplate;
+
+    @Autowired
+    private AuditorAware<String> auditorAware;
 
     @AfterEach
     void clear() {
@@ -117,12 +121,15 @@ class UserGroupRepositoryTest {
                 "setModifiedAt",
                 "setModifiedBy");
         UserGroupEntity savedGroup = repository.insert(group);
+
         Optional<UserGroupEntity> groupMod = repository.findById(savedGroup.getId());
         groupMod.get().setId(savedGroup.getId());
         groupMod.get().setStatus(UserGroupStatus.SUSPENDED);
         //when
         UserGroupEntity modifiedGroup = repository.save(groupMod.get());
         //then
+        assertNull(savedGroup.getModifiedBy());
+        assertEquals(selfCareUser.getId(), modifiedGroup.getModifiedBy());
         assertTrue(modifiedGroup.getModifiedAt().isAfter(savedGroup.getCreatedAt()));
         assertEquals(UserGroupStatus.ACTIVE, savedGroup.getStatus());
         assertEquals(UserGroupStatus.SUSPENDED, modifiedGroup.getStatus());
@@ -161,10 +168,41 @@ class UserGroupRepositoryTest {
                 UserGroupEntity.class);
         //then
         Optional<UserGroupEntity> groupMod = repository.findById(savedGroup.getId());
+        assertEquals(selfCareUser.getId(), savedGroup.getCreatedBy());
         assertEquals(1, updateResult1.getMatchedCount());
         assertEquals(1, updateResult2.getMatchedCount());
         assertEquals(1, updateResult3.getMatchedCount());
         assertEquals(2, groupMod.get().getMembers().size());
+    }
+
+    @Test
+    void suspend() {
+        Instant now = Instant.now().minusSeconds(1);
+        SelfCareUser selfCareUser = SelfCareUser.builder("id")
+                .email("test@example.com")
+                .name("name")
+                .surname("surname")
+                .build();
+        TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
+        TestSecurityContextHolder.setAuthentication(authenticationToken);
+        UserGroupEntity group = TestUtils.mockInstance(new UserGroupEntity(), "setId",
+                "setCreatedAt",
+                "setCreateBy",
+                "setModifiedAt",
+                "setModifiedBy");
+        UserGroupEntity savedGroup = repository.insert(group);
+        UUID memberUID = UUID.randomUUID();
+        //when
+        UpdateResult updateResult = mongoTemplate.updateFirst(
+                Query.query(Criteria.where(UserGroupEntity.Fields.id).is(savedGroup.getId())),
+                Update.update(UserGroupEntity.Fields.status, UserGroupStatus.SUSPENDED)
+                        .set("modifiedBy", auditorAware.getCurrentAuditor().get())
+                        .set("modifiedAt", now),
+                UserGroupEntity.class);
+        //then
+        Optional<UserGroupEntity> groupMod = repository.findById(savedGroup.getId());
+        assertEquals(selfCareUser.getId(), groupMod.get().getModifiedBy());
+        assertEquals(selfCareUser.getId(), savedGroup.getCreatedBy());
     }
 
     @Test
@@ -214,7 +252,6 @@ class UserGroupRepositoryTest {
         filter.getInstitutionId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.institutionId).is(value)));
         filter.getProductId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.productId).is(value)));
         filter.getUserId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.members).is(value)));
-
         //when
         List<UserGroupEntity> foundGroups = mongoTemplate.find(query.with(pageable), UserGroupEntity.class);
         //then
@@ -270,7 +307,9 @@ class UserGroupRepositoryTest {
                 Query.query(Criteria.where(UserGroupEntity.Fields.members).is("userId2")
                         .and(UserGroupEntity.Fields.institutionId).is(institutionId)
                         .and(UserGroupEntity.Fields.productId).is(productId)),
-                new Update().pull("members", "userId2"),
+                new Update().pull("members", "userId2")
+                        .set("modifiedBy", auditorAware.getCurrentAuditor().get())
+                        .set("modifiedAt", now),
                 UserGroupEntity.class);
 
         //then
@@ -283,5 +322,6 @@ class UserGroupRepositoryTest {
         assertEquals(1, foundGroups.get(0).getMembers().size());
         assertEquals(1, updateResult.getModifiedCount());
     }
+
 
 }
