@@ -179,8 +179,8 @@ public class UserGroupController {
     public void deleteMemberFromUserGroups(@ApiParam("${swagger.user-group.model.memberId}")
                                            @PathVariable("memberId")
                                                    UUID memberId,
-                                           @RequestParam String institutionId,
-                                           @RequestParam String productId) {
+                                           @RequestParam(value = "institutionId") String institutionId,
+                                           @RequestParam(value = "productId") String productId) {
         log.trace("deleteMemberFromUserGroups start");
         log.debug("deleteMemberFromUserGroups memberId = {}, institutionId = {}, productId = {}", memberId, institutionId, productId);
         groupService.deleteMembers(memberId.toString(), institutionId, productId);
