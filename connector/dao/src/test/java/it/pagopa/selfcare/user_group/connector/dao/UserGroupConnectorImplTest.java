@@ -718,8 +718,11 @@ class UserGroupConnectorImplTest {
         UserGroupOperations saved = groupConnector.save(entity);
         //then
         assertEquals(entity, saved);
+        ArgumentCaptor<UserGroupEntity> entityCaptor = ArgumentCaptor.forClass(UserGroupEntity.class);
         Mockito.verify(repositoryMock, Mockito.times(1))
-                .save(Mockito.eq(entity));
+                .save(entityCaptor.capture());
+        UserGroupEntity capturedEntity = entityCaptor.getValue();
+        assertEquals(entity, capturedEntity);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 

@@ -35,6 +35,7 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
     private final UserGroupRepository repository;
     private final MongoTemplate mongoTemplate;
     private final AuditorAware<String> auditorAware;
+    private static final String COULD_NOT_UPDATE_MESSAGE = "Couldn't update resource";
 
 
     @Autowired
@@ -77,12 +78,12 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         UpdateResult updateResult = mongoTemplate.updateFirst(
                 Query.query(Criteria.where(UserGroupEntity.Fields.id).is(id)
                         .and(UserGroupEntity.Fields.status).is(UserGroupStatus.ACTIVE)),
-                new Update().push("members", memberId)
+                new Update().push(UserGroupEntity.Fields.members, memberId)
                         .set(UserGroupEntity.Fields.modifiedBy, auditorAware.getCurrentAuditor().orElse(null))
                         .currentDate(UserGroupEntity.Fields.modifiedAt),
                 UserGroupEntity.class);
         if (updateResult.getModifiedCount() == 0) {
-            throw new ResourceUpdateException("Couldn't update resource");
+            throw new ResourceUpdateException(COULD_NOT_UPDATE_MESSAGE);
         }
         log.trace("insertMember end");
 
@@ -96,12 +97,12 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         UpdateResult updateResult = mongoTemplate.updateFirst(
                 Query.query(Criteria.where(UserGroupEntity.Fields.id).is(id)
                         .and(UserGroupEntity.Fields.status).is(UserGroupStatus.ACTIVE)),
-                new Update().pull("members", memberId)
+                new Update().pull(UserGroupEntity.Fields.members, memberId)
                         .set(UserGroupEntity.Fields.modifiedBy, auditorAware.getCurrentAuditor().orElse(null))
                         .currentTimestamp(UserGroupEntity.Fields.modifiedAt),
                 UserGroupEntity.class);
         if (updateResult.getModifiedCount() == 0) {
-            throw new ResourceUpdateException("Couldn't update resource");
+            throw new ResourceUpdateException(COULD_NOT_UPDATE_MESSAGE);
         }
         log.trace("deleteMember end");
     }
@@ -114,12 +115,12 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
                 Query.query(Criteria.where(UserGroupEntity.Fields.members).is(memberId)
                         .and(UserGroupEntity.Fields.institutionId).is(institutionId)
                         .and(UserGroupEntity.Fields.productId).is(productId)),
-                new Update().pull("members", memberId)
+                new Update().pull(UserGroupEntity.Fields.members, memberId)
                         .set(UserGroupEntity.Fields.modifiedBy, auditorAware.getCurrentAuditor().orElse(null))
                         .currentTimestamp(UserGroupEntity.Fields.modifiedAt),
                 UserGroupEntity.class);
         if (updateResult.getModifiedCount() == 0) {
-            throw new ResourceUpdateException("Couldn't update resource");
+            throw new ResourceUpdateException(COULD_NOT_UPDATE_MESSAGE);
         }
         log.trace("deleteMembers end");
     }

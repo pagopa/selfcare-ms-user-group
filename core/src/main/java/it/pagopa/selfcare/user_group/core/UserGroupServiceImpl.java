@@ -29,6 +29,7 @@ class UserGroupServiceImpl implements UserGroupService {
     private final UserGroupConnector groupConnector;
     private static final String USER_GROUP_ID_REQUIRED_MESSAGE = "A user group id is required";
     private static final String TRYING_TO_MODIFY_SUSPENDED_GROUP = "Trying to modify suspended group";
+    private static final String MEMBER_ID_REQUIRED = "A member id is required";
     private final List<String> allowedSortingParams;
 
     @Autowired
@@ -59,7 +60,7 @@ class UserGroupServiceImpl implements UserGroupService {
         log.trace("addMember start");
         log.debug("addMember id = {}, memberId ={}", id, memberId);
         Assert.hasText(id, USER_GROUP_ID_REQUIRED_MESSAGE);
-        Assert.notNull(memberId, "A member id is required");
+        Assert.notNull(memberId, MEMBER_ID_REQUIRED);
         UserGroupOperations foundGroup = groupConnector.findById(id).orElseThrow(ResourceNotFoundException::new);
         if (UserGroupStatus.SUSPENDED.equals(foundGroup.getStatus())) {
             throw new ResourceUpdateException(TRYING_TO_MODIFY_SUSPENDED_GROUP);
@@ -73,7 +74,7 @@ class UserGroupServiceImpl implements UserGroupService {
         log.trace("deleteMember start");
         log.debug("deleteMember groupId = {}, memberId = {}", groupId, memberId);
         Assert.hasText(groupId, USER_GROUP_ID_REQUIRED_MESSAGE);
-        Assert.hasText(memberId, "A member id is required");
+        Assert.hasText(memberId, MEMBER_ID_REQUIRED);
         UserGroupOperations foundGroup = groupConnector.findById(groupId).orElseThrow(ResourceNotFoundException::new);
         if (UserGroupStatus.SUSPENDED.equals(foundGroup.getStatus())) {
             throw new ResourceUpdateException(TRYING_TO_MODIFY_SUSPENDED_GROUP);
@@ -86,7 +87,7 @@ class UserGroupServiceImpl implements UserGroupService {
     public void deleteMembers(String memberId, String institutionId, String productId) {
         log.trace("deleteMembers start");
         log.debug("deleteMembers memberId = {}, institutionId = {}, productId= {}", memberId, institutionId, productId);
-        Assert.hasText(memberId, "A member id is required");
+        Assert.hasText(memberId, MEMBER_ID_REQUIRED);
         Assert.hasText(institutionId, "A institution id is required");
         Assert.hasText(productId, "A product id is required");
         groupConnector.deleteMembers(memberId, institutionId, productId);
