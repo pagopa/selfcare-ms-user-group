@@ -433,8 +433,9 @@ class UserGroupServiceImplTest {
         Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
                 .thenReturn(Optional.of(group));
         //when
-        groupService.deleteMember(id, memberId);
+        Executable executable = () -> groupService.deleteMember(id, memberId);
         //then
+        assertDoesNotThrow(executable);
         Mockito.verify(groupConnectorMock, Mockito.times(1))
                 .findById(id);
         Mockito.verify(groupConnectorMock, Mockito.times(1))
@@ -473,7 +474,7 @@ class UserGroupServiceImplTest {
     @Test
     void deleteMembers_nullProductId() {
         //given
-        String memberId = "memberid";
+        String memberId = "memberId";
         String institutionId = "institutionId";
         String productId = null;
         //when
@@ -483,6 +484,22 @@ class UserGroupServiceImplTest {
         assertEquals("A product id is required", e.getMessage());
         Mockito.verifyNoInteractions(groupConnectorMock);
     }
+
+    @Test
+    void deleteMembers() {
+        //given
+        String memberId = "memberId";
+        String institutionId = "institutionId";
+        String productId = "productId";
+        //when
+        Executable executable = () -> groupService.deleteMembers(memberId, institutionId, productId);
+        //then
+        assertDoesNotThrow(executable);
+        Mockito.verify(groupConnectorMock, Mockito.times(1))
+                .deleteMembers(memberId, institutionId, productId);
+        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+    }
+
 
     @Test
     void getGroup() {
