@@ -106,14 +106,14 @@ public class UserGroupController {
         return result;
     }
 
-    @PutMapping(value = "/{id}/members/{userId}")
+    @PutMapping(value = "/{id}/members/{memberId}")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.addMember}")
     public void addMemberToUserGroup(@ApiParam("${swagger.user-group.model.id}")
                                      @PathVariable("id")
                                              String id,
                                      @ApiParam("${swagger.user-group.model.memberId}")
-                                     @PathVariable("userId")
+                                     @PathVariable("memberId")
                                              UUID userId) {
         log.trace("addMemberToUserGroup start");
         log.debug("addMemberToUserGroup id = {}", id);
@@ -149,12 +149,12 @@ public class UserGroupController {
                                                  @RequestParam(value = "userId", required = false)
                                                          Optional<UUID> memberId,
                                                  Pageable pageable) {
-        log.trace("getGroupsByInstitutionAndProductIds start");
-        log.debug("getGroupsByInstitutionAndProductIds institutionId = {}, productId = {}, pageable = {}", institutionId, productId, pageable);
+        log.trace("getUserGroups start");
+        log.debug("getUserGroups institutionId = {}, productId = {}, pageable = {}", institutionId, productId, pageable);
         List<UserGroupOperations> userGroups = groupService.getUserGroups(institutionId, productId, memberId.map(UUID::toString), pageable);
         List<UserGroupResource> result = userGroups.stream().map(GroupMapper::toResource).collect(Collectors.toList());
-        log.debug("getGroupsByInstitutionAndProductIds result = {}", result);
-        log.trace("getGroupsByInstitutionAndProductIds end");
+        log.debug("getUserGroups result = {}", result);
+        log.trace("getUserGroups end");
         return result;
     }
 
@@ -181,10 +181,10 @@ public class UserGroupController {
                                                    UUID memberId,
                                            @RequestParam String institutionId,
                                            @RequestParam String productId) {
-        log.trace("deleteMemberFromUserGroup start");
-        log.debug("deleteMemberFromUserGroup memberId = {}, institutionId = {}, productId = {}", memberId, institutionId, productId);
+        log.trace("deleteMemberFromUserGroups start");
+        log.debug("deleteMemberFromUserGroups memberId = {}, institutionId = {}, productId = {}", memberId, institutionId, productId);
         groupService.deleteMembers(memberId.toString(), institutionId, productId);
-        log.trace("deleteMemberFromUserGroup end");
+        log.trace("deleteMemberFromUserGroups end");
     }
 
 
