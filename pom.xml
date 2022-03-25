@@ -14,10 +14,10 @@
     <artifactId>selc-user-group</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>selc-user-group</name>
-    <description>Microservice to manage Self Care User GRoup</description>
+    <description>Microservice to manage Self Care User Group</description>
 
     <properties>
-        <selc-commons.version>2.0.0</selc-commons.version>
+        <selc-commons.version>1.3.1</selc-commons.version>
     </properties>
     <dependencyManagement>
         <dependencies>
