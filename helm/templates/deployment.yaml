@@ -43,6 +43,8 @@ spec:
             - configMapRef:
                 name: common
             - configMapRef:
+                name: jwt
+            - configMapRef:
                 name: {{ include "this.fullname" . }}
           ports:
             - name: http
