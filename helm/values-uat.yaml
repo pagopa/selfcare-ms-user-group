@@ -1,6 +1,6 @@
 image:
   repository: selcuacr.azurecr.io/selfcaremsusergroup
-  tag: 0.0.1-SNAPSHOT
+  tag: 1.0-SNAPSHOT
 
 autoscaling:
   enabled: false
