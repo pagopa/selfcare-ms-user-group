@@ -3,7 +3,6 @@ package it.pagopa.selfcare.user_group.web.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.utils.TestUtils;
-import it.pagopa.selfcare.commons.web.model.ErrorResource;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.user_group.core.UserGroupService;
@@ -19,20 +18,23 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @WebMvcTest(value = {UserGroupController.class}, excludeAutoConfiguration = SecurityAutoConfiguration.class)
@@ -68,9 +70,9 @@ class UserGroupControllerTest {
         MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .post(BASE_URL + "/")
                 .content(mapper.writeValueAsString(CREATE_USER_GROUP_DTO))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().isCreated())
                 .andReturn();
         //then
         UserGroupResource group = mapper.readValue(result.getResponse().getContentAsString(), UserGroupResource.class);
@@ -84,15 +86,14 @@ class UserGroupControllerTest {
         Mockito.doThrow(ResourceNotFoundException.class)
                 .when(groupServiceMock).deleteGroup(Mockito.anyString());
         //when
-        MvcResult result = mvc.perform(MockMvcRequestBuilders
+        mvc.perform(MockMvcRequestBuilders
                 .delete(BASE_URL + "/id")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().is(HttpStatus.NOT_FOUND.value()))
-                .andReturn();
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(APPLICATION_PROBLEM_JSON))
+                .andExpect(content().string(not(emptyString())));
         //then
-        ErrorResource error = mapper.readValue(result.getResponse().getContentAsString(), ErrorResource.class);
-        assertNotNull(error);
     }
 
     @Test
@@ -102,9 +103,9 @@ class UserGroupControllerTest {
         // when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .delete(BASE_URL + "/id")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().is2xxSuccessful())
                 .andReturn();
         // then
         assertEquals("", result.getResponse().getContentAsString());
@@ -121,15 +122,14 @@ class UserGroupControllerTest {
         Mockito.doThrow(ResourceNotFoundException.class)
                 .when(groupServiceMock).activateGroup(Mockito.anyString());
         //when
-        MvcResult result = mvc.perform(MockMvcRequestBuilders
+        mvc.perform(MockMvcRequestBuilders
                 .post(BASE_URL + "/{id}/activate", groupId)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().is(HttpStatus.NOT_FOUND.value()))
-                .andReturn();
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(APPLICATION_PROBLEM_JSON))
+                .andExpect(content().string(not(emptyString())));
         //then
-        ErrorResource error = mapper.readValue(result.getResponse().getContentAsString(), ErrorResource.class);
-        assertNotNull(error);
     }
 
     @Test
@@ -139,9 +139,9 @@ class UserGroupControllerTest {
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .post(BASE_URL + "/{id}/activate", groupId)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().isNoContent())
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().isNoContent())
                 .andReturn();
         //then
         assertEquals(0, result.getResponse().getContentLength());
@@ -157,15 +157,14 @@ class UserGroupControllerTest {
         Mockito.doThrow(ResourceNotFoundException.class)
                 .when(groupServiceMock).suspendGroup(Mockito.anyString());
         //when
-        MvcResult result = mvc.perform(MockMvcRequestBuilders
+        mvc.perform(MockMvcRequestBuilders
                 .post(BASE_URL + "/{id}/suspend", groupId)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().is(HttpStatus.NOT_FOUND.value()))
-                .andReturn();
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(APPLICATION_PROBLEM_JSON))
+                .andExpect(content().string(not(emptyString())));
         //then
-        ErrorResource error = mapper.readValue(result.getResponse().getContentAsString(), ErrorResource.class);
-        assertNotNull(error);
     }
 
     @Test
@@ -175,9 +174,9 @@ class UserGroupControllerTest {
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .post(BASE_URL + "/{id}/suspend", groupId)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().isNoContent())
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().isNoContent())
                 .andReturn();
         //then
         assertEquals(0, result.getResponse().getContentLength());
@@ -201,9 +200,9 @@ class UserGroupControllerTest {
         MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .put(BASE_URL + "/id")
                 .content(mapper.writeValueAsString(UPDATE_USER_GROUP_DTO))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().is2xxSuccessful())
                 .andReturn();
         //then
         UserGroupResource group = mapper.readValue(result.getResponse().getContentAsString(), UserGroupResource.class);
@@ -221,9 +220,9 @@ class UserGroupControllerTest {
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .put(BASE_URL + "/groupId/members/" + member.getMember())
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().is2xxSuccessful())
                 .andReturn();
         //then
         assertEquals(0, result.getResponse().getContentLength());
@@ -240,9 +239,9 @@ class UserGroupControllerTest {
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .delete(BASE_URL + "/groupId/members/" + memberId)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().isNoContent())
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().isNoContent())
                 .andReturn();
         //then
         assertEquals(0, result.getResponse().getContentLength());
@@ -267,9 +266,9 @@ class UserGroupControllerTest {
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
                 .get(BASE_URL + "/groupId")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().is2xxSuccessful())
                 .andReturn();
         //then
         UserGroupResource group = mapper.readValue(result.getResponse().getContentAsString(), UserGroupResource.class);
@@ -290,9 +289,9 @@ class UserGroupControllerTest {
                 .get(BASE_URL + "/")
                 .param("institutionId", institutionId)
                 .param("productId", productId)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().is2xxSuccessful())
                 .andReturn();
         //then
         List<UserGroupResource> groups = mapper.readValue(result.getResponse().getContentAsString(),
@@ -317,9 +316,9 @@ class UserGroupControllerTest {
                 .delete(BASE_URL + "/members/" + memberId)
                 .param("institutionId", institutionId)
                 .param("productId", productId)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().isNoContent())
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().isNoContent())
                 .andReturn();
         //then
         assertEquals(0, result.getResponse().getContentLength());
