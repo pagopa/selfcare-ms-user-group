@@ -1,14 +1,16 @@
 package it.pagopa.selfcare.user_group.web.handler;
 
-import it.pagopa.selfcare.commons.web.model.ErrorResource;
+import it.pagopa.selfcare.commons.web.model.Problem;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceAlreadyExistsException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceUpdateException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.http.HttpStatus.*;
 
 class UserGroupExceptionHandlerTest {
     private static final String DETAIL_MESSAGE = "detail message";
@@ -22,10 +24,13 @@ class UserGroupExceptionHandlerTest {
         Mockito.when(mockException.getMessage())
                 .thenReturn(DETAIL_MESSAGE);
         //when
-        ErrorResource response = handler.handleResourceNotFoundException(mockException);
+        ResponseEntity<Problem> responseEntity = handler.handleResourceNotFoundException(mockException);
         //then
-        assertNotNull(response);
-        assertEquals(DETAIL_MESSAGE, response.getMessage());
+        assertNotNull(responseEntity);
+        assertEquals(NOT_FOUND, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        assertEquals(DETAIL_MESSAGE, responseEntity.getBody().getDetail());
+        assertEquals(NOT_FOUND.value(), responseEntity.getBody().getStatus());
     }
 
     @Test
@@ -35,10 +40,13 @@ class UserGroupExceptionHandlerTest {
         Mockito.when(mockException.getMessage())
                 .thenReturn(DETAIL_MESSAGE);
         //when
-        ErrorResource response = handler.handleResourceAlreadyExistsException(mockException);
+        ResponseEntity<Problem> responseEntity = handler.handleResourceAlreadyExistsException(mockException);
         //then
-        assertNotNull(response);
-        assertEquals(DETAIL_MESSAGE, response.getMessage());
+        assertNotNull(responseEntity);
+        assertEquals(CONFLICT, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        assertEquals(DETAIL_MESSAGE, responseEntity.getBody().getDetail());
+        assertEquals(CONFLICT.value(), responseEntity.getBody().getStatus());
     }
 
     @Test
@@ -48,9 +56,12 @@ class UserGroupExceptionHandlerTest {
         Mockito.when(mockException.getMessage())
                 .thenReturn(DETAIL_MESSAGE);
         //when
-        ErrorResource response = handler.handleResourceUpdateException(mockException);
+        ResponseEntity<Problem> responseEntity = handler.handleResourceUpdateException(mockException);
         //then
-        assertNotNull(response);
-        assertEquals(DETAIL_MESSAGE, response.getMessage());
+        assertNotNull(responseEntity);
+        assertEquals(BAD_REQUEST, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        assertEquals(DETAIL_MESSAGE, responseEntity.getBody().getDetail());
+        assertEquals(BAD_REQUEST.value(), responseEntity.getBody().getStatus());
     }
 }
