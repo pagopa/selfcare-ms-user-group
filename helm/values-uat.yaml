@@ -2,6 +2,10 @@ image:
   repository: selcuacr.azurecr.io/selfcaremsusergroup
   tag: 1.0-SNAPSHOT
 
+ingress:
+  annotations:
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://uat.selfcare.pagopa.it,http://localhost:3000"
+
 autoscaling:
   enabled: false
   minReplicas: 1
