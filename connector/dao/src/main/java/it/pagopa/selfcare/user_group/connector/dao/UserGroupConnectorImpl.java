@@ -53,7 +53,7 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         try {
             insert = repository.insert(new UserGroupEntity(entity));
         } catch (DuplicateKeyException e) {
-            throw new ResourceAlreadyExistsException("UserGroup id = " + entity.getId(), e);
+            throw new ResourceAlreadyExistsException("Failed _id or unique index constraint.", e);
         }
 
         log.trace("insert end");
@@ -68,7 +68,7 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         try {
             result = repository.save(new UserGroupEntity(entity));
         } catch (DuplicateKeyException e) {
-            throw new ResourceAlreadyExistsException("UserGroup id = " + entity.getId(), e);
+            throw new ResourceAlreadyExistsException("Failed _id or unique index constraint.", e);
         }
         log.debug("save result = {}", result);
         log.trace("save end");
