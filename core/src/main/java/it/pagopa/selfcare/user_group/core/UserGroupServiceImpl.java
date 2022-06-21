@@ -3,7 +3,6 @@ package it.pagopa.selfcare.user_group.core;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupConnector;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
-import it.pagopa.selfcare.user_group.connector.exception.ResourceAlreadyExistsException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceUpdateException;
 import it.pagopa.selfcare.user_group.connector.model.UserGroupFilter;
@@ -16,7 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.yaml.snakeyaml.constructor.DuplicateKeyException;
 
 import javax.validation.ValidationException;
 import java.util.Arrays;
@@ -171,12 +169,7 @@ class UserGroupServiceImpl implements UserGroupService {
         foundGroup.setMembers(group.getMembers());
         foundGroup.setName(group.getName());
         foundGroup.setDescription(group.getDescription());
-        UserGroupOperations updatedGroup;
-        try {
-            updatedGroup = groupConnector.save(foundGroup);
-        } catch (DuplicateKeyException e) {
-            throw new ResourceAlreadyExistsException("Group name " + group.getName() + " already in use", e);
-        }
+        UserGroupOperations updatedGroup = groupConnector.save(foundGroup);
         log.debug("updateGroup updatedGroup = {}", updatedGroup);
         log.trace("updateGroup end");
         return updatedGroup;
