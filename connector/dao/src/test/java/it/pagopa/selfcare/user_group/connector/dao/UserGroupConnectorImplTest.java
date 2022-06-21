@@ -726,5 +726,23 @@ class UserGroupConnectorImplTest {
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 
+    @Test
+    void save_duplicateKey() {
+        //given
+        String id = "id";
+        UserGroupEntity entity = TestUtils.mockInstance(new UserGroupEntity());
+        Mockito.doThrow(DuplicateKeyException.class)
+                .when(repositoryMock)
+                .save(Mockito.any(UserGroupEntity.class));
+        //when
+        Executable executable = () -> groupConnector.save(entity);
+        //then
+        ResourceAlreadyExistsException e = assertThrows(ResourceAlreadyExistsException.class, executable);
+        assertEquals("UserGroup id = " + entity.getId(), e.getMessage());
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .save(entity);
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
 
 }
