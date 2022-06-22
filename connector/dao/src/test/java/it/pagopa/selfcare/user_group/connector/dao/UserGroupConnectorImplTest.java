@@ -75,7 +75,7 @@ class UserGroupConnectorImplTest {
         Executable executable = () -> groupConnector.insert(entity);
         //then
         ResourceAlreadyExistsException e = assertThrows(ResourceAlreadyExistsException.class, executable);
-        assertEquals("UserGroup id = " + entity.getId(), e.getMessage());
+        assertEquals("Failed _id or unique index constraint.", e.getMessage());
         Mockito.verify(repositoryMock, Mockito.times(1))
                 .insert(entity);
         Mockito.verifyNoMoreInteractions(repositoryMock);
@@ -723,6 +723,24 @@ class UserGroupConnectorImplTest {
                 .save(entityCaptor.capture());
         UserGroupEntity capturedEntity = entityCaptor.getValue();
         assertEquals(entity, capturedEntity);
+        Mockito.verifyNoMoreInteractions(repositoryMock);
+    }
+
+    @Test
+    void save_duplicateKey() {
+        //given
+        String id = "id";
+        UserGroupEntity entity = TestUtils.mockInstance(new UserGroupEntity());
+        Mockito.doThrow(DuplicateKeyException.class)
+                .when(repositoryMock)
+                .save(Mockito.any(UserGroupEntity.class));
+        //when
+        Executable executable = () -> groupConnector.save(entity);
+        //then
+        ResourceAlreadyExistsException e = assertThrows(ResourceAlreadyExistsException.class, executable);
+        assertEquals("Failed _id or unique index constraint.", e.getMessage());
+        Mockito.verify(repositoryMock, Mockito.times(1))
+                .save(entity);
         Mockito.verifyNoMoreInteractions(repositoryMock);
     }
 

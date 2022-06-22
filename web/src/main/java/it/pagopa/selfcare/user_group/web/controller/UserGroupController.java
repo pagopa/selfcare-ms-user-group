@@ -3,6 +3,10 @@ package it.pagopa.selfcare.user_group.web.controller;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import it.pagopa.selfcare.commons.web.model.Problem;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.core.UserGroupService;
 import it.pagopa.selfcare.user_group.web.model.CreateUserGroupDto;
@@ -39,6 +43,12 @@ public class UserGroupController {
     @PostMapping(value = "/", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.createUserGroup}")
+    @ApiResponse(responseCode = "409",
+            description = "Conflict",
+            content = {
+                    @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = Problem.class))
+            })
     public UserGroupResource createGroup(@RequestBody
                                          @Valid
                                                  CreateUserGroupDto group) {
@@ -50,6 +60,7 @@ public class UserGroupController {
         log.trace("createGroup end");
         return result;
     }
+
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -64,6 +75,7 @@ public class UserGroupController {
 
     }
 
+
     @PostMapping("/{id}/activate")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.activateUserGroup}")
@@ -75,6 +87,7 @@ public class UserGroupController {
         groupService.activateGroup(id);
         log.trace("activateGroup end");
     }
+
 
     @PostMapping("/{id}/suspend")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -88,9 +101,16 @@ public class UserGroupController {
         log.trace("suspendGroup end");
     }
 
+
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.updateUserGroup}")
+    @ApiResponse(responseCode = "409",
+            description = "Conflict",
+            content = {
+                    @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                            schema = @Schema(implementation = Problem.class))
+            })
     public UserGroupResource updateUserGroup(@ApiParam("${swagger.user-group.model.id}")
                                              @PathVariable("id")
                                                      String id,
@@ -105,6 +125,7 @@ public class UserGroupController {
         log.trace("updateUserGroup end");
         return result;
     }
+
 
     @PutMapping(value = "/{id}/members/{memberId}")
     @ResponseStatus(HttpStatus.OK)
@@ -121,6 +142,7 @@ public class UserGroupController {
         log.trace("addMemberToUserGroup end");
     }
 
+
     @GetMapping(value = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.getUserGroup}")
@@ -135,6 +157,7 @@ public class UserGroupController {
         log.trace("getUserGroup end");
         return groupResource;
     }
+
 
     @GetMapping(value = "/")
     @ResponseStatus(HttpStatus.OK)
@@ -158,6 +181,7 @@ public class UserGroupController {
         return result;
     }
 
+
     @DeleteMapping(value = "/{id}/members/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.deleteMember}")
@@ -173,6 +197,7 @@ public class UserGroupController {
         log.trace("deleteMemberFromUserGroup end");
     }
 
+
     @DeleteMapping(value = "/members/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.deleteMember}")
@@ -186,6 +211,5 @@ public class UserGroupController {
         groupService.deleteMembers(memberId.toString(), institutionId, productId);
         log.trace("deleteMemberFromUserGroups end");
     }
-
 
 }
