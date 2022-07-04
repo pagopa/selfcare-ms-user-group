@@ -1,12 +1,16 @@
 package it.pagopa.selfcare.user_group.web.model.mapper;
 
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupFilter;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import it.pagopa.selfcare.user_group.web.model.CreateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.GroupDto;
 import it.pagopa.selfcare.user_group.web.model.UpdateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -54,6 +58,19 @@ public class GroupMapper {
         log.debug("fromDto group = {}", group);
         log.trace("fromDto end");
         return group;
+    }
+
+    public static UserGroupFilter toFilter(Optional<String> institutionId, Optional<String> productId, Optional<String> userId, Optional<UserGroupStatus> allowedStates) {
+        Assert.notNull(institutionId, "An Optional institutionId is required");
+        Assert.notNull(productId, "An Optional productId is required");
+        Assert.notNull(userId, "An Optional userId is required");
+        Assert.notNull(allowedStates, "An Optional allowedStatus is required");
+        UserGroupFilter filter = new UserGroupFilter();
+        filter.setInstitutionId(institutionId);
+        filter.setProductId(productId);
+        filter.setUserId(userId);
+        filter.setStatus(allowedStates);
+        return filter;
     }
 
 

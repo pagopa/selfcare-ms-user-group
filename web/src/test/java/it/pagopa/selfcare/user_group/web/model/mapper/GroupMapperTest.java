@@ -2,12 +2,16 @@ package it.pagopa.selfcare.user_group.web.model.mapper;
 
 import it.pagopa.selfcare.commons.utils.TestUtils;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupFilter;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import it.pagopa.selfcare.user_group.web.model.CreateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.UpdateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -90,4 +94,77 @@ class GroupMapperTest {
         //then
         assertNull(group);
     }
+
+    @Test
+    void toFilter() {
+        //given
+        Optional<String> institutionId = Optional.of("institutionId");
+        Optional<String> productId = Optional.of("productId");
+        Optional<String> userId = Optional.of("userId");
+        Optional<UserGroupStatus> allowedStates = Optional.of(UserGroupStatus.ACTIVE);
+        //when
+        UserGroupFilter filter = GroupMapper.toFilter(institutionId, productId, userId, allowedStates);
+        //then
+        assertEquals(institutionId, filter.getInstitutionId());
+        assertEquals(productId, filter.getProductId());
+        assertEquals(userId, filter.getUserId());
+        assertEquals(allowedStates, filter.getStatus());
+    }
+
+    @Test
+    void toFilter_nullInstitutionId() {
+        //given
+        Optional<String> institutionId = null;
+        Optional<String> productId = Optional.of("productId");
+        Optional<String> userId = Optional.of("userId");
+        Optional<UserGroupStatus> allowedStates = Optional.of(UserGroupStatus.ACTIVE);
+        //when
+        Executable executable = () -> GroupMapper.toFilter(institutionId, productId, userId, allowedStates);
+        //then
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("An Optional institutionId is required", e.getMessage());
+    }
+
+    @Test
+    void toFilter_nullAllowedStates() {
+        //given
+        Optional<String> institutionId = Optional.of("institutionId");
+        Optional<String> productId = Optional.of("productId");
+        Optional<String> userId = Optional.of("userId");
+        Optional<UserGroupStatus> allowedStates = null;
+        //when
+        Executable executable = () -> GroupMapper.toFilter(institutionId, productId, userId, allowedStates);
+        //then
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("An Optional allowedStatus is required", e.getMessage());
+    }
+
+    @Test
+    void toFilter_productId() {
+        //given
+        Optional<String> institutionId = Optional.of("institutionId");
+        Optional<String> productId = null;
+        Optional<String> userId = Optional.of("userId");
+        Optional<UserGroupStatus> allowedStates = Optional.of(UserGroupStatus.ACTIVE);
+        //when
+        Executable executable = () -> GroupMapper.toFilter(institutionId, productId, userId, allowedStates);
+        //then
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("An Optional productId is required", e.getMessage());
+    }
+
+    @Test
+    void toFilter_userId() {
+        //given
+        Optional<String> institutionId = Optional.of("institutionId");
+        Optional<String> productId = Optional.of("productId");
+        Optional<String> userId = null;
+        Optional<UserGroupStatus> allowedStates = Optional.of(UserGroupStatus.ACTIVE);
+        //when
+        Executable executable = () -> GroupMapper.toFilter(institutionId, productId, userId, allowedStates);
+        //then
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
+        assertEquals("An Optional userId is required", e.getMessage());
+    }
+
 }
