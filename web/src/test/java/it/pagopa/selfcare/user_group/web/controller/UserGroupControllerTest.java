@@ -283,7 +283,7 @@ class UserGroupControllerTest {
         String productId = "productId";
         UserGroupOperations groupOperations = TestUtils.mockInstance(new GroupDto());
         groupOperations.setMembers(Set.of(UUID.randomUUID().toString()));
-        Mockito.when(groupServiceMock.getUserGroups(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        Mockito.when(groupServiceMock.getUserGroups(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(Collections.singletonList(groupOperations));
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
@@ -300,7 +300,7 @@ class UserGroupControllerTest {
                 });
         assertNotNull(groups);
         Mockito.verify(groupServiceMock, Mockito.times(1))
-                .getUserGroups(Mockito.any(), Mockito.any(), Mockito.any(), pageableCaptor.capture());
+                .getUserGroups(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), pageableCaptor.capture());
         Pageable capturedPageable = pageableCaptor.getValue();
         assertTrue(capturedPageable.getSort().isUnsorted());
     }
@@ -312,7 +312,7 @@ class UserGroupControllerTest {
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
                         .get(BASE_URL + "/")
-                        .param("status", String.valueOf(status))
+                        .param("allowedStatus", String.valueOf(status))
                         .contentType(APPLICATION_JSON_VALUE)
                         .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isBadRequest())
@@ -321,9 +321,39 @@ class UserGroupControllerTest {
     }
 
     @Test
+    void getUserGroups_allowedFilters() throws Exception {
+        //given
+        UserGroupStatus status = UserGroupStatus.ACTIVE;
+        String institutionId = "institutionId";
+        String productId = "productId";
+        UserGroupOperations groupOperations = TestUtils.mockInstance(new GroupDto());
+        groupOperations.setMembers(Set.of(UUID.randomUUID().toString()));
+        Mockito.when(groupServiceMock.getUserGroups(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+                .thenReturn(Collections.singletonList(groupOperations));
+        //when
+        MvcResult result = mvc.perform(MockMvcRequestBuilders
+                        .get(BASE_URL + "/")
+                        .param("institutionId", institutionId)
+                        .param("productId", productId)
+                        .param("allowedStatus", String.valueOf(status))
+                        .contentType(APPLICATION_JSON_VALUE)
+                        .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().is2xxSuccessful())
+                .andReturn();
+        //then
+        List<UserGroupResource> groups = mapper.readValue(result.getResponse().getContentAsString(),
+                new TypeReference<>() {
+                });
+        assertNotNull(groups);
+        Mockito.verify(groupServiceMock, Mockito.times(1))
+                .getUserGroups(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), pageableCaptor.capture());
+        Pageable capturedPageable = pageableCaptor.getValue();
+        assertTrue(capturedPageable.getSort().isUnsorted());
+    }
+
+    @Test
     void deleteMembers() throws Exception {
         //given
-        String groupId = "groupId";
         UUID memberId = UUID.randomUUID();
         String institutionId = "institutionId";
         String productId = "productId";

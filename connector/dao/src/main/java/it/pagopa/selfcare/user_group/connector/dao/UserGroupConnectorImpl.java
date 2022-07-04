@@ -152,6 +152,7 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         filter.getInstitutionId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.institutionId).is(value)));
         filter.getProductId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.productId).is(value)));
         filter.getUserId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.members).is(value)));
+        filter.getStatus().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.status).is(value)));
         List<UserGroupOperations> result = new ArrayList<>(mongoTemplate.find(query.with(pageable), UserGroupEntity.class));
         log.debug("findAll result = {}", result);
         log.trace("findAll end");

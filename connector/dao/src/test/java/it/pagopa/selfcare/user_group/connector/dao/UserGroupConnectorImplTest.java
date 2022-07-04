@@ -118,11 +118,13 @@ class UserGroupConnectorImplTest {
         String institutionId = "institutionId";
         String productId = "productId";
         String userId = "userId";
+        UserGroupStatus allowedStatus = UserGroupStatus.ACTIVE;
         Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
         UserGroupFilter groupFilter = new UserGroupFilter();
         groupFilter.setUserId(Optional.of(userId));
         groupFilter.setInstitutionId(Optional.of(institutionId));
         groupFilter.setProductId(Optional.of(productId));
+        groupFilter.setStatus(Optional.of(allowedStatus));
         List<UserGroupEntity> entities = List.of(TestUtils.mockInstance(new UserGroupEntity()));
 
         Mockito.when(mongoTemplateMock.find(Mockito.any(Query.class), (Class<UserGroupEntity>) Mockito.any()))
@@ -139,6 +141,7 @@ class UserGroupConnectorImplTest {
         assertTrue(query.toString().contains(institutionId));
         assertTrue(query.toString().contains(userId));
         assertTrue(query.toString().contains(productId));
+        assertTrue(query.toString().contains(allowedStatus.name()));
         Mockito.verifyNoMoreInteractions(mongoTemplateMock);
     }
 

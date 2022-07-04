@@ -107,17 +107,18 @@ class UserGroupServiceImpl implements UserGroupService {
     }
 
     @Override
-    public List<UserGroupOperations> getUserGroups(Optional<String> institutionId, Optional<String> productId, Optional<String> userId, Pageable pageable) {
+    public List<UserGroupOperations> getUserGroups(Optional<String> institutionId, Optional<String> productId, Optional<String> userId, Optional<UserGroupStatus> status, Pageable pageable) {
         log.trace("getUserGroups start");
         log.debug("getUserGroups institutionId = {}, productId = {},userId = {}, pageable = {}", institutionId, productId, userId, pageable);
         Assert.notNull(institutionId, "An Optional institutionId is required");
         Assert.notNull(productId, "An Optional productId is required");
         Assert.notNull(userId, "An Optional userId is required");
-
+        Assert.notNull(status, "An Optional allowedStatus is required");
         UserGroupFilter filter = new UserGroupFilter();
         filter.setUserId(userId);
         filter.setInstitutionId(institutionId);
         filter.setProductId(productId);
+        filter.setStatus(status);
         boolean match = pageable.getSort().stream().allMatch(order -> allowedSortingParams.contains(order.getProperty()));
         if (!match) {
             throw new ValidationException("Given sort parameters aren't valid");

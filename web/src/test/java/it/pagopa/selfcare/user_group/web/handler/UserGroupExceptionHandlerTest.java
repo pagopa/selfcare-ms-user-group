@@ -1,6 +1,7 @@
 package it.pagopa.selfcare.user_group.web.handler;
 
 import it.pagopa.selfcare.commons.web.model.Problem;
+import it.pagopa.selfcare.user_group.connector.exception.FilterCombinationNotAllowedException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceAlreadyExistsException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceUpdateException;
@@ -56,7 +57,23 @@ class UserGroupExceptionHandlerTest {
         Mockito.when(mockException.getMessage())
                 .thenReturn(DETAIL_MESSAGE);
         //when
-        ResponseEntity<Problem> responseEntity = handler.handleResourceUpdateException(mockException);
+        ResponseEntity<Problem> responseEntity = handler.handleBadRequestExceptions(mockException);
+        //then
+        assertNotNull(responseEntity);
+        assertEquals(BAD_REQUEST, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
+        assertEquals(DETAIL_MESSAGE, responseEntity.getBody().getDetail());
+        assertEquals(BAD_REQUEST.value(), responseEntity.getBody().getStatus());
+    }
+
+    @Test
+    void filterCombinationNotAllowedException() {
+        //given
+        FilterCombinationNotAllowedException mockException = Mockito.mock(FilterCombinationNotAllowedException.class);
+        Mockito.when(mockException.getMessage())
+                .thenReturn(DETAIL_MESSAGE);
+        //when
+        ResponseEntity<Problem> responseEntity = handler.handleBadRequestExceptions(mockException);
         //then
         assertNotNull(responseEntity);
         assertEquals(BAD_REQUEST, responseEntity.getStatusCode());

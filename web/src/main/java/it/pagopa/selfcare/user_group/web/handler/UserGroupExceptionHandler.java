@@ -26,7 +26,7 @@ public class UserGroupExceptionHandler {
 
     @ExceptionHandler({ResourceUpdateException.class,
             FilterCombinationNotAllowedException.class})
-    ResponseEntity<Problem> handleResourceUpdateException(Exception e) {
+    ResponseEntity<Problem> handleBadRequestExceptions(Exception e) {
         log.warn(e.toString());
         return ProblemMapper.toResponseEntity(new Problem(BAD_REQUEST, e.getMessage()));
     }

@@ -174,7 +174,7 @@ public class UserGroupController {
                                                      @RequestParam(value = "userId", required = false)
                                                              Optional<UUID> memberId,
                                                  @ApiParam("${swagger.user-group.model.statusFilter}")
-                                                     @RequestParam(value = "status", required = false)
+                                                     @RequestParam(value = "allowedStatus", required = false)
                                                              Optional<UserGroupStatus> status,
                                                  Pageable pageable) {
         log.trace("getUserGroups start");
@@ -182,7 +182,7 @@ public class UserGroupController {
         if (status.isPresent() && institutionId.isEmpty() && productId.isEmpty() && memberId.isEmpty()) {
             throw new FilterCombinationNotAllowedException("Provide at least one of institutionId, productId or memberId filters");
         }
-        List<UserGroupOperations> userGroups = groupService.getUserGroups(institutionId, productId, memberId.map(UUID::toString), pageable);
+        List<UserGroupOperations> userGroups = groupService.getUserGroups(institutionId, productId, memberId.map(UUID::toString), status, pageable);
         List<UserGroupResource> result = userGroups.stream().map(GroupMapper::toResource).collect(Collectors.toList());
         log.debug("getUserGroups result = {}", result);
         log.trace("getUserGroups end");
