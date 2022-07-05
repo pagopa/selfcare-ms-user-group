@@ -74,16 +74,17 @@
               "type" : "string"
             }
           }
-        }, {
-          "name" : "productId",
-          "in" : "query",
-          "description" : "Users group's productId",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "string"
-          }
         },
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Users group's productId",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "userId",
             "in": "query",
@@ -98,7 +99,7 @@
           {
             "name": "allowedStatus",
             "in": "query",
-            "description": "If filter on status is valorized, at least one of institutionId, productId or userId has to be present",
+            "description": "If filter on status is present, it must be used with at least one of the other filters",
             "required": false,
             "style": "form",
             "schema": {
@@ -110,15 +111,15 @@
             }
           }
         ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/UserGroupResource"
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserGroupResource"
                   }
                 }
               }
