@@ -2,7 +2,6 @@ package it.pagopa.selfcare.user_group.web.handler;
 
 import it.pagopa.selfcare.commons.web.model.Problem;
 import it.pagopa.selfcare.commons.web.model.mapper.ProblemMapper;
-import it.pagopa.selfcare.user_group.connector.exception.FilterCombinationNotAllowedException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceAlreadyExistsException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceUpdateException;
@@ -24,8 +23,7 @@ public class UserGroupExceptionHandler {
         return ProblemMapper.toResponseEntity(new Problem(CONFLICT, e.getMessage()));
     }
 
-    @ExceptionHandler({ResourceUpdateException.class,
-            FilterCombinationNotAllowedException.class})
+    @ExceptionHandler({ResourceUpdateException.class})
     ResponseEntity<Problem> handleBadRequestExceptions(Exception e) {
         log.warn(e.toString());
         return ProblemMapper.toResponseEntity(new Problem(BAD_REQUEST, e.getMessage()));

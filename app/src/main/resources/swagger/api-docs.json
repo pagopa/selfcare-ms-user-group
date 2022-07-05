@@ -83,17 +83,33 @@
           "schema" : {
             "type" : "string"
           }
-        }, {
-          "name" : "userId",
-          "in" : "query",
-          "description" : "Member's unique identifier",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "string",
-            "format" : "uuid"
+        },
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "Member's unique identifier",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "allowedStatus",
+            "in": "query",
+            "description": "If filter on status is valorized, at least one of institutionId, productId or userId has to be present",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "SUSPENDED"
+              ]
+            }
           }
-        } ],
+        ],
         "responses" : {
           "200" : {
             "description" : "OK",
