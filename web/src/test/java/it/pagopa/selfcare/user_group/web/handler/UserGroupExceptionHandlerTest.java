@@ -56,7 +56,7 @@ class UserGroupExceptionHandlerTest {
         Mockito.when(mockException.getMessage())
                 .thenReturn(DETAIL_MESSAGE);
         //when
-        ResponseEntity<Problem> responseEntity = handler.handleBadRequestExceptions(mockException);
+        ResponseEntity<Problem> responseEntity = handler.handleResourceUpdateException(mockException);
         //then
         assertNotNull(responseEntity);
         assertEquals(BAD_REQUEST, responseEntity.getStatusCode());

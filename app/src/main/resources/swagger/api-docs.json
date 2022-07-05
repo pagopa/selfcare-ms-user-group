@@ -64,14 +64,14 @@
         }, {
           "name" : "sort",
           "in" : "query",
-          "description" : "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
-          "required" : false,
-          "style" : "form",
-          "allowReserved" : true,
-          "schema" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
+          "description": "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+          "required": false,
+          "style": "form",
+          "allowReserved": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           }
         },
@@ -125,11 +125,11 @@
               }
             }
           },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
                   "$ref" : "#/components/schemas/Problem"
                 }
               }

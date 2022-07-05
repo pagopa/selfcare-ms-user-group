@@ -221,30 +221,28 @@ class UserGroupRepositoryTest {
                 "setCreateBy",
                 "setModifiedAt",
                 "setModifiedBy");
-        String productId = "productId";
-        String institutionId = "institutionId";
-        group1.setProductId(productId);
+        Optional<String> institutionId = Optional.of("institutionId");
+        Optional<String> productId = Optional.of("productId");
+        Optional<String> userId = Optional.of("userId");
+        group1.setProductId(productId.get());
         group1.setName("alfa");
         group1.setMembers(Set.of("userId", "userId2"));
-        group1.setInstitutionId(institutionId);
+        group1.setInstitutionId(institutionId.get());
         UserGroupEntity savedGroup = repository.insert(group1);
         UserGroupEntity group2 = TestUtils.mockInstance(new UserGroupEntity(), "setId",
                 "setCreatedAt",
                 "setCreateBy",
                 "setModifiedAt",
                 "setModifiedBy");
-        group2.setProductId(productId);
+        group2.setProductId(productId.get());
         group2.setName("beta");
-        group2.setInstitutionId(institutionId);
+        group2.setInstitutionId(institutionId.get());
         group2.setMembers(Set.of("userId"));
         UserGroupEntity savedGroup1 = repository.insert(group2);
 
-        String userId = "userId";
         Pageable pageable = PageRequest.of(0, 3);
-        UserGroupFilter filter = new UserGroupFilter();
-        filter.setUserId(Optional.of(userId));
-        filter.setInstitutionId(Optional.of(institutionId));
-        filter.setProductId(Optional.of(productId));
+        UserGroupFilter filter = UserGroupFilter.builder().userId(userId).institutionId(institutionId).productId(productId).build();
+
         Query query = new Query();
         if (pageable.getSort().isSorted() && filter.getProductId().isEmpty() && filter.getInstitutionId().isEmpty()) {
             throw new ValidationException();
@@ -262,6 +260,10 @@ class UserGroupRepositoryTest {
     void findAll_allowedState() {
         //given
         Instant now = Instant.now().minusSeconds(1);
+        Optional<String> institutionId = Optional.of("institutionId");
+        Optional<String> productId = Optional.of("productId");
+        Optional<String> userId = Optional.of("userId");
+        Optional<UserGroupStatus> allowedStatus = Optional.of(UserGroupStatus.ACTIVE);
         SelfCareUser selfCareUser = SelfCareUser.builder("id")
                 .email("test@example.com")
                 .name("name")
@@ -274,12 +276,10 @@ class UserGroupRepositoryTest {
                 "setCreateBy",
                 "setModifiedAt",
                 "setModifiedBy");
-        String productId = "productId";
-        String institutionId = "institutionId";
-        group1.setProductId(productId);
+        group1.setProductId(productId.get());
         group1.setName("alfa");
         group1.setMembers(Set.of("userId", "userId2"));
-        group1.setInstitutionId(institutionId);
+        group1.setInstitutionId(institutionId.get());
         group1.setStatus(UserGroupStatus.SUSPENDED);
         UserGroupEntity savedGroup = repository.insert(group1);
         UserGroupEntity group2 = TestUtils.mockInstance(new UserGroupEntity(), "setId",
@@ -287,20 +287,13 @@ class UserGroupRepositoryTest {
                 "setCreateBy",
                 "setModifiedAt",
                 "setModifiedBy");
-        group2.setProductId(productId);
+        group2.setProductId(productId.get());
         group2.setName("beta");
-        group2.setInstitutionId(institutionId);
+        group2.setInstitutionId(institutionId.get());
         group2.setMembers(Set.of("userId"));
         UserGroupEntity savedGroup1 = repository.insert(group2);
-
-        String userId = "userId";
-        UserGroupStatus allowedStatus = UserGroupStatus.ACTIVE;
+        UserGroupFilter filter = UserGroupFilter.builder().userId(userId).institutionId(institutionId).productId(productId).status(allowedStatus).build();
         Pageable pageable = PageRequest.of(0, 3);
-        UserGroupFilter filter = new UserGroupFilter();
-        filter.setUserId(Optional.of(userId));
-        filter.setInstitutionId(Optional.of(institutionId));
-        filter.setProductId(Optional.of(productId));
-        filter.setStatus(Optional.of(allowedStatus));
         Query query = new Query();
         if (pageable.getSort().isSorted() && filter.getProductId().isEmpty() && filter.getInstitutionId().isEmpty()) {
             throw new ValidationException();
@@ -349,9 +342,8 @@ class UserGroupRepositoryTest {
         group2.setMembers(Set.of("userId"));
         UserGroupEntity savedGroup1 = repository.insert(group2);
         Pageable pageable = PageRequest.of(0, 3);
-        UserGroupFilter filter = new UserGroupFilter();
+        UserGroupFilter filter = UserGroupFilter.builder().build();
         String userId = "userId";
-//        filter.setUserId(Optional.of(userId));
         filter.setInstitutionId(Optional.of(institutionId));
         filter.setProductId(Optional.of(productId));
         Query query = new Query();

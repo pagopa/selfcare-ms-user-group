@@ -24,7 +24,7 @@ public class UserGroupExceptionHandler {
     }
 
     @ExceptionHandler({ResourceUpdateException.class})
-    ResponseEntity<Problem> handleBadRequestExceptions(Exception e) {
+    ResponseEntity<Problem> handleResourceUpdateException(ResourceUpdateException e) {
         log.warn(e.toString());
         return ProblemMapper.toResponseEntity(new Problem(BAD_REQUEST, e.getMessage()));
     }

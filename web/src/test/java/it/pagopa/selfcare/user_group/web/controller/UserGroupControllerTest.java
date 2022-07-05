@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.utils.TestUtils;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupFilter;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import it.pagopa.selfcare.user_group.core.UserGroupService;
 import it.pagopa.selfcare.user_group.web.config.WebTestConfig;
 import it.pagopa.selfcare.user_group.web.handler.UserGroupExceptionHandler;
@@ -280,6 +282,8 @@ class UserGroupControllerTest {
         //given
         String institutionId = "institutionId";
         String productId = "productId";
+        String userId = UUID.randomUUID().toString();
+        UserGroupStatus allowedStatus = UserGroupStatus.ACTIVE;
         UserGroupOperations groupOperations = TestUtils.mockInstance(new GroupDto());
         groupOperations.setMembers(Set.of(UUID.randomUUID().toString()));
         Mockito.when(groupServiceMock.getUserGroups(Mockito.any(), Mockito.any()))
@@ -289,6 +293,8 @@ class UserGroupControllerTest {
                         .get(BASE_URL + "/")
                         .param("institutionId", institutionId)
                         .param("productId", productId)
+                        .param("userId", userId)
+                        .param("allowedStatus", String.valueOf(allowedStatus))
                         .contentType(APPLICATION_JSON_VALUE)
                         .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().is2xxSuccessful())
@@ -298,8 +304,14 @@ class UserGroupControllerTest {
                 new TypeReference<>() {
                 });
         assertNotNull(groups);
+        ArgumentCaptor<UserGroupFilter> filterCaptor = ArgumentCaptor.forClass(UserGroupFilter.class);
         Mockito.verify(groupServiceMock, Mockito.times(1))
-                .getUserGroups(Mockito.any(), pageableCaptor.capture());
+                .getUserGroups(filterCaptor.capture(), pageableCaptor.capture());
+        UserGroupFilter capturedFilter = filterCaptor.getValue();
+        assertEquals(capturedFilter.getStatus().get(), allowedStatus);
+        assertEquals(capturedFilter.getProductId().get(), productId);
+        assertEquals(capturedFilter.getInstitutionId().get(), institutionId);
+        assertEquals(capturedFilter.getUserId().get(), userId);
         Pageable capturedPageable = pageableCaptor.getValue();
         assertTrue(capturedPageable.getSort().isUnsorted());
     }

@@ -116,16 +116,13 @@ class UserGroupConnectorImplTest {
     @Test
     void findAll_fullyValued() {
         //given
-        String institutionId = "institutionId";
-        String productId = "productId";
-        String userId = "userId";
-        UserGroupStatus allowedStatus = UserGroupStatus.ACTIVE;
+        Optional<String> institutionId = Optional.of("institutionId");
+        Optional<String> productId = Optional.of("productId");
+        Optional<String> userId = Optional.of(UUID.randomUUID().toString());
+        Optional<UserGroupStatus> allowedStatus = Optional.of(UserGroupStatus.ACTIVE);
         Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
-        UserGroupFilter groupFilter = new UserGroupFilter();
-        groupFilter.setUserId(Optional.of(userId));
-        groupFilter.setInstitutionId(Optional.of(institutionId));
-        groupFilter.setProductId(Optional.of(productId));
-        groupFilter.setStatus(Optional.of(allowedStatus));
+        UserGroupFilter groupFilter = UserGroupFilter.builder().userId(userId).institutionId(institutionId).productId(productId).status(allowedStatus).build();
+
         List<UserGroupEntity> entities = List.of(mockInstance(new UserGroupEntity()));
 
         when(mongoTemplateMock.find(Mockito.any(Query.class), (Class<UserGroupEntity>) Mockito.any()))
@@ -138,10 +135,10 @@ class UserGroupConnectorImplTest {
         verify(mongoTemplateMock, Mockito.times(1))
                 .find(queryCaptor.capture(), Mockito.any());
         Query query = queryCaptor.getValue();
-        assertTrue(query.toString().contains(institutionId));
-        assertTrue(query.toString().contains(userId));
-        assertTrue(query.toString().contains(productId));
-        assertTrue(query.toString().contains(allowedStatus.name()));
+        assertTrue(query.toString().contains(institutionId.get()));
+        assertTrue(query.toString().contains(userId.get()));
+        assertTrue(query.toString().contains(productId.get()));
+        assertTrue(query.toString().contains(allowedStatus.get().name()));
         verifyNoMoreInteractions(mongoTemplateMock);
     }
 
@@ -149,7 +146,7 @@ class UserGroupConnectorImplTest {
     void findAll_fullyNull() {
         //given
         Pageable pageable = Pageable.unpaged();
-        UserGroupFilter groupFilter = new UserGroupFilter();
+        UserGroupFilter groupFilter = UserGroupFilter.builder().build();
         List<UserGroupEntity> entities = List.of(mockInstance(new UserGroupEntity()));
         when(mongoTemplateMock.find(Mockito.any(Query.class), (Class<UserGroupEntity>) Mockito.any()))
                 .thenReturn(entities);
@@ -171,11 +168,8 @@ class UserGroupConnectorImplTest {
         String productId = "productId";
         UserGroupStatus allowedStatus = UserGroupStatus.ACTIVE;
         Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
-        UserGroupFilter groupFilter = new UserGroupFilter();
-        groupFilter.setProductId(Optional.of(productId));
-        groupFilter.setStatus(Optional.of(allowedStatus));
+        UserGroupFilter groupFilter = UserGroupFilter.builder().status(Optional.of(allowedStatus)).productId(Optional.of(productId)).build();
         List<UserGroupEntity> entities = List.of(mockInstance(new UserGroupEntity()));
-
         when(mongoTemplateMock.find(Mockito.any(Query.class), (Class<UserGroupEntity>) Mockito.any()))
                 .thenReturn(entities);
         //when
@@ -197,9 +191,7 @@ class UserGroupConnectorImplTest {
         String institutionId = "institutionId";
         UserGroupStatus allowedStatus = UserGroupStatus.ACTIVE;
         Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
-        UserGroupFilter groupFilter = new UserGroupFilter();
-        groupFilter.setStatus(Optional.of(allowedStatus));
-        groupFilter.setInstitutionId(Optional.of(institutionId));
+        UserGroupFilter groupFilter = UserGroupFilter.builder().status(Optional.of(allowedStatus)).institutionId(Optional.of(institutionId)).build();
         List<UserGroupEntity> entities = List.of(mockInstance(new UserGroupEntity()));
 
         when(mongoTemplateMock.find(Mockito.any(Query.class), (Class<UserGroupEntity>) Mockito.any()))
@@ -221,7 +213,7 @@ class UserGroupConnectorImplTest {
     void findAll_sortNotAllowedException() {
         //given
         Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
-        UserGroupFilter groupFilter = new UserGroupFilter();
+        UserGroupFilter groupFilter = UserGroupFilter.builder().build();
         //when
         Executable executable = () -> groupConnector.findAll(groupFilter, pageable);
         //then
@@ -234,11 +226,10 @@ class UserGroupConnectorImplTest {
     void findAll_filterNotAllowedException() {
         //given
         Pageable pageable = Pageable.unpaged();
-        UserGroupFilter filter = new UserGroupFilter();
         UserGroupStatus allowedStatus = UserGroupStatus.ACTIVE;
-        filter.setStatus(Optional.of(allowedStatus));
+        UserGroupFilter groupFilter = UserGroupFilter.builder().status(Optional.of(allowedStatus)).build();
         //when
-        Executable executable = () -> groupConnector.findAll(filter, pageable);
+        Executable executable = () -> groupConnector.findAll(groupFilter, pageable);
         //then
         ValidationException e = assertThrows(ValidationException.class, executable);
         assertEquals("At least one of productId, institutionId and userId must be provided with status filter", e.getMessage());

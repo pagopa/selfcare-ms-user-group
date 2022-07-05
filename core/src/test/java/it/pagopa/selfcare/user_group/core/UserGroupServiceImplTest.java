@@ -546,13 +546,9 @@ class UserGroupServiceImplTest {
         //given
         Optional<String> institutionId = Optional.of("institutionId");
         Optional<String> productId = Optional.of("productId");
-        Optional<String> userId = Optional.of("userId");
+        Optional<String> userId = Optional.of(UUID.randomUUID().toString());
         Optional<UserGroupStatus> allowedStatus = Optional.of(UserGroupStatus.ACTIVE);
-        UserGroupFilter filterMock = new UserGroupFilter();
-        filterMock.setStatus(allowedStatus);
-        filterMock.setUserId(userId);
-        filterMock.setInstitutionId(institutionId);
-        filterMock.setProductId(productId);
+        UserGroupFilter filterMock = UserGroupFilter.builder().userId(userId).institutionId(institutionId).productId(productId).status(allowedStatus).build();
         Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
         Mockito.when(groupConnectorMock.findAll(Mockito.any(), Mockito.any()))
                 .thenReturn(Collections.singletonList(new DummyGroup()));

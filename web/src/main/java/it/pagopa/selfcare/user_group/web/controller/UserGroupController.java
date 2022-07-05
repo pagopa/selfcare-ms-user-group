@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import it.pagopa.selfcare.commons.web.model.Problem;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupFilter;
 import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import it.pagopa.selfcare.user_group.core.UserGroupService;
 import it.pagopa.selfcare.user_group.web.model.CreateUserGroupDto;
@@ -178,7 +179,8 @@ public class UserGroupController {
                                                  Pageable pageable) {
         log.trace("getUserGroups start");
         log.debug("getUserGroups institutionId = {}, productId = {}, pageable = {}, status = {}", institutionId, productId, pageable, status);
-        List<UserGroupOperations> userGroups = groupService.getUserGroups(GroupMapper.toFilter(institutionId, productId, memberId.map(UUID::toString), status), pageable);
+        UserGroupFilter filter = UserGroupFilter.builder().userId(memberId.map(UUID::toString)).institutionId(institutionId).productId(productId).status(status).build();
+        List<UserGroupOperations> userGroups = groupService.getUserGroups(filter, pageable);
         List<UserGroupResource> result = userGroups.stream().map(GroupMapper::toResource).collect(Collectors.toList());
         log.debug("getUserGroups result = {}", result);
         log.trace("getUserGroups end");
