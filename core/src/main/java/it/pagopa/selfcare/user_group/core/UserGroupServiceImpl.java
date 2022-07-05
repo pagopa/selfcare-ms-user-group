@@ -19,7 +19,6 @@ import org.springframework.util.Assert;
 import javax.validation.ValidationException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -107,17 +106,9 @@ class UserGroupServiceImpl implements UserGroupService {
     }
 
     @Override
-    public List<UserGroupOperations> getUserGroups(Optional<String> institutionId, Optional<String> productId, Optional<String> userId, Pageable pageable) {
+    public List<UserGroupOperations> getUserGroups(UserGroupFilter filter, Pageable pageable) {
         log.trace("getUserGroups start");
-        log.debug("getUserGroups institutionId = {}, productId = {},userId = {}, pageable = {}", institutionId, productId, userId, pageable);
-        Assert.notNull(institutionId, "An Optional institutionId is required");
-        Assert.notNull(productId, "An Optional productId is required");
-        Assert.notNull(userId, "An Optional userId is required");
-
-        UserGroupFilter filter = new UserGroupFilter();
-        filter.setUserId(userId);
-        filter.setInstitutionId(institutionId);
-        filter.setProductId(productId);
+        log.debug("getUserGroups filter = {}, pageable = {}", filter, pageable);
         boolean match = pageable.getSort().stream().allMatch(order -> allowedSortingParams.contains(order.getProperty()));
         if (!match) {
             throw new ValidationException("Given sort parameters aren't valid");

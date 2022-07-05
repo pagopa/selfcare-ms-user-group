@@ -56,7 +56,6 @@ public class GroupMapper {
         return group;
     }
 
-
     public static UserGroupOperations fromDto(UpdateUserGroupDto dto) {
         log.trace("fromDto start");
         log.debug("fromDto dto = {}", dto);

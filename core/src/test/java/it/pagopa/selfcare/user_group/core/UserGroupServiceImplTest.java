@@ -544,22 +544,25 @@ class UserGroupServiceImplTest {
     @Test
     void getUserGroups() {
         //given
-        String institutionId = "institutionId";
-        String productId = "productId";
-        String userId = UUID.randomUUID().toString();
+        Optional<String> institutionId = Optional.of("institutionId");
+        Optional<String> productId = Optional.of("productId");
+        Optional<String> userId = Optional.of(UUID.randomUUID().toString());
+        Optional<UserGroupStatus> allowedStatus = Optional.of(UserGroupStatus.ACTIVE);
+        UserGroupFilter filterMock = UserGroupFilter.builder().userId(userId).institutionId(institutionId).productId(productId).status(allowedStatus).build();
         Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
         Mockito.when(groupConnectorMock.findAll(Mockito.any(), Mockito.any()))
                 .thenReturn(Collections.singletonList(new DummyGroup()));
         //when
-        List<UserGroupOperations> groups = groupService.getUserGroups(Optional.of(institutionId), Optional.of(productId), Optional.of(userId), pageable);
+        List<UserGroupOperations> groups = groupService.getUserGroups(filterMock, pageable);
         //then
         assertEquals(1, groups.size());
         Mockito.verify(groupConnectorMock, Mockito.times(1))
                 .findAll(filter.capture(), Mockito.any());
         UserGroupFilter capturedFilter = filter.getValue();
-        assertEquals(capturedFilter.getInstitutionId().get(), institutionId);
-        assertEquals(capturedFilter.getProductId().get(), productId);
-        assertEquals(capturedFilter.getUserId().get(), userId);
+        assertEquals(capturedFilter.getInstitutionId().get(), filterMock.getInstitutionId().get());
+        assertEquals(capturedFilter.getProductId().get(), filterMock.getProductId().get());
+        assertEquals(capturedFilter.getUserId().get(), filterMock.getUserId().get());
+        assertEquals(capturedFilter.getStatus().get(), filterMock.getStatus().get());
         Mockito.verifyNoMoreInteractions(groupConnectorMock);
     }
 
@@ -569,69 +572,16 @@ class UserGroupServiceImplTest {
         String institutionId = "institutionId";
         String productId = "productId";
         String userId = UUID.randomUUID().toString();
+        UserGroupStatus status = UserGroupStatus.ACTIVE;
         Pageable pageable = PageRequest.of(0, 3, Sort.by("description"));
         Mockito.when(groupConnectorMock.findAll(Mockito.any(), Mockito.any()))
                 .thenReturn(Collections.singletonList(new DummyGroup()));
         //when
-        Executable executable = () -> groupService.getUserGroups(Optional.of(institutionId), Optional.of(productId), Optional.of(userId), pageable);
+        Executable executable = () -> groupService.getUserGroups(null, pageable);
         ;
         //then
         ValidationException e = assertThrows(ValidationException.class, executable);
         assertEquals("Given sort parameters aren't valid", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
-    }
-
-    @Test
-    void getUserGroups_nullInstitutionId() {
-        //given
-        Optional<String> institutionId = null;
-        Optional<String> productId = Optional.of("productId");
-        Optional<String> userId = Optional.of(UUID.randomUUID().toString());
-        Pageable pageable = PageRequest.of(0, 3, Sort.by("description"));
-        Mockito.when(groupConnectorMock.findAll(Mockito.any(), Mockito.any()))
-                .thenReturn(Collections.singletonList(new DummyGroup()));
-        //when
-        Executable executable = () -> groupService.getUserGroups(institutionId, productId, userId, pageable);
-        ;
-        //then
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
-        assertEquals("An Optional institutionId is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
-    }
-
-    @Test
-    void getUserGroups_nullProductId() {
-        //given
-        Optional<String> institutionId = Optional.of("institutionID");
-        Optional<String> productId = null;
-        Optional<String> userId = Optional.of(UUID.randomUUID().toString());
-        Pageable pageable = PageRequest.of(0, 3, Sort.by("description"));
-        Mockito.when(groupConnectorMock.findAll(Mockito.any(), Mockito.any()))
-                .thenReturn(Collections.singletonList(new DummyGroup()));
-        //when
-        Executable executable = () -> groupService.getUserGroups(institutionId, productId, userId, pageable);
-        ;
-        //then
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
-        assertEquals("An Optional productId is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
-    }
-
-    @Test
-    void getUserGroups_nullUserId() {
-        //given
-        Optional<String> institutionId = Optional.of("institutionID");
-        Optional<String> productId = Optional.of("productId");
-        Optional<String> userId = null;
-        Pageable pageable = PageRequest.of(0, 3, Sort.by("description"));
-        Mockito.when(groupConnectorMock.findAll(Mockito.any(), Mockito.any()))
-                .thenReturn(Collections.singletonList(new DummyGroup()));
-        //when
-        Executable executable = () -> groupService.getUserGroups(institutionId, productId, userId, pageable);
-        ;
-        //then
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
-        assertEquals("An Optional userId is required", e.getMessage());
         Mockito.verifyNoInteractions(groupConnectorMock);
     }
 

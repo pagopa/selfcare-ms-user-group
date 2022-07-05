@@ -90,4 +90,5 @@ class GroupMapperTest {
         //then
         assertNull(group);
     }
+
 }
