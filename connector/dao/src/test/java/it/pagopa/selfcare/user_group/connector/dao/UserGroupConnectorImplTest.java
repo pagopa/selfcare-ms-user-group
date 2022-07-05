@@ -130,7 +130,6 @@ class UserGroupConnectorImplTest {
 
         when(mongoTemplateMock.find(Mockito.any(Query.class), (Class<UserGroupEntity>) Mockito.any()))
                 .thenReturn(entities);
-        Instant now = Instant.now();
         //when
         List<UserGroupOperations> groups = groupConnector.findAll(groupFilter, pageable);
         //then
@@ -163,6 +162,32 @@ class UserGroupConnectorImplTest {
                 .find(queryCaptor.capture(), Mockito.any());
         Query query = queryCaptor.getValue();
         assertTrue(query.getFieldsObject().isEmpty());
+        verifyNoMoreInteractions(mongoTemplateMock);
+    }
+
+    @Test
+    void findAll_differentFilterCombination() {
+        //given
+        String productId = "productId";
+        UserGroupStatus allowedStatus = UserGroupStatus.ACTIVE;
+        Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
+        UserGroupFilter groupFilter = new UserGroupFilter();
+        groupFilter.setProductId(Optional.of(productId));
+        groupFilter.setStatus(Optional.of(allowedStatus));
+        List<UserGroupEntity> entities = List.of(mockInstance(new UserGroupEntity()));
+
+        when(mongoTemplateMock.find(Mockito.any(Query.class), (Class<UserGroupEntity>) Mockito.any()))
+                .thenReturn(entities);
+        //when
+        List<UserGroupOperations> groups = groupConnector.findAll(groupFilter, pageable);
+        //then
+        assertEquals(1, groups.size());
+        ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+        verify(mongoTemplateMock, Mockito.times(1))
+                .find(queryCaptor.capture(), Mockito.any());
+        Query query = queryCaptor.getValue();
+        assertTrue(query.toString().contains(productId));
+        assertTrue(query.toString().contains(allowedStatus.name()));
         verifyNoMoreInteractions(mongoTemplateMock);
     }
 
