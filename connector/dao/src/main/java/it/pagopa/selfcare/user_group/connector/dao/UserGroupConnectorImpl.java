@@ -147,11 +147,15 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         log.debug("findAll institutionId= {} , productId = {}, userId = {}, pageable = {}", filter.getInstitutionId(), filter.getProductId(), filter.getUserId(), pageable);
         Query query = new Query();
         if (pageable.getSort().isSorted() && filter.getProductId().isEmpty() && filter.getInstitutionId().isEmpty()) {
-            throw new ValidationException();
+            throw new ValidationException("Sorting not allowed without productId or institutionId");
+        }
+        if (filter.getStatus().isPresent() && filter.getUserId().isEmpty() && filter.getProductId().isEmpty() && filter.getInstitutionId().isEmpty()) {
+            throw new ValidationException("At least one of productId, institutionId and userId must be provided with status filter");
         }
         filter.getInstitutionId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.institutionId).is(value)));
         filter.getProductId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.productId).is(value)));
         filter.getUserId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.members).is(value)));
+        filter.getStatus().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.status).is(value)));
         List<UserGroupOperations> result = new ArrayList<>(mongoTemplate.find(query.with(pageable), UserGroupEntity.class));
         log.debug("findAll result = {}", result);
         log.trace("findAll end");

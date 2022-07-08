@@ -64,55 +64,72 @@
         }, {
           "name" : "sort",
           "in" : "query",
-          "description" : "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
-          "required" : false,
-          "style" : "form",
-          "allowReserved" : true,
-          "schema" : {
-            "type" : "array",
-            "items" : {
-              "type" : "string"
+          "description": "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+          "required": false,
+          "style": "form",
+          "allowReserved": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           }
-        }, {
-          "name" : "productId",
-          "in" : "query",
-          "description" : "Users group's productId",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "string"
+        },
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Users group's productId",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "Member's unique identifier",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "allowedStatus",
+            "in": "query",
+            "description": "If filter on status is present, it must be used with at least one of the other filters",
+            "required": false,
+            "style": "form",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ACTIVE",
+                "SUSPENDED"
+              ]
+            }
           }
-        }, {
-          "name" : "userId",
-          "in" : "query",
-          "description" : "Member's unique identifier",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "string",
-            "format" : "uuid"
-          }
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "OK",
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "type" : "array",
-                  "items" : {
-                    "$ref" : "#/components/schemas/UserGroupResource"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserGroupResource"
                   }
                 }
               }
             }
           },
-          "400" : {
-            "description" : "Bad Request",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
                   "$ref" : "#/components/schemas/Problem"
                 }
               }

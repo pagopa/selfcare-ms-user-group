@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import it.pagopa.selfcare.commons.web.model.Problem;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupFilter;
+import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import it.pagopa.selfcare.user_group.core.UserGroupService;
 import it.pagopa.selfcare.user_group.web.model.CreateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.UpdateUserGroupDto;
@@ -163,18 +165,22 @@ public class UserGroupController {
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.getUserGroups}")
     public List<UserGroupResource> getUserGroups(@ApiParam("${swagger.user-group.model.institutionId}")
-                                                 @RequestParam(value = "institutionId", required = false)
-                                                         Optional<String> institutionId,
+                                                     @RequestParam(value = "institutionId", required = false)
+                                                             Optional<String> institutionId,
                                                  @ApiParam("${swagger.user-group.model.productId}")
-                                                 @RequestParam(value = "productId", required = false)
-                                                         Optional<String> productId,
+                                                     @RequestParam(value = "productId", required = false)
+                                                             Optional<String> productId,
                                                  @ApiParam("${swagger.user-group.model.memberId}")
-                                                 @RequestParam(value = "userId", required = false)
-                                                         Optional<UUID> memberId,
+                                                     @RequestParam(value = "userId", required = false)
+                                                             Optional<UUID> memberId,
+                                                 @ApiParam("${swagger.user-group.model.statusFilter}")
+                                                     @RequestParam(value = "allowedStatus", required = false)
+                                                             Optional<UserGroupStatus> status,
                                                  Pageable pageable) {
         log.trace("getUserGroups start");
-        log.debug("getUserGroups institutionId = {}, productId = {}, pageable = {}", institutionId, productId, pageable);
-        List<UserGroupOperations> userGroups = groupService.getUserGroups(institutionId, productId, memberId.map(UUID::toString), pageable);
+        log.debug("getUserGroups institutionId = {}, productId = {}, pageable = {}, status = {}", institutionId, productId, pageable, status);
+        UserGroupFilter filter = UserGroupFilter.builder().userId(memberId.map(UUID::toString)).institutionId(institutionId).productId(productId).status(status).build();
+        List<UserGroupOperations> userGroups = groupService.getUserGroups(filter, pageable);
         List<UserGroupResource> result = userGroups.stream().map(GroupMapper::toResource).collect(Collectors.toList());
         log.debug("getUserGroups result = {}", result);
         log.trace("getUserGroups end");
