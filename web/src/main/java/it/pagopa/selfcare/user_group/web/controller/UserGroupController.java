@@ -174,7 +174,7 @@ public class UserGroupController {
                                                      @RequestParam(value = "userId", required = false)
                                                              Optional<UUID> memberId,
                                                  @ApiParam("${swagger.user-group.model.statusFilter}")
-                                                     @RequestParam(value = "allowedStatus", required = false)
+                                                     @RequestParam(value = "status", required = false)
                                                              Optional<UserGroupStatus> status,
                                                  Pageable pageable) {
         log.trace("getUserGroups start");
