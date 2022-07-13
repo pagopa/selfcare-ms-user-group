@@ -62,8 +62,8 @@
             "format" : "int32"
           }
         }, {
-          "name" : "sort",
-          "in" : "query",
+          "name": "sort",
+          "in": "query",
           "description": "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
           "required": false,
           "style": "form",
@@ -97,7 +97,7 @@
             }
           },
           {
-            "name": "allowedStatus",
+            "name": "status",
             "in": "query",
             "description": "If filter on status is present, it must be used with at least one of the other filters",
             "required": false,
@@ -130,16 +130,16 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref" : "#/components/schemas/Problem"
+                  "$ref": "#/components/schemas/Problem"
                 }
               }
             }
           },
-          "401" : {
-            "description" : "Unauthorized",
-            "content" : {
-              "application/problem+json" : {
-                "schema" : {
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/problem+json": {
+                "schema": {
                   "$ref" : "#/components/schemas/Problem"
                 }
               }
