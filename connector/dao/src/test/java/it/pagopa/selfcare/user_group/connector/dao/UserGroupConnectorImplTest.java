@@ -3,7 +3,6 @@ package it.pagopa.selfcare.user_group.connector.dao;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import it.pagopa.selfcare.commons.base.security.SelfCareUser;
-import it.pagopa.selfcare.commons.utils.TestUtils;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.connector.dao.auditing.SpringSecurityAuditorAware;
 import it.pagopa.selfcare.user_group.connector.dao.model.UserGroupEntity;
@@ -36,7 +35,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class UserGroupConnectorImplTest {
 
@@ -67,7 +68,7 @@ class UserGroupConnectorImplTest {
 
     @Test
     void insert_duplicateKey() {
-        UserGroupEntity entity = TestUtils.mockInstance(new UserGroupEntity());
+        UserGroupEntity entity = mockInstance(new UserGroupEntity());
         Mockito.doThrow(DuplicateKeyException.class)
                 .when(repositoryMock)
                 .insert(Mockito.any(UserGroupEntity.class));
@@ -76,109 +77,170 @@ class UserGroupConnectorImplTest {
         //then
         ResourceAlreadyExistsException e = assertThrows(ResourceAlreadyExistsException.class, executable);
         assertEquals("Failed _id or unique index constraint.", e.getMessage());
-        Mockito.verify(repositoryMock, Mockito.times(1))
+        verify(repositoryMock, Mockito.times(1))
                 .insert(entity);
-        Mockito.verifyNoMoreInteractions(repositoryMock);
+        verifyNoMoreInteractions(repositoryMock);
     }
 
     @Test
     void insert() {
         //given
-        UserGroupEntity entity = TestUtils.mockInstance(new UserGroupEntity());
-        Mockito.when(repositoryMock.insert(Mockito.any(UserGroupEntity.class)))
+        UserGroupEntity entity = mockInstance(new UserGroupEntity());
+        when(repositoryMock.insert(Mockito.any(UserGroupEntity.class)))
                 .thenReturn(entity);
         //when
         UserGroupOperations saved = groupConnector.insert(entity);
         //then
         Assertions.assertEquals(entity, saved);
-        Mockito.verify(repositoryMock, Mockito.times(1))
+        verify(repositoryMock, Mockito.times(1))
                 .insert(entity);
-        Mockito.verifyNoMoreInteractions(repositoryMock);
+        verifyNoMoreInteractions(repositoryMock);
     }
 
     @Test
     void findById() {
         // given
         String id = "id";
-        Optional<UserGroupEntity> entity = Optional.of(TestUtils.mockInstance(new UserGroupEntity()));
-        Mockito.when(repositoryMock.findById(Mockito.any()))
+        Optional<UserGroupEntity> entity = Optional.of(mockInstance(new UserGroupEntity()));
+        when(repositoryMock.findById(Mockito.any()))
                 .thenReturn(entity);
         // when
         Optional<UserGroupOperations> found = groupConnector.findById(id);
         // then
         Assertions.assertEquals(entity, found);
-        Mockito.verify(repositoryMock, Mockito.times(1))
+        verify(repositoryMock, Mockito.times(1))
                 .findById(id);
-        Mockito.verifyNoMoreInteractions(repositoryMock);
+        verifyNoMoreInteractions(repositoryMock);
     }
 
     @Test
     void findAll_fullyValued() {
         //given
-        String institutionId = "institutionId";
-        String productId = "productId";
-        String userId = "userId";
+        Optional<String> institutionId = Optional.of("institutionId");
+        Optional<String> productId = Optional.of("productId");
+        Optional<String> userId = Optional.of(UUID.randomUUID().toString());
+        Optional<UserGroupStatus> allowedStatus = Optional.of(UserGroupStatus.ACTIVE);
         Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
-        UserGroupFilter groupFilter = new UserGroupFilter();
-        groupFilter.setUserId(Optional.of(userId));
-        groupFilter.setInstitutionId(Optional.of(institutionId));
-        groupFilter.setProductId(Optional.of(productId));
-        List<UserGroupEntity> entities = List.of(TestUtils.mockInstance(new UserGroupEntity()));
+        UserGroupFilter groupFilter = UserGroupFilter.builder().userId(userId).institutionId(institutionId).productId(productId).status(allowedStatus).build();
 
-        Mockito.when(mongoTemplateMock.find(Mockito.any(Query.class), (Class<UserGroupEntity>) Mockito.any()))
+        List<UserGroupEntity> entities = List.of(mockInstance(new UserGroupEntity()));
+
+        when(mongoTemplateMock.find(Mockito.any(Query.class), (Class<UserGroupEntity>) Mockito.any()))
                 .thenReturn(entities);
-        Instant now = Instant.now();
         //when
         List<UserGroupOperations> groups = groupConnector.findAll(groupFilter, pageable);
         //then
         assertEquals(1, groups.size());
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
-        Mockito.verify(mongoTemplateMock, Mockito.times(1))
+        verify(mongoTemplateMock, Mockito.times(1))
                 .find(queryCaptor.capture(), Mockito.any());
         Query query = queryCaptor.getValue();
-        assertTrue(query.toString().contains(institutionId));
-        assertTrue(query.toString().contains(userId));
-        assertTrue(query.toString().contains(productId));
-        Mockito.verifyNoMoreInteractions(mongoTemplateMock);
+        assertTrue(query.toString().contains(institutionId.get()));
+        assertTrue(query.toString().contains(userId.get()));
+        assertTrue(query.toString().contains(productId.get()));
+        assertTrue(query.toString().contains(allowedStatus.get().name()));
+        verifyNoMoreInteractions(mongoTemplateMock);
     }
 
     @Test
     void findAll_fullyNull() {
         //given
         Pageable pageable = Pageable.unpaged();
-        UserGroupFilter groupFilter = new UserGroupFilter();
-        List<UserGroupEntity> entities = List.of(TestUtils.mockInstance(new UserGroupEntity()));
-        Mockito.when(mongoTemplateMock.find(Mockito.any(Query.class), (Class<UserGroupEntity>) Mockito.any()))
+        UserGroupFilter groupFilter = UserGroupFilter.builder().build();
+        List<UserGroupEntity> entities = List.of(mockInstance(new UserGroupEntity()));
+        when(mongoTemplateMock.find(Mockito.any(Query.class), (Class<UserGroupEntity>) Mockito.any()))
                 .thenReturn(entities);
         //when
         List<UserGroupOperations> groups = groupConnector.findAll(groupFilter, pageable);
         //then
         assertEquals(1, groups.size());
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
-        Mockito.verify(mongoTemplateMock, Mockito.times(1))
+        verify(mongoTemplateMock, Mockito.times(1))
                 .find(queryCaptor.capture(), Mockito.any());
         Query query = queryCaptor.getValue();
         assertTrue(query.getFieldsObject().isEmpty());
-        Mockito.verifyNoMoreInteractions(mongoTemplateMock);
+        verifyNoMoreInteractions(mongoTemplateMock);
+    }
+
+    @Test
+    void findAll_differentFilterCombination1() {
+        //given
+        String productId = "productId";
+        UserGroupStatus allowedStatus = UserGroupStatus.ACTIVE;
+        Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
+        UserGroupFilter groupFilter = UserGroupFilter.builder().status(Optional.of(allowedStatus)).productId(Optional.of(productId)).build();
+        List<UserGroupEntity> entities = List.of(mockInstance(new UserGroupEntity()));
+        when(mongoTemplateMock.find(Mockito.any(Query.class), (Class<UserGroupEntity>) Mockito.any()))
+                .thenReturn(entities);
+        //when
+        List<UserGroupOperations> groups = groupConnector.findAll(groupFilter, pageable);
+        //then
+        assertEquals(1, groups.size());
+        ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+        verify(mongoTemplateMock, Mockito.times(1))
+                .find(queryCaptor.capture(), Mockito.any());
+        Query query = queryCaptor.getValue();
+        assertTrue(query.toString().contains(productId));
+        assertTrue(query.toString().contains(allowedStatus.name()));
+        verifyNoMoreInteractions(mongoTemplateMock);
+    }
+
+    @Test
+    void findAll_differentFilterCombination2() {
+        //given
+        String institutionId = "institutionId";
+        UserGroupStatus allowedStatus = UserGroupStatus.ACTIVE;
+        Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
+        UserGroupFilter groupFilter = UserGroupFilter.builder().status(Optional.of(allowedStatus)).institutionId(Optional.of(institutionId)).build();
+        List<UserGroupEntity> entities = List.of(mockInstance(new UserGroupEntity()));
+
+        when(mongoTemplateMock.find(Mockito.any(Query.class), (Class<UserGroupEntity>) Mockito.any()))
+                .thenReturn(entities);
+        //when
+        List<UserGroupOperations> groups = groupConnector.findAll(groupFilter, pageable);
+        //then
+        assertEquals(1, groups.size());
+        ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+        verify(mongoTemplateMock, Mockito.times(1))
+                .find(queryCaptor.capture(), Mockito.any());
+        Query query = queryCaptor.getValue();
+        assertTrue(query.toString().contains(institutionId));
+        assertTrue(query.toString().contains(allowedStatus.name()));
+        verifyNoMoreInteractions(mongoTemplateMock);
     }
 
     @Test
     void findAll_sortNotAllowedException() {
         //given
         Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
-        UserGroupFilter groupFilter = new UserGroupFilter();
+        UserGroupFilter groupFilter = UserGroupFilter.builder().build();
         //when
         Executable executable = () -> groupConnector.findAll(groupFilter, pageable);
         //then
-        assertThrows(ValidationException.class, executable);
-        Mockito.verifyNoInteractions(mongoTemplateMock);
+        ValidationException e = assertThrows(ValidationException.class, executable);
+        assertEquals("Sorting not allowed without productId or institutionId", e.getMessage());
+        verifyNoInteractions(mongoTemplateMock);
+    }
+
+    @Test
+    void findAll_filterNotAllowedException() {
+        //given
+        Pageable pageable = Pageable.unpaged();
+        UserGroupStatus allowedStatus = UserGroupStatus.ACTIVE;
+        UserGroupFilter groupFilter = UserGroupFilter.builder().status(Optional.of(allowedStatus)).build();
+        //when
+        Executable executable = () -> groupConnector.findAll(groupFilter, pageable);
+        //then
+        ValidationException e = assertThrows(ValidationException.class, executable);
+        assertEquals("At least one of productId, institutionId and userId must be provided with status filter", e.getMessage());
+        verifyNoInteractions(mongoTemplateMock);
     }
 
     @Test
     void deleteById() {
         //given
         String groupId = "groupId";
-        DeleteResult result = TestUtils.mockInstance(new DeleteResult() {
+        DeleteResult result = mockInstance(new DeleteResult() {
             @Override
             public boolean wasAcknowledged() {
                 return false;
@@ -189,7 +251,7 @@ class UserGroupConnectorImplTest {
                 return 1;
             }
         });
-        Mockito.when(mongoTemplateMock.remove(Mockito.any(Query.class), (Class<?>) Mockito.any()))
+        when(mongoTemplateMock.remove(Mockito.any(Query.class), (Class<?>) Mockito.any()))
                 .thenReturn(result);
         //when
         Executable executable = () -> groupConnector.deleteById(groupId);
@@ -197,11 +259,11 @@ class UserGroupConnectorImplTest {
         assertDoesNotThrow(executable);
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
 
-        Mockito.verify(mongoTemplateMock, Mockito.times(1))
+        verify(mongoTemplateMock, Mockito.times(1))
                 .remove(queryCaptor.capture(), (Class<?>) Mockito.any());
         Query query = queryCaptor.getValue();
         assertEquals(groupId, query.getQueryObject().get(UserGroupEntity.Fields.id));
-        Mockito.verifyNoMoreInteractions(mongoTemplateMock);
+        verifyNoMoreInteractions(mongoTemplateMock);
 
     }
 
@@ -209,7 +271,7 @@ class UserGroupConnectorImplTest {
     void deleteById_resourceNotFound() {
         //given
         String groupId = "groupId";
-        DeleteResult result = TestUtils.mockInstance(new DeleteResult() {
+        DeleteResult result = mockInstance(new DeleteResult() {
             @Override
             public boolean wasAcknowledged() {
                 return false;
@@ -220,25 +282,25 @@ class UserGroupConnectorImplTest {
                 return 0;
             }
         });
-        Mockito.when(mongoTemplateMock.remove(Mockito.any(Query.class), (Class<?>) Mockito.any()))
+        when(mongoTemplateMock.remove(Mockito.any(Query.class), (Class<?>) Mockito.any()))
                 .thenReturn(result);
         //when
         Executable executable = () -> groupConnector.deleteById(groupId);
         //then
         assertThrows(ResourceNotFoundException.class, executable);
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
-        Mockito.verify(mongoTemplateMock, Mockito.times(1))
+        verify(mongoTemplateMock, Mockito.times(1))
                 .remove(queryCaptor.capture(), (Class<?>) Mockito.any());
         Query query = queryCaptor.getValue();
         assertEquals(groupId, query.getQueryObject().get(UserGroupEntity.Fields.id));
-        Mockito.verifyNoMoreInteractions(mongoTemplateMock);
+        verifyNoMoreInteractions(mongoTemplateMock);
     }
 
     @Test
     void suspendById() {
         //given
         String groupId = "groupId";
-        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+        UpdateResult result = mockInstance(new UpdateResult() {
             @Override
             public boolean wasAcknowledged() {
                 return false;
@@ -260,7 +322,7 @@ class UserGroupConnectorImplTest {
             }
         });
         Instant now = Instant.now();
-        Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+        when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
                 .thenReturn(result);
         //when
         Executable executable = () -> groupConnector.suspendById(groupId);
@@ -268,7 +330,7 @@ class UserGroupConnectorImplTest {
         assertDoesNotThrow(executable);
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
         ArgumentCaptor<Update> updateCaptor = ArgumentCaptor.forClass(Update.class);
-        Mockito.verify(mongoTemplateMock, Mockito.times(1))
+        verify(mongoTemplateMock, Mockito.times(1))
                 .updateFirst(queryCaptor.capture(), updateCaptor.capture(), (Class<?>) Mockito.any());
         Query query = queryCaptor.getValue();
         Update update = updateCaptor.getValue();
@@ -278,7 +340,7 @@ class UserGroupConnectorImplTest {
         assertEquals(UserGroupStatus.SUSPENDED, set.get("status"));
         assertEquals(selfCareUser.getId(), set.get("modifiedBy"));
         assertTrue(currentDate.containsKey("modifiedAt"));
-        Mockito.verifyNoMoreInteractions(mongoTemplateMock);
+        verifyNoMoreInteractions(mongoTemplateMock);
 
 
     }
@@ -287,7 +349,7 @@ class UserGroupConnectorImplTest {
     void suspendById_resourceNotFound() {
         //given
         String groupId = "groupId";
-        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+        UpdateResult result = mockInstance(new UpdateResult() {
             @Override
             public boolean wasAcknowledged() {
                 return false;
@@ -308,7 +370,7 @@ class UserGroupConnectorImplTest {
                 return null;
             }
         });
-        Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+        when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
                 .thenReturn(result);
         //when
         Executable executable = () -> groupConnector.suspendById(groupId);
@@ -316,7 +378,7 @@ class UserGroupConnectorImplTest {
         assertThrows(ResourceNotFoundException.class, executable);
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
         ArgumentCaptor<Update> updateCaptor = ArgumentCaptor.forClass(Update.class);
-        Mockito.verify(mongoTemplateMock, Mockito.times(1))
+        verify(mongoTemplateMock, Mockito.times(1))
                 .updateFirst(queryCaptor.capture(), updateCaptor.capture(), (Class<?>) Mockito.any());
         Query query = queryCaptor.getValue();
         Update update = updateCaptor.getValue();
@@ -326,7 +388,7 @@ class UserGroupConnectorImplTest {
         assertEquals(UserGroupStatus.SUSPENDED, set.get("status"));
         assertEquals(selfCareUser.getId(), set.get("modifiedBy"));
         assertTrue(currentDate.containsKey("modifiedAt"));
-        Mockito.verifyNoMoreInteractions(mongoTemplateMock);
+        verifyNoMoreInteractions(mongoTemplateMock);
 
     }
 
@@ -334,7 +396,7 @@ class UserGroupConnectorImplTest {
     void activateById() {
         //given
         String groupId = "groupId";
-        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+        UpdateResult result = mockInstance(new UpdateResult() {
             @Override
             public boolean wasAcknowledged() {
                 return false;
@@ -355,7 +417,7 @@ class UserGroupConnectorImplTest {
                 return null;
             }
         });
-        Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+        when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
                 .thenReturn(result);
         //when
         Executable executable = () -> groupConnector.activateById(groupId);
@@ -363,7 +425,7 @@ class UserGroupConnectorImplTest {
         assertDoesNotThrow(executable);
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
         ArgumentCaptor<Update> updateCaptor = ArgumentCaptor.forClass(Update.class);
-        Mockito.verify(mongoTemplateMock, Mockito.times(1))
+        verify(mongoTemplateMock, Mockito.times(1))
                 .updateFirst(queryCaptor.capture(), updateCaptor.capture(), (Class<?>) Mockito.any());
         Query query = queryCaptor.getValue();
         Update update = updateCaptor.getValue();
@@ -373,7 +435,7 @@ class UserGroupConnectorImplTest {
         assertEquals(UserGroupStatus.ACTIVE, set.get("status"));
         assertEquals(selfCareUser.getId(), set.get("modifiedBy"));
         assertTrue(currentDate.containsKey("modifiedAt"));
-        Mockito.verifyNoMoreInteractions(mongoTemplateMock);
+        verifyNoMoreInteractions(mongoTemplateMock);
 
 
     }
@@ -382,7 +444,7 @@ class UserGroupConnectorImplTest {
     void activateById_resourceNotFound() {
         //given
         String groupId = "groupId";
-        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+        UpdateResult result = mockInstance(new UpdateResult() {
             @Override
             public boolean wasAcknowledged() {
                 return false;
@@ -403,7 +465,7 @@ class UserGroupConnectorImplTest {
                 return null;
             }
         });
-        Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+        when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
                 .thenReturn(result);
         //when
         Executable executable = () -> groupConnector.activateById(groupId);
@@ -411,7 +473,7 @@ class UserGroupConnectorImplTest {
         assertThrows(ResourceNotFoundException.class, executable);
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
         ArgumentCaptor<Update> updateCaptor = ArgumentCaptor.forClass(Update.class);
-        Mockito.verify(mongoTemplateMock, Mockito.times(1))
+        verify(mongoTemplateMock, Mockito.times(1))
                 .updateFirst(queryCaptor.capture(), updateCaptor.capture(), (Class<?>) Mockito.any());
         Query query = queryCaptor.getValue();
         Update update = updateCaptor.getValue();
@@ -421,7 +483,7 @@ class UserGroupConnectorImplTest {
         assertEquals(UserGroupStatus.ACTIVE, set.get("status"));
         assertEquals(selfCareUser.getId(), set.get("modifiedBy"));
         assertTrue(currentDate.containsKey("modifiedAt"));
-        Mockito.verifyNoMoreInteractions(mongoTemplateMock);
+        verifyNoMoreInteractions(mongoTemplateMock);
     }
 
     @Test
@@ -429,7 +491,7 @@ class UserGroupConnectorImplTest {
         //given
         String groupId = "groupId";
         String memberId = UUID.randomUUID().toString();
-        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+        UpdateResult result = mockInstance(new UpdateResult() {
             @Override
             public boolean wasAcknowledged() {
                 return false;
@@ -450,7 +512,7 @@ class UserGroupConnectorImplTest {
                 return null;
             }
         });
-        Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+        when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
                 .thenReturn(result);
         //when
         Executable executable = () -> groupConnector.insertMember(groupId, memberId);
@@ -460,7 +522,7 @@ class UserGroupConnectorImplTest {
 
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
         ArgumentCaptor<Update> updateCaptor = ArgumentCaptor.forClass(Update.class);
-        Mockito.verify(mongoTemplateMock, Mockito.times(1))
+        verify(mongoTemplateMock, Mockito.times(1))
                 .updateFirst(queryCaptor.capture(), updateCaptor.capture(), (Class<?>) Mockito.any());
         Query query = queryCaptor.getValue();
         Update update = updateCaptor.getValue();
@@ -470,7 +532,7 @@ class UserGroupConnectorImplTest {
         assertEquals(UserGroupStatus.ACTIVE, query.getQueryObject().get("status", UserGroupStatus.class));
         assertEquals(selfCareUser.getId(), set.get("modifiedBy"));
         assertTrue(currentDate.containsKey("modifiedAt"));
-        Mockito.verifyNoMoreInteractions(mongoTemplateMock);
+        verifyNoMoreInteractions(mongoTemplateMock);
     }
 
     @Test
@@ -479,7 +541,7 @@ class UserGroupConnectorImplTest {
         String groupId = "groupId";
         String memberId = UUID.randomUUID().toString();
 
-        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+        UpdateResult result = mockInstance(new UpdateResult() {
             @Override
             public boolean wasAcknowledged() {
                 return false;
@@ -500,7 +562,7 @@ class UserGroupConnectorImplTest {
                 return null;
             }
         });
-        Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+        when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
                 .thenReturn(result);
         //when
         Executable executable = () -> groupConnector.insertMember(groupId, memberId);
@@ -508,7 +570,7 @@ class UserGroupConnectorImplTest {
         assertDoesNotThrow(executable);
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
         ArgumentCaptor<Update> updateCaptor = ArgumentCaptor.forClass(Update.class);
-        Mockito.verify(mongoTemplateMock, Mockito.times(1))
+        verify(mongoTemplateMock, Mockito.times(1))
                 .updateFirst(queryCaptor.capture(), updateCaptor.capture(), (Class<?>) Mockito.any());
         Query query = queryCaptor.getValue();
         Update update = updateCaptor.getValue();
@@ -518,7 +580,7 @@ class UserGroupConnectorImplTest {
         assertEquals(UserGroupStatus.ACTIVE, query.getQueryObject().get("status", UserGroupStatus.class));
         assertEquals(selfCareUser.getId(), set.get("modifiedBy"));
         assertTrue(currentDate.containsKey("modifiedAt"));
-        Mockito.verifyNoMoreInteractions(mongoTemplateMock);
+        verifyNoMoreInteractions(mongoTemplateMock);
     }
 
     @Test
@@ -526,7 +588,7 @@ class UserGroupConnectorImplTest {
         //given
         String groupId = "groupId";
         String memberId = UUID.randomUUID().toString();
-        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+        UpdateResult result = mockInstance(new UpdateResult() {
             @Override
             public boolean wasAcknowledged() {
                 return false;
@@ -547,7 +609,7 @@ class UserGroupConnectorImplTest {
                 return null;
             }
         });
-        Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+        when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
                 .thenReturn(result);
         //when
         Executable executable = () -> groupConnector.deleteMember(groupId, memberId);
@@ -556,7 +618,7 @@ class UserGroupConnectorImplTest {
         assertEquals("Couldn't update resource", resourceUpdateException.getMessage());
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
         ArgumentCaptor<Update> updateCaptor = ArgumentCaptor.forClass(Update.class);
-        Mockito.verify(mongoTemplateMock, Mockito.times(1))
+        verify(mongoTemplateMock, Mockito.times(1))
                 .updateFirst(queryCaptor.capture(), updateCaptor.capture(), (Class<?>) Mockito.any());
         Query query = queryCaptor.getValue();
         Update update = updateCaptor.getValue();
@@ -566,7 +628,7 @@ class UserGroupConnectorImplTest {
         assertEquals(UserGroupStatus.ACTIVE, query.getQueryObject().get("status", UserGroupStatus.class));
         assertEquals(selfCareUser.getId(), set.get("modifiedBy"));
         assertTrue(currentDate.containsKey("modifiedAt"));
-        Mockito.verifyNoMoreInteractions(mongoTemplateMock);
+        verifyNoMoreInteractions(mongoTemplateMock);
     }
 
     @Test
@@ -575,7 +637,7 @@ class UserGroupConnectorImplTest {
         String groupId = "groupId";
         String memberId = UUID.randomUUID().toString();
 
-        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+        UpdateResult result = mockInstance(new UpdateResult() {
             @Override
             public boolean wasAcknowledged() {
                 return false;
@@ -596,15 +658,15 @@ class UserGroupConnectorImplTest {
                 return null;
             }
         });
-        Mockito.when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+        when(mongoTemplateMock.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
                 .thenReturn(result);
         //when
         Executable executable = () -> groupConnector.deleteMember(groupId, memberId);
         //then
         assertDoesNotThrow(executable);
-        Mockito.verify(mongoTemplateMock, Mockito.times(1))
+        verify(mongoTemplateMock, Mockito.times(1))
                 .updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any());
-        Mockito.verifyNoMoreInteractions(mongoTemplateMock);
+        verifyNoMoreInteractions(mongoTemplateMock);
     }
 
     @Test
@@ -614,7 +676,7 @@ class UserGroupConnectorImplTest {
         String memberId = UUID.randomUUID().toString();
         String institutionId = "institutionId";
         String productId = "productId";
-        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+        UpdateResult result = mockInstance(new UpdateResult() {
             @Override
             public boolean wasAcknowledged() {
                 return false;
@@ -635,7 +697,7 @@ class UserGroupConnectorImplTest {
                 return null;
             }
         });
-        Mockito.when(mongoTemplateMock.updateMulti(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+        when(mongoTemplateMock.updateMulti(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
                 .thenReturn(result);
         //when
         Executable executable = () -> groupConnector.deleteMembers(memberId, institutionId, productId);
@@ -644,7 +706,7 @@ class UserGroupConnectorImplTest {
         assertEquals("Couldn't update resource", resourceUpdateException.getMessage());
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
         ArgumentCaptor<Update> updateCaptor = ArgumentCaptor.forClass(Update.class);
-        Mockito.verify(mongoTemplateMock, Mockito.times(1))
+        verify(mongoTemplateMock, Mockito.times(1))
                 .updateMulti(queryCaptor.capture(), updateCaptor.capture(), (Class<?>) Mockito.any());
         Query query = queryCaptor.getValue();
         Update update = updateCaptor.getValue();
@@ -655,7 +717,7 @@ class UserGroupConnectorImplTest {
         assertEquals(productId, query.getQueryObject().get(UserGroupEntity.Fields.productId));
         assertEquals(selfCareUser.getId(), set.get("modifiedBy"));
         assertTrue(currentDate.containsKey("modifiedAt"));
-        Mockito.verifyNoMoreInteractions(mongoTemplateMock);
+        verifyNoMoreInteractions(mongoTemplateMock);
     }
 
     @Test
@@ -664,7 +726,7 @@ class UserGroupConnectorImplTest {
         String memberId = UUID.randomUUID().toString();
         String institutionId = "institutionId";
         String productId = "productId";
-        UpdateResult result = TestUtils.mockInstance(new UpdateResult() {
+        UpdateResult result = mockInstance(new UpdateResult() {
             @Override
             public boolean wasAcknowledged() {
                 return false;
@@ -685,7 +747,7 @@ class UserGroupConnectorImplTest {
                 return null;
             }
         });
-        Mockito.when(mongoTemplateMock.updateMulti(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
+        when(mongoTemplateMock.updateMulti(Mockito.any(Query.class), Mockito.any(Update.class), (Class<?>) Mockito.any()))
                 .thenReturn(result);
         //when
         Executable executable = () -> groupConnector.deleteMembers(memberId, institutionId, productId);
@@ -693,7 +755,7 @@ class UserGroupConnectorImplTest {
         assertDoesNotThrow(executable);
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
         ArgumentCaptor<Update> updateCaptor = ArgumentCaptor.forClass(Update.class);
-        Mockito.verify(mongoTemplateMock, Mockito.times(1))
+        verify(mongoTemplateMock, Mockito.times(1))
                 .updateMulti(queryCaptor.capture(), updateCaptor.capture(), (Class<?>) Mockito.any());
         Query query = queryCaptor.getValue();
         Update update = updateCaptor.getValue();
@@ -704,33 +766,33 @@ class UserGroupConnectorImplTest {
         assertEquals(productId, query.getQueryObject().get(UserGroupEntity.Fields.productId));
         assertEquals(selfCareUser.getId(), set.get("modifiedBy"));
         assertTrue(currentDate.containsKey("modifiedAt"));
-        Mockito.verifyNoMoreInteractions(mongoTemplateMock);
+        verifyNoMoreInteractions(mongoTemplateMock);
     }
 
     @Test
     void save() {
         //given
         String id = "id";
-        UserGroupEntity entity = TestUtils.mockInstance(new UserGroupEntity());
-        Mockito.when(repositoryMock.save(Mockito.any()))
+        UserGroupEntity entity = mockInstance(new UserGroupEntity());
+        when(repositoryMock.save(Mockito.any()))
                 .thenReturn(entity);
         //when
         UserGroupOperations saved = groupConnector.save(entity);
         //then
         assertEquals(entity, saved);
         ArgumentCaptor<UserGroupEntity> entityCaptor = ArgumentCaptor.forClass(UserGroupEntity.class);
-        Mockito.verify(repositoryMock, Mockito.times(1))
+        verify(repositoryMock, Mockito.times(1))
                 .save(entityCaptor.capture());
         UserGroupEntity capturedEntity = entityCaptor.getValue();
         assertEquals(entity, capturedEntity);
-        Mockito.verifyNoMoreInteractions(repositoryMock);
+        verifyNoMoreInteractions(repositoryMock);
     }
 
     @Test
     void save_duplicateKey() {
         //given
         String id = "id";
-        UserGroupEntity entity = TestUtils.mockInstance(new UserGroupEntity());
+        UserGroupEntity entity = mockInstance(new UserGroupEntity());
         Mockito.doThrow(DuplicateKeyException.class)
                 .when(repositoryMock)
                 .save(Mockito.any(UserGroupEntity.class));
@@ -739,9 +801,9 @@ class UserGroupConnectorImplTest {
         //then
         ResourceAlreadyExistsException e = assertThrows(ResourceAlreadyExistsException.class, executable);
         assertEquals("Failed _id or unique index constraint.", e.getMessage());
-        Mockito.verify(repositoryMock, Mockito.times(1))
+        verify(repositoryMock, Mockito.times(1))
                 .save(entity);
-        Mockito.verifyNoMoreInteractions(repositoryMock);
+        verifyNoMoreInteractions(repositoryMock);
     }
 
 

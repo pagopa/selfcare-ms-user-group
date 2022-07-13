@@ -64,4 +64,5 @@ class UserGroupExceptionHandlerTest {
         assertEquals(DETAIL_MESSAGE, responseEntity.getBody().getDetail());
         assertEquals(BAD_REQUEST.value(), responseEntity.getBody().getStatus());
     }
+
 }
