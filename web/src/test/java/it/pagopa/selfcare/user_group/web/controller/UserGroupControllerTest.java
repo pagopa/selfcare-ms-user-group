@@ -294,7 +294,7 @@ class UserGroupControllerTest {
                         .param("institutionId", institutionId)
                         .param("productId", productId)
                         .param("userId", userId)
-                        .param("allowedStatus", String.valueOf(allowedStatus))
+                        .param("status", String.valueOf(allowedStatus))
                         .contentType(APPLICATION_JSON_VALUE)
                         .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().is2xxSuccessful())
