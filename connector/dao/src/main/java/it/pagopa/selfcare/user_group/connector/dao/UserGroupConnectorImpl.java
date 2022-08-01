@@ -15,11 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.validation.ValidationException;
@@ -142,7 +144,7 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
     }
 
     @Override
-    public List<UserGroupOperations> findAll(UserGroupFilter filter, Pageable pageable) {
+    public Page<UserGroupOperations> findAll(UserGroupFilter filter, Pageable pageable) {
         log.trace("findAll start");
         log.debug("findAll institutionId= {} , productId = {}, userId = {}, pageable = {}", filter.getInstitutionId(), filter.getProductId(), filter.getUserId(), pageable);
         Query query = new Query();
@@ -156,11 +158,14 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
         filter.getProductId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.productId).is(value)));
         filter.getUserId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.members).is(value)));
         filter.getStatus().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.status).is(value)));
-        List<UserGroupOperations> result = new ArrayList<>(mongoTemplate.find(query.with(pageable), UserGroupEntity.class));
+        long count = this.mongoTemplate.count(query, UserGroupEntity.class);
+        List<UserGroupOperations> userGroupOperations = new ArrayList<>(mongoTemplate.find(query.with(pageable), UserGroupEntity.class));
+        final Page<UserGroupOperations> result = PageableExecutionUtils.getPage(userGroupOperations, pageable, () -> count);
         log.debug("findAll result = {}", result);
         log.trace("findAll end");
         return result;
     }
+
 
     @Override
     public void activateById(String id) {

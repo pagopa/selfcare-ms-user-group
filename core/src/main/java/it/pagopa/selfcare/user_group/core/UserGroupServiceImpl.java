@@ -10,6 +10,7 @@ import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -105,15 +106,16 @@ class UserGroupServiceImpl implements UserGroupService {
         return foundGroup;
     }
 
+
     @Override
-    public List<UserGroupOperations> getUserGroups(UserGroupFilter filter, Pageable pageable) {
+    public Page<UserGroupOperations> getUserGroups(UserGroupFilter filter, Pageable pageable) {
         log.trace("getUserGroups start");
         log.debug("getUserGroups filter = {}, pageable = {}", filter, pageable);
         boolean match = pageable.getSort().stream().allMatch(order -> allowedSortingParams.contains(order.getProperty()));
         if (!match) {
             throw new ValidationException("Given sort parameters aren't valid");
         }
-        List<UserGroupOperations> result = groupConnector.findAll(filter, pageable);
+        Page<UserGroupOperations> result = groupConnector.findAll(filter, pageable);
         log.debug("getUserGroups result = {}", result);
         log.trace("getUserGroups end");
         return result;
