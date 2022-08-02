@@ -2,9 +2,9 @@ package it.pagopa.selfcare.user_group.core;
 
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.connector.model.UserGroupFilter;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface UserGroupService {
@@ -19,7 +19,7 @@ public interface UserGroupService {
 
     UserGroupOperations getUserGroup(String id);
 
-    List<UserGroupOperations> getUserGroups(UserGroupFilter filter, Pageable pageable);
+    Page<UserGroupOperations> getUserGroups(UserGroupFilter filter, Pageable pageable);
 
     void deleteGroup(String id);
 

@@ -1,6 +1,5 @@
 package it.pagopa.selfcare.user_group.web.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.commons.utils.TestUtils;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
@@ -25,18 +24,20 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.emptyString;
-import static org.hamcrest.Matchers.not;
+import static it.pagopa.selfcare.commons.utils.TestUtils.mockInstance;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.data.support.PageableExecutionUtils.getPage;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @WebMvcTest(value = {UserGroupController.class}, excludeAutoConfiguration = SecurityAutoConfiguration.class)
@@ -47,8 +48,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 })
 class UserGroupControllerTest {
 
-    private static final DummyCreateUserGroupDto CREATE_USER_GROUP_DTO = TestUtils.mockInstance(new DummyCreateUserGroupDto());
-    private static final DummyUpdateUserGroupDto UPDATE_USER_GROUP_DTO = TestUtils.mockInstance(new DummyUpdateUserGroupDto());
+    private static final DummyCreateUserGroupDto CREATE_USER_GROUP_DTO = mockInstance(new DummyCreateUserGroupDto());
+    private static final DummyUpdateUserGroupDto UPDATE_USER_GROUP_DTO = mockInstance(new DummyUpdateUserGroupDto());
     private static final String BASE_URL = "/user-groups/v1";
 
     @MockBean
@@ -66,14 +67,14 @@ class UserGroupControllerTest {
     @Test
     void createGroup() throws Exception {
         //given
-        Mockito.when(groupServiceMock.createGroup(Mockito.any(UserGroupOperations.class)))
+        when(groupServiceMock.createGroup(any(UserGroupOperations.class)))
                 .thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0, UserGroupOperations.class));
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
-                        .post(BASE_URL + "/")
-                        .content(mapper.writeValueAsString(CREATE_USER_GROUP_DTO))
-                        .contentType(APPLICATION_JSON_VALUE)
-                        .accept(APPLICATION_JSON_VALUE))
+                .post(BASE_URL + "/")
+                .content(mapper.writeValueAsString(CREATE_USER_GROUP_DTO))
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isCreated())
                 .andReturn();
         //then
@@ -89,9 +90,9 @@ class UserGroupControllerTest {
                 .when(groupServiceMock).deleteGroup(Mockito.anyString());
         //when
         mvc.perform(MockMvcRequestBuilders
-                        .delete(BASE_URL + "/id")
-                        .contentType(APPLICATION_JSON_VALUE)
-                        .accept(APPLICATION_JSON_VALUE))
+                .delete(BASE_URL + "/id")
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(APPLICATION_PROBLEM_JSON))
                 .andExpect(content().string(not(emptyString())));
@@ -104,14 +105,14 @@ class UserGroupControllerTest {
                 .when(groupServiceMock).deleteGroup(Mockito.anyString());
         // when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
-                        .delete(BASE_URL + "/id")
-                        .contentType(APPLICATION_JSON_VALUE)
-                        .accept(APPLICATION_JSON_VALUE))
+                .delete(BASE_URL + "/id")
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().is2xxSuccessful())
                 .andReturn();
         // then
         assertEquals("", result.getResponse().getContentAsString());
-        Mockito.verify(groupServiceMock, Mockito.times(1))
+        verify(groupServiceMock, times(1))
                 .deleteGroup(Mockito.anyString());
         Mockito.verifyNoMoreInteractions(groupServiceMock);
 
@@ -125,9 +126,9 @@ class UserGroupControllerTest {
                 .when(groupServiceMock).activateGroup(Mockito.anyString());
         //when
         mvc.perform(MockMvcRequestBuilders
-                        .post(BASE_URL + "/{id}/activate", groupId)
-                        .contentType(APPLICATION_JSON_VALUE)
-                        .accept(APPLICATION_JSON_VALUE))
+                .post(BASE_URL + "/{id}/activate", groupId)
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(APPLICATION_PROBLEM_JSON))
                 .andExpect(content().string(not(emptyString())));
@@ -140,14 +141,14 @@ class UserGroupControllerTest {
         String groupId = "groupId";
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
-                        .post(BASE_URL + "/{id}/activate", groupId)
-                        .contentType(APPLICATION_JSON_VALUE)
-                        .accept(APPLICATION_JSON_VALUE))
+                .post(BASE_URL + "/{id}/activate", groupId)
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isNoContent())
                 .andReturn();
         //then
         assertEquals(0, result.getResponse().getContentLength());
-        Mockito.verify(groupServiceMock, Mockito.times(1))
+        verify(groupServiceMock, times(1))
                 .activateGroup(groupId);
         Mockito.verifyNoMoreInteractions(groupServiceMock);
     }
@@ -160,9 +161,9 @@ class UserGroupControllerTest {
                 .when(groupServiceMock).suspendGroup(Mockito.anyString());
         //when
         mvc.perform(MockMvcRequestBuilders
-                        .post(BASE_URL + "/{id}/suspend", groupId)
-                        .contentType(APPLICATION_JSON_VALUE)
-                        .accept(APPLICATION_JSON_VALUE))
+                .post(BASE_URL + "/{id}/suspend", groupId)
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(APPLICATION_PROBLEM_JSON))
                 .andExpect(content().string(not(emptyString())));
@@ -175,14 +176,14 @@ class UserGroupControllerTest {
         String groupId = "groupId";
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
-                        .post(BASE_URL + "/{id}/suspend", groupId)
-                        .contentType(APPLICATION_JSON_VALUE)
-                        .accept(APPLICATION_JSON_VALUE))
+                .post(BASE_URL + "/{id}/suspend", groupId)
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isNoContent())
                 .andReturn();
         //then
         assertEquals(0, result.getResponse().getContentLength());
-        Mockito.verify(groupServiceMock, Mockito.times(1))
+        verify(groupServiceMock, times(1))
                 .suspendGroup(groupId);
         Mockito.verifyNoMoreInteractions(groupServiceMock);
     }
@@ -190,20 +191,20 @@ class UserGroupControllerTest {
     @Test
     void updateGroup_exists() throws Exception {
         //given
-        Mockito.when(groupServiceMock.updateGroup(Mockito.anyString(), Mockito.any(UserGroupOperations.class)))
+        when(groupServiceMock.updateGroup(Mockito.anyString(), any(UserGroupOperations.class)))
                 .thenAnswer(invocationOnMock -> {
                     String id = invocationOnMock.getArgument(0, String.class);
                     UserGroupOperations group = invocationOnMock.getArgument(1, UserGroupOperations.class);
                     group.setId(id);
-                    group.setMembers(Set.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()));
+                    group.setMembers(Set.of(randomUUID().toString(), randomUUID().toString()));
                     return group;
                 });
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
-                        .put(BASE_URL + "/id")
-                        .content(mapper.writeValueAsString(UPDATE_USER_GROUP_DTO))
-                        .contentType(APPLICATION_JSON_VALUE)
-                        .accept(APPLICATION_JSON_VALUE))
+                .put(BASE_URL + "/id")
+                .content(mapper.writeValueAsString(UPDATE_USER_GROUP_DTO))
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().is2xxSuccessful())
                 .andReturn();
         //then
@@ -218,17 +219,17 @@ class UserGroupControllerTest {
         //given
         String groupId = "groupId";
         MemberUUID member = new MemberUUID();
-        member.setMember(UUID.randomUUID());
+        member.setMember(randomUUID());
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
-                        .put(BASE_URL + "/groupId/members/" + member.getMember())
-                        .contentType(APPLICATION_JSON_VALUE)
-                        .accept(APPLICATION_JSON_VALUE))
+                .put(BASE_URL + "/groupId/members/" + member.getMember())
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().is2xxSuccessful())
                 .andReturn();
         //then
         assertEquals(0, result.getResponse().getContentLength());
-        Mockito.verify(groupServiceMock, Mockito.times(1))
+        verify(groupServiceMock, times(1))
                 .addMember(groupId, member.getMember());
         Mockito.verifyNoMoreInteractions(groupServiceMock);
     }
@@ -237,17 +238,17 @@ class UserGroupControllerTest {
     void deleteMember() throws Exception {
         //given
         String groupId = "groupId";
-        UUID memberId = UUID.randomUUID();
+        UUID memberId = randomUUID();
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
-                        .delete(BASE_URL + "/groupId/members/" + memberId)
-                        .contentType(APPLICATION_JSON_VALUE)
-                        .accept(APPLICATION_JSON_VALUE))
+                .delete(BASE_URL + "/groupId/members/" + memberId)
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isNoContent())
                 .andReturn();
         //then
         assertEquals(0, result.getResponse().getContentLength());
-        Mockito.verify(groupServiceMock, Mockito.times(1))
+        verify(groupServiceMock, times(1))
                 .deleteMember(groupId, memberId.toString());
         Mockito.verifyNoMoreInteractions(groupServiceMock);
     }
@@ -257,19 +258,19 @@ class UserGroupControllerTest {
         //given
         String InstitutionId = "institutionId";
         String productId = "productId";
-        Mockito.when(groupServiceMock.getUserGroup(Mockito.anyString()))
+        when(groupServiceMock.getUserGroup(Mockito.anyString()))
                 .thenAnswer(invocationOnMock -> {
                     String id = invocationOnMock.getArgument(0, String.class);
-                    UserGroupOperations group = TestUtils.mockInstance(new GroupDto(), "setId");
+                    UserGroupOperations group = mockInstance(new GroupDto(), "setId");
                     group.setId(id);
-                    group.setMembers(Set.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()));
+                    group.setMembers(Set.of(randomUUID().toString(), randomUUID().toString()));
                     return group;
                 });
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
-                        .get(BASE_URL + "/groupId")
-                        .contentType(APPLICATION_JSON_VALUE)
-                        .accept(APPLICATION_JSON_VALUE))
+                .get(BASE_URL + "/groupId")
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().is2xxSuccessful())
                 .andReturn();
         //then
@@ -282,30 +283,50 @@ class UserGroupControllerTest {
         //given
         String institutionId = "institutionId";
         String productId = "productId";
-        String userId = UUID.randomUUID().toString();
+        String userId = randomUUID().toString();
         UserGroupStatus allowedStatus = UserGroupStatus.ACTIVE;
-        UserGroupOperations groupOperations = TestUtils.mockInstance(new GroupDto());
-        groupOperations.setMembers(Set.of(UUID.randomUUID().toString()));
-        Mockito.when(groupServiceMock.getUserGroups(Mockito.any(), Mockito.any()))
-                .thenReturn(Collections.singletonList(groupOperations));
-        //when
-        MvcResult result = mvc.perform(MockMvcRequestBuilders
-                        .get(BASE_URL + "/")
-                        .param("institutionId", institutionId)
-                        .param("productId", productId)
-                        .param("userId", userId)
-                        .param("status", String.valueOf(allowedStatus))
-                        .contentType(APPLICATION_JSON_VALUE)
-                        .accept(APPLICATION_JSON_VALUE))
-                .andExpect(status().is2xxSuccessful())
-                .andReturn();
-        //then
-        List<UserGroupResource> groups = mapper.readValue(result.getResponse().getContentAsString(),
-                new TypeReference<>() {
+        final int page = 1;
+        final int size = 3;
+        UserGroupOperations groupOperations = mockInstance(new GroupDto());
+        groupOperations.setMembers(Set.of(randomUUID().toString()));
+        when(groupServiceMock.getUserGroups(any(), any()))
+                .thenAnswer(invocation -> {
+                    final Pageable pageable = invocation.getArgument(1, Pageable.class);
+                    return getPage(List.of(groupOperations), pageable, () -> pageable.isPaged()
+                            ? pageable.getPageSize() * pageable.getPageNumber() + 1
+                            : 1);
                 });
-        assertNotNull(groups);
+        //when
+        mvc.perform(MockMvcRequestBuilders
+                .get(BASE_URL + "/")
+                .param("institutionId", institutionId)
+                .param("productId", productId)
+                .param("userId", userId)
+                .param("status", String.valueOf(allowedStatus))
+                .param("page", String.valueOf(page))
+                .param("size", String.valueOf(size))
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.number", notNullValue()))
+                .andExpect(jsonPath("$.size", notNullValue()))
+                .andExpect(jsonPath("$.totalElements", notNullValue()))
+                .andExpect(jsonPath("$.totalPages", notNullValue()))
+                .andExpect(jsonPath("$.content", notNullValue()))
+                .andExpect(jsonPath("$.content[0].id", notNullValue()))
+                .andExpect(jsonPath("$.content[0].institutionId", notNullValue()))
+                .andExpect(jsonPath("$.content[0].productId", notNullValue()))
+                .andExpect(jsonPath("$.content[0].name", notNullValue()))
+                .andExpect(jsonPath("$.content[0].description", notNullValue()))
+                .andExpect(jsonPath("$.content[0].status", notNullValue()))
+                .andExpect(jsonPath("$.content[0].members", not(emptyArray())))
+                .andExpect(jsonPath("$.content[0].createdAt", notNullValue()))
+                .andExpect(jsonPath("$.content[0].createdBy", notNullValue()))
+                .andExpect(jsonPath("$.content[0].modifiedAt", notNullValue()))
+                .andExpect(jsonPath("$.content[0].modifiedBy", notNullValue()));
+        //then
         ArgumentCaptor<UserGroupFilter> filterCaptor = ArgumentCaptor.forClass(UserGroupFilter.class);
-        Mockito.verify(groupServiceMock, Mockito.times(1))
+        verify(groupServiceMock, times(1))
                 .getUserGroups(filterCaptor.capture(), pageableCaptor.capture());
         UserGroupFilter capturedFilter = filterCaptor.getValue();
         assertEquals(capturedFilter.getStatus().get(), allowedStatus);
@@ -314,26 +335,28 @@ class UserGroupControllerTest {
         assertEquals(capturedFilter.getUserId().get(), userId);
         Pageable capturedPageable = pageableCaptor.getValue();
         assertTrue(capturedPageable.getSort().isUnsorted());
+        assertEquals(page, capturedPageable.getPageNumber());
+        assertEquals(size, capturedPageable.getPageSize());
     }
 
     @Test
     void deleteMembers() throws Exception {
         //given
-        UUID memberId = UUID.randomUUID();
+        UUID memberId = randomUUID();
         String institutionId = "institutionId";
         String productId = "productId";
         //when
         MvcResult result = mvc.perform(MockMvcRequestBuilders
-                        .delete(BASE_URL + "/members/" + memberId)
-                        .param("institutionId", institutionId)
-                        .param("productId", productId)
-                        .contentType(APPLICATION_JSON_VALUE)
-                        .accept(APPLICATION_JSON_VALUE))
+                .delete(BASE_URL + "/members/" + memberId)
+                .param("institutionId", institutionId)
+                .param("productId", productId)
+                .contentType(APPLICATION_JSON_VALUE)
+                .accept(APPLICATION_JSON_VALUE))
                 .andExpect(status().isNoContent())
                 .andReturn();
         //then
         assertEquals(0, result.getResponse().getContentLength());
-        Mockito.verify(groupServiceMock, Mockito.times(1))
+        verify(groupServiceMock, times(1))
                 .deleteMembers(memberId.toString(), institutionId, productId);
         Mockito.verifyNoMoreInteractions(groupServiceMock);
     }

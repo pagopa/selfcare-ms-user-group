@@ -42,7 +42,7 @@
         }, {
           "name" : "page",
           "in" : "query",
-          "description" : "Results page you want to retrieve (0..N)",
+          "description" : "The page number to access (0 indexed, defaults to 0)",
           "required" : false,
           "style" : "form",
           "allowReserved" : true,
@@ -53,7 +53,7 @@
         }, {
           "name" : "size",
           "in" : "query",
-          "description" : "Number of records per page",
+          "description" : "Number of records per page (defaults to 20, max 2000)",
           "required" : false,
           "style" : "form",
           "allowReserved" : true,
@@ -62,84 +62,74 @@
             "format" : "int32"
           }
         }, {
-          "name": "sort",
-          "in": "query",
-          "description": "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
-          "required": false,
-          "style": "form",
-          "allowReserved": true,
-          "schema": {
-            "type": "array",
-            "items": {
-              "type": "string"
+          "name" : "sort",
+          "in" : "query",
+          "description" : "Sorting criteria in the format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.",
+          "required" : false,
+          "style" : "form",
+          "allowReserved" : true,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
             }
           }
-        },
-          {
-            "name": "productId",
-            "in": "query",
-            "description": "Users group's productId",
-            "required": false,
-            "style": "form",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "userId",
-            "in": "query",
-            "description": "Member's unique identifier",
-            "required": false,
-            "style": "form",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "description": "If filter on status is present, it must be used with at least one of the other filters",
-            "required": false,
-            "style": "form",
-            "schema": {
-              "type": "string",
-              "enum": [
-                "ACTIVE",
-                "SUSPENDED"
-              ]
-            }
+        }, {
+          "name" : "productId",
+          "in" : "query",
+          "description" : "Users group's productId",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string"
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserGroupResource"
-                  }
+        }, {
+          "name" : "userId",
+          "in" : "query",
+          "description" : "Member's unique identifier",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string",
+            "format" : "uuid"
+          }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "description" : "If filter on status is present, it must be used with at least one of the other filters",
+          "required" : false,
+          "style" : "form",
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "SUSPENDED" ]
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PageOfUserGroupResource"
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
+          "400" : {
+            "description" : "Bad Request",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Problem"
                 }
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/problem+json": {
-                "schema": {
+          "401" : {
+            "description" : "Unauthorized",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
                   "$ref" : "#/components/schemas/Problem"
                 }
               }
@@ -817,6 +807,40 @@
           "reason" : {
             "type" : "string",
             "description" : "Invalid parameter reason."
+          }
+        }
+      },
+      "PageOfUserGroupResource" : {
+        "title" : "PageOfUserGroupResource",
+        "required" : [ "content", "number", "size", "totalElements", "totalPages" ],
+        "type" : "object",
+        "properties" : {
+          "content" : {
+            "type" : "array",
+            "description" : "The page content",
+            "items" : {
+              "$ref" : "#/components/schemas/UserGroupResource"
+            }
+          },
+          "number" : {
+            "type" : "integer",
+            "description" : "The number of the current page",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "description" : "The size of the page",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "description" : "The total amount of elements",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "description" : "The number of total pages",
+            "format" : "int32"
           }
         }
       },
