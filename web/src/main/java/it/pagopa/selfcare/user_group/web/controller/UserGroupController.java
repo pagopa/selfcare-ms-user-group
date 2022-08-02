@@ -6,7 +6,9 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import it.pagopa.selfcare.commons.web.model.Page;
 import it.pagopa.selfcare.commons.web.model.Problem;
+import it.pagopa.selfcare.commons.web.model.mapper.PageMapper;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.connector.model.UserGroupFilter;
 import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
@@ -23,10 +25,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -164,29 +164,28 @@ public class UserGroupController {
     @GetMapping(value = "/")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.getUserGroups}")
-    public List<UserGroupResource> getUserGroups(@ApiParam("${swagger.user-group.model.institutionId}")
-                                                     @RequestParam(value = "institutionId", required = false)
-                                                             Optional<String> institutionId,
+    public Page<UserGroupResource> getUserGroups(@ApiParam("${swagger.user-group.model.institutionId}")
+                                                 @RequestParam(value = "institutionId", required = false)
+                                                         Optional<String> institutionId,
                                                  @ApiParam("${swagger.user-group.model.productId}")
-                                                     @RequestParam(value = "productId", required = false)
-                                                             Optional<String> productId,
+                                                 @RequestParam(value = "productId", required = false)
+                                                         Optional<String> productId,
                                                  @ApiParam("${swagger.user-group.model.memberId}")
-                                                     @RequestParam(value = "userId", required = false)
-                                                             Optional<UUID> memberId,
+                                                 @RequestParam(value = "userId", required = false)
+                                                         Optional<UUID> memberId,
                                                  @ApiParam("${swagger.user-group.model.statusFilter}")
-                                                     @RequestParam(value = "status", required = false)
-                                                             Optional<UserGroupStatus> status,
+                                                 @RequestParam(value = "status", required = false)
+                                                         Optional<UserGroupStatus> status,
                                                  Pageable pageable) {
         log.trace("getUserGroups start");
         log.debug("getUserGroups institutionId = {}, productId = {}, pageable = {}, status = {}", institutionId, productId, pageable, status);
         UserGroupFilter filter = UserGroupFilter.builder().userId(memberId.map(UUID::toString)).institutionId(institutionId).productId(productId).status(status).build();
-        List<UserGroupOperations> userGroups = groupService.getUserGroups(filter, pageable);
-        List<UserGroupResource> result = userGroups.stream().map(GroupMapper::toResource).collect(Collectors.toList());
+        Page<UserGroupResource> result = PageMapper.map(groupService.getUserGroups(filter, pageable)
+                .map(GroupMapper::toResource));
         log.debug("getUserGroups result = {}", result);
         log.trace("getUserGroups end");
         return result;
     }
-
 
     @DeleteMapping(value = "/{id}/members/{memberId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
