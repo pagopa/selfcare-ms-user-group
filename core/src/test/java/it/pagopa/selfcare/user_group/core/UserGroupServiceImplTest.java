@@ -20,6 +20,7 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -35,7 +36,11 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.data.support.PageableExecutionUtils.getPage;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {UserGroupServiceImpl.class, CoreTestConfig.class})
@@ -67,7 +72,7 @@ class UserGroupServiceImplTest {
         //then
         IllegalStateException e = assertThrows(IllegalStateException.class, executable);
         assertEquals("Authentication is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
@@ -81,7 +86,7 @@ class UserGroupServiceImplTest {
         //then
         IllegalStateException illegalStateException = Assertions.assertThrows(IllegalStateException.class, executable);
         Assertions.assertEquals("Not SelfCareUser principal", illegalStateException.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
@@ -100,7 +105,7 @@ class UserGroupServiceImplTest {
         //then
         IllegalArgumentException illegalArgumentException = Assertions.assertThrows(IllegalArgumentException.class, executable);
         Assertions.assertEquals("A group is required", illegalArgumentException.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
@@ -114,20 +119,20 @@ class UserGroupServiceImplTest {
                 .build();
         TestingAuthenticationToken authenticationToken = new TestingAuthenticationToken(selfCareUser, null);
         TestSecurityContextHolder.setAuthentication(authenticationToken);
-        Set<UUID> members = Set.of(UUID.randomUUID(), UUID.randomUUID());
+        Set<UUID> members = Set.of(randomUUID(), randomUUID());
         UserGroupOperations input = TestUtils.mockInstance(new DummyGroup(), "setId", "setCreateAt", "setModifiedAt");
         input.setId("id");
         input.setMembers(members.stream().map(UUID::toString).collect(Collectors.toSet()));
-        Mockito.when(groupConnectorMock.insert(Mockito.any(UserGroupOperations.class)))
+        when(groupConnectorMock.insert(any(UserGroupOperations.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0, UserGroupOperations.class));
         //when
         UserGroupOperations output = groupService.createGroup(input);
         //then
         assertNotNull(output);
 
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
-                .insert(Mockito.any(UserGroupOperations.class));
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verify(groupConnectorMock, times(1))
+                .insert(any(UserGroupOperations.class));
+        verifyNoMoreInteractions(groupConnectorMock);
     }
 
     @Test
@@ -137,9 +142,9 @@ class UserGroupServiceImplTest {
         //when
         groupService.deleteGroup(id);
         //then
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .deleteById(id);
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verifyNoMoreInteractions(groupConnectorMock);
     }
 
 
@@ -152,7 +157,7 @@ class UserGroupServiceImplTest {
         //then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A user group id is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
@@ -162,9 +167,9 @@ class UserGroupServiceImplTest {
         //when
         groupService.suspendGroup(id);
         //then
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .suspendById(id);
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verifyNoMoreInteractions(groupConnectorMock);
     }
 
 
@@ -177,7 +182,7 @@ class UserGroupServiceImplTest {
         //then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A user group id is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
@@ -187,9 +192,9 @@ class UserGroupServiceImplTest {
         //when
         groupService.activateGroup(id);
         //then
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .activateById(id);
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verifyNoMoreInteractions(groupConnectorMock);
     }
 
     @Test
@@ -201,7 +206,7 @@ class UserGroupServiceImplTest {
         //then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A user group id is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
@@ -214,7 +219,7 @@ class UserGroupServiceImplTest {
         //then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A user group id is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
@@ -227,7 +232,7 @@ class UserGroupServiceImplTest {
         //then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A user group is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
@@ -236,16 +241,16 @@ class UserGroupServiceImplTest {
         String id = "id";
         UserGroupOperations group = TestUtils.mockInstance(new DummyGroup());
         group.setStatus(UserGroupStatus.SUSPENDED);
-        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
+        when(groupConnectorMock.findById(Mockito.anyString()))
                 .thenReturn(Optional.of(group));
         //when
         Executable executable = () -> groupService.updateGroup(id, group);
         //then
         ResourceUpdateException e = assertThrows(ResourceUpdateException.class, executable);
         assertEquals("Trying to modify suspended group", e.getMessage());
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .findById(id);
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verifyNoMoreInteractions(groupConnectorMock);
     }
 
     @Test
@@ -257,9 +262,9 @@ class UserGroupServiceImplTest {
         Executable executable = () -> groupService.updateGroup(id, input);
         //then
         assertThrows(ResourceNotFoundException.class, executable);
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .findById(id);
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verifyNoMoreInteractions(groupConnectorMock);
     }
 
     @Test
@@ -268,9 +273,9 @@ class UserGroupServiceImplTest {
         String id = "id";
         UserGroupOperations group = TestUtils.mockInstance(new DummyGroup(), "setId");
         UserGroupOperations foundGroup = TestUtils.mockInstance(new DummyGroup());
-        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
+        when(groupConnectorMock.findById(Mockito.anyString()))
                 .thenReturn(Optional.of(foundGroup));
-        Mockito.when(groupConnectorMock.save(Mockito.any()))
+        when(groupConnectorMock.save(any()))
                 .thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0, UserGroupOperations.class));
         //when
         UserGroupOperations saved = groupService.updateGroup(id, group);
@@ -278,24 +283,24 @@ class UserGroupServiceImplTest {
         assertEquals(saved.getDescription(), group.getDescription());
         assertEquals(saved.getMembers(), group.getMembers());
         assertEquals(saved.getName(), group.getName());
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .findById(id);
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
-                .save(Mockito.any());
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verify(groupConnectorMock, times(1))
+                .save(any());
+        verifyNoMoreInteractions(groupConnectorMock);
     }
 
     @Test
     void addMember_nullId() {
         //given
         String id = null;
-        UUID memberId = UUID.randomUUID();
+        UUID memberId = randomUUID();
         //when
         Executable executable = () -> groupService.addMember(id, memberId);
         //then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A user group id is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
@@ -308,21 +313,21 @@ class UserGroupServiceImplTest {
         //then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A member id is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
     void addMember_doesNotExist() {
         //given
         String id = "id";
-        UUID memberId = UUID.randomUUID();
+        UUID memberId = randomUUID();
         //when
         Executable executable = () -> groupService.addMember(id, memberId);
         //then
         assertThrows(ResourceNotFoundException.class, executable);
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .findById(id);
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verifyNoMoreInteractions(groupConnectorMock);
 
     }
 
@@ -330,50 +335,50 @@ class UserGroupServiceImplTest {
     void addMember_groupSuspended() {
         //given
         String id = "id";
-        UUID memberId = UUID.randomUUID();
+        UUID memberId = randomUUID();
         UserGroupOperations group = TestUtils.mockInstance(new DummyGroup());
         group.setStatus(UserGroupStatus.SUSPENDED);
-        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
+        when(groupConnectorMock.findById(Mockito.anyString()))
                 .thenReturn(Optional.of(group));
         //when
         Executable executable = () -> groupService.addMember(id, memberId);
         //then
         ResourceUpdateException e = assertThrows(ResourceUpdateException.class, executable);
         assertEquals("Trying to modify suspended group", e.getMessage());
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .findById(id);
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verifyNoMoreInteractions(groupConnectorMock);
     }
 
     @Test
     void addMember() {
         //given
         String id = "id";
-        UUID memberUUID = UUID.randomUUID();
+        UUID memberUUID = randomUUID();
         UserGroupOperations group = TestUtils.mockInstance(new DummyGroup());
-        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
+        when(groupConnectorMock.findById(Mockito.anyString()))
                 .thenReturn(Optional.of(group));
         //when
         groupService.addMember(id, memberUUID);
         //then
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .findById(id);
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .insertMember(Mockito.anyString(), Mockito.anyString());
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verifyNoMoreInteractions(groupConnectorMock);
     }
 
     @Test
     void deleteMember_nullId() {
         //given
         String id = null;
-        String memberId = UUID.randomUUID().toString();
+        String memberId = randomUUID().toString();
         //when
         Executable executable = () -> groupService.deleteMember(id, memberId);
         //then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A user group id is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
@@ -386,21 +391,21 @@ class UserGroupServiceImplTest {
         //then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A member id is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
     void deleteMember_doesNotExist() {
         //given
         String id = "id";
-        String memberId = UUID.randomUUID().toString();
+        String memberId = randomUUID().toString();
         //when
         Executable executable = () -> groupService.deleteMember(id, memberId);
         //then
         assertThrows(ResourceNotFoundException.class, executable);
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .findById(id);
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verifyNoMoreInteractions(groupConnectorMock);
 
     }
 
@@ -408,39 +413,39 @@ class UserGroupServiceImplTest {
     void deleteMember_groupSuspended() {
         //given
         String id = "id";
-        String memberId = UUID.randomUUID().toString();
+        String memberId = randomUUID().toString();
         UserGroupOperations group = TestUtils.mockInstance(new DummyGroup());
         group.setStatus(UserGroupStatus.SUSPENDED);
-        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
+        when(groupConnectorMock.findById(Mockito.anyString()))
                 .thenReturn(Optional.of(group));
         //when
         Executable executable = () -> groupService.deleteMember(id, memberId);
         //then
         ResourceUpdateException e = assertThrows(ResourceUpdateException.class, executable);
         assertEquals("Trying to modify suspended group", e.getMessage());
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .findById(id);
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verifyNoMoreInteractions(groupConnectorMock);
     }
 
     @Test
     void deleteMember() {
         //given
         String id = "id";
-        String memberId = UUID.randomUUID().toString();
+        String memberId = randomUUID().toString();
 
         UserGroupOperations group = TestUtils.mockInstance(new DummyGroup());
-        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
+        when(groupConnectorMock.findById(Mockito.anyString()))
                 .thenReturn(Optional.of(group));
         //when
         Executable executable = () -> groupService.deleteMember(id, memberId);
         //then
         assertDoesNotThrow(executable);
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .findById(id);
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .deleteMember(Mockito.anyString(), Mockito.anyString());
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verifyNoMoreInteractions(groupConnectorMock);
     }
 
     @Test
@@ -454,7 +459,7 @@ class UserGroupServiceImplTest {
         //then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A member id is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
@@ -468,7 +473,7 @@ class UserGroupServiceImplTest {
         //then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A institution id is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
@@ -482,7 +487,7 @@ class UserGroupServiceImplTest {
         //then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A product id is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
@@ -495,9 +500,9 @@ class UserGroupServiceImplTest {
         Executable executable = () -> groupService.deleteMembers(memberId, institutionId, productId);
         //then
         assertDoesNotThrow(executable);
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .deleteMembers(memberId, institutionId, productId);
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verifyNoMoreInteractions(groupConnectorMock);
     }
 
 
@@ -505,15 +510,15 @@ class UserGroupServiceImplTest {
     void getGroup() {
         //given
         String groupId = "groupId";
-        Mockito.when(groupConnectorMock.findById(Mockito.anyString()))
+        when(groupConnectorMock.findById(Mockito.anyString()))
                 .thenAnswer(invocation -> Optional.of(new DummyGroup()));
         //when
         UserGroupOperations group = groupService.getUserGroup(groupId);
         //then
         assertNotNull(group);
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .findById(groupId);
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verifyNoMoreInteractions(groupConnectorMock);
     }
 
     @Test
@@ -524,9 +529,9 @@ class UserGroupServiceImplTest {
         Executable executable = () -> groupService.getUserGroup(groupId);
         //then
         assertThrows(ResourceNotFoundException.class, executable);
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
+        verify(groupConnectorMock, times(1))
                 .findById(groupId);
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verifyNoMoreInteractions(groupConnectorMock);
     }
 
     @Test
@@ -538,7 +543,7 @@ class UserGroupServiceImplTest {
         //then
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class, executable);
         assertEquals("A user group id is required", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
     @Test
@@ -546,24 +551,26 @@ class UserGroupServiceImplTest {
         //given
         Optional<String> institutionId = Optional.of("institutionId");
         Optional<String> productId = Optional.of("productId");
-        Optional<String> userId = Optional.of(UUID.randomUUID().toString());
+        Optional<String> userId = Optional.of(randomUUID().toString());
         Optional<UserGroupStatus> allowedStatus = Optional.of(UserGroupStatus.ACTIVE);
         UserGroupFilter filterMock = UserGroupFilter.builder().userId(userId).institutionId(institutionId).productId(productId).status(allowedStatus).build();
         Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
-        Mockito.when(groupConnectorMock.findAll(Mockito.any(), Mockito.any()))
-                .thenReturn(Collections.singletonList(new DummyGroup()));
+        when(groupConnectorMock.findAll(any(), any()))
+                .thenReturn(getPage(List.of(new DummyGroup()), pageable, () -> pageable.isPaged()
+                        ? pageable.getPageSize() * pageable.getPageNumber() + 1
+                        : 1));
         //when
-        List<UserGroupOperations> groups = groupService.getUserGroups(filterMock, pageable);
+        Page<UserGroupOperations> page = groupService.getUserGroups(filterMock, pageable);
         //then
-        assertEquals(1, groups.size());
-        Mockito.verify(groupConnectorMock, Mockito.times(1))
-                .findAll(filter.capture(), Mockito.any());
+        assertEquals(1, page.getContent().size());
+        verify(groupConnectorMock, times(1))
+                .findAll(filter.capture(), any());
         UserGroupFilter capturedFilter = filter.getValue();
         assertEquals(capturedFilter.getInstitutionId().get(), filterMock.getInstitutionId().get());
         assertEquals(capturedFilter.getProductId().get(), filterMock.getProductId().get());
         assertEquals(capturedFilter.getUserId().get(), filterMock.getUserId().get());
         assertEquals(capturedFilter.getStatus().get(), filterMock.getStatus().get());
-        Mockito.verifyNoMoreInteractions(groupConnectorMock);
+        verifyNoMoreInteractions(groupConnectorMock);
     }
 
     @Test
@@ -571,18 +578,20 @@ class UserGroupServiceImplTest {
         //given
         String institutionId = "institutionId";
         String productId = "productId";
-        String userId = UUID.randomUUID().toString();
+        String userId = randomUUID().toString();
         UserGroupStatus status = UserGroupStatus.ACTIVE;
         Pageable pageable = PageRequest.of(0, 3, Sort.by("description"));
-        Mockito.when(groupConnectorMock.findAll(Mockito.any(), Mockito.any()))
-                .thenReturn(Collections.singletonList(new DummyGroup()));
+        when(groupConnectorMock.findAll(any(), any()))
+                .thenReturn(getPage(Collections.singletonList(new DummyGroup()), pageable, () -> pageable.isPaged()
+                        ? pageable.getPageSize() * pageable.getPageNumber() + 1
+                        : 1));
         //when
         Executable executable = () -> groupService.getUserGroups(null, pageable);
         ;
         //then
         ValidationException e = assertThrows(ValidationException.class, executable);
         assertEquals("Given sort parameters aren't valid", e.getMessage());
-        Mockito.verifyNoInteractions(groupConnectorMock);
+        verifyNoInteractions(groupConnectorMock);
     }
 
 }
