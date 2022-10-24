@@ -130,7 +130,7 @@ public class UserGroupController {
 
 
     @PutMapping(value = "/{id}/members/{memberId}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.addMember}")
     public void addMemberToUserGroup(@ApiParam("${swagger.user-group.model.id}")
                                      @PathVariable("id")
