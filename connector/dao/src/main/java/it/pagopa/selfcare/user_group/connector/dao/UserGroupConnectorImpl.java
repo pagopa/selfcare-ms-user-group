@@ -1,10 +1,9 @@
 package it.pagopa.selfcare.user_group.connector.dao;
 
-
-import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupConnector;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
+import it.pagopa.selfcare.user_group.connector.dao.model.CriteriaBuilder;
 import it.pagopa.selfcare.user_group.connector.dao.model.UserGroupEntity;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceAlreadyExistsException;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
@@ -23,6 +22,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.validation.ValidationException;
 import java.util.ArrayList;
@@ -147,17 +147,13 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
     public Page<UserGroupOperations> findAll(UserGroupFilter filter, Pageable pageable) {
         log.trace("findAll start");
         log.debug("findAll institutionId= {} , productId = {}, userId = {}, pageable = {}", filter.getInstitutionId(), filter.getProductId(), filter.getUserId(), pageable);
-        Query query = new Query();
-        if (pageable.getSort().isSorted() && filter.getProductId().isEmpty() && filter.getInstitutionId().isEmpty()) {
+        if (pageable.getSort().isSorted() && !StringUtils.hasText(filter.getProductId()) && !StringUtils.hasText(filter.getInstitutionId())) {
             throw new ValidationException("Sorting not allowed without productId or institutionId");
         }
-        if (filter.getStatus().isPresent() && filter.getUserId().isEmpty() && filter.getProductId().isEmpty() && filter.getInstitutionId().isEmpty()) {
+        if (filter.getStatus().size() == 1 && !StringUtils.hasText(filter.getUserId()) && !StringUtils.hasText(filter.getProductId()) && !StringUtils.hasText(filter.getInstitutionId())) {
             throw new ValidationException("At least one of productId, institutionId and userId must be provided with status filter");
         }
-        filter.getInstitutionId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.institutionId).is(value)));
-        filter.getProductId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.productId).is(value)));
-        filter.getUserId().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.members).is(value)));
-        filter.getStatus().ifPresent(value -> query.addCriteria(Criteria.where(UserGroupEntity.Fields.status).is(value)));
+        Query query = new Query(constructCriteria(filter));
         long count = this.mongoTemplate.count(query, UserGroupEntity.class);
         List<UserGroupOperations> userGroupOperations = new ArrayList<>(mongoTemplate.find(query.with(pageable), UserGroupEntity.class));
         final Page<UserGroupOperations> result = PageableExecutionUtils.getPage(userGroupOperations, pageable, () -> count);
@@ -181,10 +177,7 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
     public void deleteById(String id) {
         log.trace("deleteById start");
         log.debug("deleteById id = {} ", id);
-        DeleteResult result = mongoTemplate.remove(Query.query(Criteria.where(UserGroupEntity.Fields.id).is(id)), UserGroupEntity.class);
-        if (result.getDeletedCount() == 0) {
-            throw new ResourceNotFoundException();
-        }
+        updateUserById(id, UserGroupStatus.DELETED);
         log.trace("deleteById end");
     }
 
@@ -210,6 +203,16 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
             throw new ResourceNotFoundException();
         }
         log.trace("updateUserById end");
+
+    }
+
+    private Criteria constructCriteria(UserGroupFilter filter) {
+        return CriteriaBuilder.builder()
+                .isIfNotNull(UserGroupEntity.Fields.institutionId, filter.getInstitutionId())
+                .isIfNotNull(UserGroupEntity.Fields.productId, filter.getProductId())
+                .isIfNotNull(UserGroupEntity.Fields.members, filter.getUserId())
+                .inIfNotEmpty(UserGroupEntity.Fields.status, filter.getStatus())
+                .build();
 
     }
 
