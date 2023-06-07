@@ -12,7 +12,7 @@
         "default" : "http://localhost"
       },
       "port" : {
-        "default" : "8080"
+        "default" : "80"
       },
       "basePath" : {
         "default" : ""
@@ -93,15 +93,21 @@
             "type" : "string",
             "format" : "uuid"
           }
-        }, {
-          "name" : "status",
-          "in" : "query",
-          "description" : "If filter on status is present, it must be used with at least one of the other filters",
-          "required" : false,
-          "style" : "form",
-          "schema" : {
-            "type" : "string",
-            "enum" : [ "ACTIVE", "SUSPENDED" ]
+        },  {
+          "name": "status",
+          "in": "query",
+          "description": "If filter on status is present, it must be used with at least one of the other filters",
+          "required": false,
+          "style": "form",
+          "schema": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "ACTIVE",
+                "DELETED",
+                "SUSPENDED"
+              ]
+            }
           }
         } ],
         "responses" : {
@@ -596,8 +602,8 @@
           }
         } ],
         "responses" : {
-          "200" : {
-            "description" : "OK"
+          "204" : {
+            "description" : "No Content"
           },
           "400" : {
             "description" : "Bad Request",
@@ -791,7 +797,7 @@
           "status" : {
             "type" : "string",
             "description" : "Users group's status",
-            "enum" : [ "ACTIVE", "SUSPENDED" ]
+            "enum" : [ "ACTIVE", "DELETED", "SUSPENDED" ]
           }
         }
       },
@@ -959,7 +965,7 @@
           "status" : {
             "type" : "string",
             "description" : "Users group's status",
-            "enum" : [ "ACTIVE", "SUSPENDED" ]
+            "enum" : [ "ACTIVE", "DELETED", "SUSPENDED" ]
           }
         }
       }
