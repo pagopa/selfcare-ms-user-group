@@ -293,7 +293,7 @@ class UserGroupControllerTest {
                 .thenAnswer(invocation -> {
                     final Pageable pageable = invocation.getArgument(1, Pageable.class);
                     return getPage(List.of(groupOperations), pageable, () -> pageable.isPaged()
-                            ? pageable.getPageSize() * pageable.getPageNumber() + 1
+                            ? (long) pageable.getPageSize() * pageable.getPageNumber() + 1
                             : 1);
                 });
         //when
@@ -329,10 +329,9 @@ class UserGroupControllerTest {
         verify(groupServiceMock, times(1))
                 .getUserGroups(filterCaptor.capture(), pageableCaptor.capture());
         UserGroupFilter capturedFilter = filterCaptor.getValue();
-        assertEquals(capturedFilter.getStatus().get(), allowedStatus);
-        assertEquals(capturedFilter.getProductId().get(), productId);
-        assertEquals(capturedFilter.getInstitutionId().get(), institutionId);
-        assertEquals(capturedFilter.getUserId().get(), userId);
+        assertEquals(capturedFilter.getProductId(), productId);
+        assertEquals(capturedFilter.getInstitutionId(), institutionId);
+        assertEquals(capturedFilter.getUserId(), userId);
         Pageable capturedPageable = pageableCaptor.getValue();
         assertTrue(capturedPageable.getSort().isUnsorted());
         assertEquals(page, capturedPageable.getPageNumber());
