@@ -93,21 +93,16 @@
             "type" : "string",
             "format" : "uuid"
           }
-        },  {
-          "name": "status",
-          "in": "query",
-          "description": "If filter on status is present, it must be used with at least one of the other filters",
-          "required": false,
-          "style": "form",
-          "schema": {
-            "type": "array",
-            "items": {
-              "enum": [
-                "ACTIVE",
-                "DELETED",
-                "SUSPENDED"
-              ]
-            }
+        }, {
+          "name" : "status",
+          "in" : "query",
+          "description" : "If filter on status is present, it must be used with at least one of the other filters",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "enum" : [ "ACTIVE", "DELETED", "SUSPENDED" ]
           }
         } ],
         "responses" : {
@@ -913,7 +908,6 @@
       },
       "UserGroupResource" : {
         "title" : "UserGroupResource",
-        "required" : [ "description", "id", "institutionId", "members", "name", "productId", "status" ],
         "type" : "object",
         "properties" : {
           "createdAt" : {
