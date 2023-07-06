@@ -1,12 +1,9 @@
 package it.pagopa.selfcare.user_group.web.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -14,53 +11,37 @@ import java.util.UUID;
 @Data
 public class UserGroupResource {
 
-    @ApiModelProperty(value = "${swagger.user-group.model.id}", required = true)
-    @JsonProperty(required = true)
-    @NotBlank
+    @ApiModelProperty(value = "${swagger.user-group.model.id}")
     private String id;
 
-    @ApiModelProperty(value = "${swagger.user-group.model.institutionId}", required = true)
-    @JsonProperty(required = true)
-    @NotBlank
+    @ApiModelProperty(value = "${swagger.user-group.model.institutionId}")
     private String institutionId;
 
-    @ApiModelProperty(value = "${swagger.user-group.model.productId}", required = true)
-    @JsonProperty(required = true)
-    @NotBlank
+    @ApiModelProperty(value = "${swagger.user-group.model.productId}")
     private String productId;
 
-    @ApiModelProperty(value = "${swagger.user-group.model.name}", required = true)
-    @JsonProperty(required = true)
-    @NotBlank
+    @ApiModelProperty(value = "${swagger.user-group.model.name}")
     private String name;
 
-    @ApiModelProperty(value = "${swagger.user-group.model.description}", required = true)
-    @JsonProperty(required = true)
-    @NotBlank
+    @ApiModelProperty(value = "${swagger.user-group.model.description}")
     private String description;
 
-    @ApiModelProperty(value = "${swagger.user-group.model.status}", required = true)
-    @JsonProperty(required = true)
-    @NotNull
+    @ApiModelProperty(value = "${swagger.user-group.model.status}")
     private UserGroupStatus status;
 
-    @ApiModelProperty(value = "${swagger.user-group.model.members}", required = true)
-    @JsonProperty
+    @ApiModelProperty(value = "${swagger.user-group.model.members}")
     private List<UUID> members;
 
     @ApiModelProperty(value = "${swagger.user-group.model.createdAt}")
-    @JsonProperty
     private Instant createdAt;
 
     @ApiModelProperty(value = "${swagger.user-group.model.createdBy}")
-    @JsonProperty
     private String createdBy;
 
     @ApiModelProperty(value = "${swagger.user-group.model.modifiedAt}")
-    @JsonProperty
     private Instant modifiedAt;
 
     @ApiModelProperty(value = "${swagger.user-group.model.modifiedBy}")
-    @JsonProperty
     private String modifiedBy;
+
 }
