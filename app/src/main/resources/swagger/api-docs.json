@@ -12,7 +12,7 @@
         "default" : "http://localhost"
       },
       "port" : {
-        "default" : "8080"
+        "default" : "80"
       },
       "basePath" : {
         "default" : ""
@@ -99,9 +99,10 @@
           "description" : "If filter on status is present, it must be used with at least one of the other filters",
           "required" : false,
           "style" : "form",
+          "explode" : true,
           "schema" : {
             "type" : "string",
-            "enum" : [ "ACTIVE", "SUSPENDED" ]
+            "enum" : [ "ACTIVE", "DELETED", "SUSPENDED" ]
           }
         } ],
         "responses" : {
@@ -596,8 +597,8 @@
           }
         } ],
         "responses" : {
-          "200" : {
-            "description" : "OK"
+          "204" : {
+            "description" : "No Content"
           },
           "400" : {
             "description" : "Bad Request",
@@ -791,7 +792,7 @@
           "status" : {
             "type" : "string",
             "description" : "Users group's status",
-            "enum" : [ "ACTIVE", "SUSPENDED" ]
+            "enum" : [ "ACTIVE", "DELETED", "SUSPENDED" ]
           }
         }
       },
@@ -907,7 +908,6 @@
       },
       "UserGroupResource" : {
         "title" : "UserGroupResource",
-        "required" : [ "description", "id", "institutionId", "members", "name", "productId", "status" ],
         "type" : "object",
         "properties" : {
           "createdAt" : {
@@ -959,7 +959,7 @@
           "status" : {
             "type" : "string",
             "description" : "Users group's status",
-            "enum" : [ "ACTIVE", "SUSPENDED" ]
+            "enum" : [ "ACTIVE", "DELETED", "SUSPENDED" ]
           }
         }
       }

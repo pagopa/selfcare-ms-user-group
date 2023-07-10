@@ -32,7 +32,6 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.validation.ValidationException;
-import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -111,7 +110,6 @@ class UserGroupServiceImplTest {
     @Test
     void createGroup_ok() {
         //given
-        Instant now = Instant.now().minusSeconds(1);
         SelfCareUser selfCareUser = SelfCareUser.builder("userId")
                 .email("test@example.com")
                 .name("name")
@@ -549,15 +547,15 @@ class UserGroupServiceImplTest {
     @Test
     void getUserGroups() {
         //given
-        Optional<String> institutionId = Optional.of("institutionId");
-        Optional<String> productId = Optional.of("productId");
-        Optional<String> userId = Optional.of(randomUUID().toString());
-        Optional<UserGroupStatus> allowedStatus = Optional.of(UserGroupStatus.ACTIVE);
-        UserGroupFilter filterMock = UserGroupFilter.builder().userId(userId).institutionId(institutionId).productId(productId).status(allowedStatus).build();
+        String institutionId = "institutionId";
+        String productId = "productId";
+        String userId = randomUUID().toString();
+        List<UserGroupStatus> allowedStatus = List.of(UserGroupStatus.ACTIVE);
+        UserGroupFilter filterMock = new UserGroupFilter(institutionId, productId, userId, allowedStatus);
         Pageable pageable = PageRequest.of(0, 3, Sort.by("name"));
         when(groupConnectorMock.findAll(any(), any()))
                 .thenReturn(getPage(List.of(new DummyGroup()), pageable, () -> pageable.isPaged()
-                        ? pageable.getPageSize() * pageable.getPageNumber() + 1
+                        ? (long) pageable.getPageSize() * pageable.getPageNumber() + 1
                         : 1));
         //when
         Page<UserGroupOperations> page = groupService.getUserGroups(filterMock, pageable);
@@ -566,28 +564,23 @@ class UserGroupServiceImplTest {
         verify(groupConnectorMock, times(1))
                 .findAll(filter.capture(), any());
         UserGroupFilter capturedFilter = filter.getValue();
-        assertEquals(capturedFilter.getInstitutionId().get(), filterMock.getInstitutionId().get());
-        assertEquals(capturedFilter.getProductId().get(), filterMock.getProductId().get());
-        assertEquals(capturedFilter.getUserId().get(), filterMock.getUserId().get());
-        assertEquals(capturedFilter.getStatus().get(), filterMock.getStatus().get());
+        assertEquals(capturedFilter.getInstitutionId(), filterMock.getInstitutionId());
+        assertEquals(capturedFilter.getProductId(), filterMock.getProductId());
+        assertEquals(capturedFilter.getUserId(), filterMock.getUserId());
+        assertEquals(capturedFilter.getStatus(), filterMock.getStatus());
         verifyNoMoreInteractions(groupConnectorMock);
     }
 
     @Test
     void getUserGroups_invalidSortParams() {
         //given
-        String institutionId = "institutionId";
-        String productId = "productId";
-        String userId = randomUUID().toString();
-        UserGroupStatus status = UserGroupStatus.ACTIVE;
         Pageable pageable = PageRequest.of(0, 3, Sort.by("description"));
         when(groupConnectorMock.findAll(any(), any()))
                 .thenReturn(getPage(Collections.singletonList(new DummyGroup()), pageable, () -> pageable.isPaged()
-                        ? pageable.getPageSize() * pageable.getPageNumber() + 1
+                        ? (long) pageable.getPageSize() * pageable.getPageNumber() + 1
                         : 1));
         //when
         Executable executable = () -> groupService.getUserGroups(null, pageable);
-        ;
         //then
         ValidationException e = assertThrows(ValidationException.class, executable);
         assertEquals("Given sort parameters aren't valid", e.getMessage());

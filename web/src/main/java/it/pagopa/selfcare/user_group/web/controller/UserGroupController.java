@@ -25,7 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -166,20 +166,20 @@ public class UserGroupController {
     @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.getUserGroups}")
     public Page<UserGroupResource> getUserGroups(@ApiParam("${swagger.user-group.model.institutionId}")
                                                  @RequestParam(value = "institutionId", required = false)
-                                                         Optional<String> institutionId,
+                                                         String institutionId,
                                                  @ApiParam("${swagger.user-group.model.productId}")
                                                  @RequestParam(value = "productId", required = false)
-                                                         Optional<String> productId,
+                                                         String productId,
                                                  @ApiParam("${swagger.user-group.model.memberId}")
                                                  @RequestParam(value = "userId", required = false)
-                                                         Optional<UUID> memberId,
+                                                         UUID memberId,
                                                  @ApiParam("${swagger.user-group.model.statusFilter}")
                                                  @RequestParam(value = "status", required = false)
-                                                         Optional<UserGroupStatus> status,
+                                                     List<UserGroupStatus> status,
                                                  Pageable pageable) {
         log.trace("getUserGroups start");
         log.debug("getUserGroups institutionId = {}, productId = {}, pageable = {}, status = {}", institutionId, productId, pageable, status);
-        UserGroupFilter filter = UserGroupFilter.builder().userId(memberId.map(UUID::toString)).institutionId(institutionId).productId(productId).status(status).build();
+        UserGroupFilter filter = new UserGroupFilter(institutionId, productId, memberId, status);
         Page<UserGroupResource> result = PageMapper.map(groupService.getUserGroups(filter, pageable)
                 .map(GroupMapper::toResource));
         log.debug("getUserGroups result = {}", result);
