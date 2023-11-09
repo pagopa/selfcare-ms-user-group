@@ -34,7 +34,7 @@ class GroupMapperTest {
         assertEquals(group.getCreatedBy(), resource.getCreatedBy());
         assertEquals(group.getModifiedBy(), resource.getModifiedBy());
         assertEquals(group.getStatus(), resource.getStatus());
-        TestUtils.reflectionEqualsByName(resource, group);
+       TestUtils.reflectionEqualsByName(resource, group);
     }
 
     @Test
