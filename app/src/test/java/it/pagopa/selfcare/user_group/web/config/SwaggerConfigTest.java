@@ -2,6 +2,7 @@ package it.pagopa.selfcare.user_group.web.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import it.pagopa.selfcare.user_group.core.UserGroupService;
+import it.pagopa.selfcare.user_group.web.model.mapper.UserGroupMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,6 +40,9 @@ class SwaggerConfigTest {
 
     @Autowired
     WebApplicationContext context;
+
+    @MockBean
+    private UserGroupMapper userGroupMapper;
 
     @Autowired
     private ObjectMapper objectMapper;

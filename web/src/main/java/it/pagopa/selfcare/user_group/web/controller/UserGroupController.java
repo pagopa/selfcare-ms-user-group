@@ -16,7 +16,7 @@ import it.pagopa.selfcare.user_group.core.UserGroupService;
 import it.pagopa.selfcare.user_group.web.model.CreateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.UpdateUserGroupDto;
 import it.pagopa.selfcare.user_group.web.model.UserGroupResource;
-import it.pagopa.selfcare.user_group.web.model.mapper.GroupMapper;
+import it.pagopa.selfcare.user_group.web.model.mapper.UserGroupMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -35,11 +35,13 @@ import java.util.UUID;
 public class UserGroupController {
 
     private final UserGroupService groupService;
-
+    private final UserGroupMapper userGroupMapper;
 
     @Autowired
-    public UserGroupController(UserGroupService groupService) {
+    public UserGroupController(UserGroupService groupService,
+                               UserGroupMapper userGroupMapper) {
         this.groupService = groupService;
+        this.userGroupMapper = userGroupMapper;
     }
 
     @PostMapping(value = "/", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -56,8 +58,8 @@ public class UserGroupController {
                                                  CreateUserGroupDto group) {
         log.trace("createGroup start");
         log.debug("createGroup group = {}", group);
-        UserGroupOperations groupOperations = groupService.createGroup(GroupMapper.fromDto(group));
-        UserGroupResource result = GroupMapper.toResource(groupOperations);
+        UserGroupOperations groupOperations = groupService.createGroup(userGroupMapper.fromDto(group));
+        UserGroupResource result = userGroupMapper.toResource(groupOperations);
         log.debug("createGroup result = {}", result);
         log.trace("createGroup end");
         return result;
@@ -121,8 +123,8 @@ public class UserGroupController {
                                                      UpdateUserGroupDto groupDto) {
         log.trace("updateUserGroup start");
         log.debug("updateUserGroup id = {}", id);
-        UserGroupOperations updatedGroup = groupService.updateGroup(id, GroupMapper.fromDto(groupDto));
-        UserGroupResource result = GroupMapper.toResource(updatedGroup);
+        UserGroupOperations updatedGroup = groupService.updateGroup(id, userGroupMapper.toUserGroupOperations(groupDto));
+        UserGroupResource result = userGroupMapper.toResource(updatedGroup);
         log.debug("updateUserGroup result = {}", result);
         log.trace("updateUserGroup end");
         return result;
@@ -154,7 +156,7 @@ public class UserGroupController {
         log.trace("getUserGroup start");
         log.debug("getUserGroup id = {}", id);
         UserGroupOperations group = groupService.getUserGroup(id);
-        UserGroupResource groupResource = GroupMapper.toResource(group);
+        UserGroupResource groupResource = userGroupMapper.toResource(group);
         log.debug("getUserGroup result = {}", groupResource);
         log.trace("getUserGroup end");
         return groupResource;
@@ -181,7 +183,7 @@ public class UserGroupController {
         log.debug("getUserGroups institutionId = {}, productId = {}, pageable = {}, status = {}", institutionId, productId, pageable, status);
         UserGroupFilter filter = new UserGroupFilter(institutionId, productId, memberId, status);
         Page<UserGroupResource> result = PageMapper.map(groupService.getUserGroups(filter, pageable)
-                .map(GroupMapper::toResource));
+                .map(userGroupMapper::toResource));
         log.debug("getUserGroups result = {}", result);
         log.trace("getUserGroups end");
         return result;
