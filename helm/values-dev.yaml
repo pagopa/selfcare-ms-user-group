@@ -14,6 +14,14 @@ ingress:
         - path: /ms-user-group/(.*)
           pathType: ImplementationSpecific
 
+resources:
+  requests:
+    cpu: "400m"
+    memory: "500M"
+  limits:
+    cpu: "800m"
+    memory: "600M"
+
 autoscaling:
   enabled: false
   minReplicas: 1
