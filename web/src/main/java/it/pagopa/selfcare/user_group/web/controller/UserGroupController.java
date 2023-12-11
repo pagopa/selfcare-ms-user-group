@@ -6,6 +6,8 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.tags.Tags;
 import it.pagopa.selfcare.commons.web.model.Page;
 import it.pagopa.selfcare.commons.web.model.Problem;
 import it.pagopa.selfcare.commons.web.model.mapper.PageMapper;
@@ -163,6 +165,7 @@ public class UserGroupController {
     }
 
 
+    @Tags({@Tag(name = "user-group"), @Tag(name = "support"), @Tag(name = "external-v2")})
     @GetMapping(value = "/")
     @ResponseStatus(HttpStatus.OK)
     @ApiOperation(value = "", notes = "${swagger.user-group.groups.api.getUserGroups}")
