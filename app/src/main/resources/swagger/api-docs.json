@@ -908,6 +908,7 @@
       },
       "UserGroupResource" : {
         "title" : "UserGroupResource",
+        "required" : [ "description", "id", "institutionId", "name", "productId", "status" ],
         "type" : "object",
         "properties" : {
           "createdAt" : {
