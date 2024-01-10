@@ -20,11 +20,6 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Check out HEAD revision
-      uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
-      with:
-          ref: ${{ github.head_ref }}
-          path: head
     - name: Check out BASE revision
       uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
       with:
@@ -35,7 +30,7 @@ jobs:
     - name: Run OpenAPI Diff (from HEAD revision)
       uses: mvegter/openapi-diff-action@72cde50f8d3a75f770f08e23b815d5ebe69ff757
       with:
-        head-spec: head/app/src/main/resources/swagger/api-docs.json
+        head-spec: app/src/main/resources/swagger/api-docs.json
         base-spec: base/app/src/main/resources/swagger/api-docs.json
     - name: Commit api-docs
       run: |
@@ -43,7 +38,4 @@ jobs:
           git config --global user.email "selfcare-github@pagopa.it"
           git config --global user.name "selfcare-github-bot"
           git commit -m "Update Swagger documentation" || exit 0
-          git status
-          echo ${{ github.ref_name }}
-          echo ${{ github.head_ref }}
-          git push origin ${{ github.ref_name }}
+          git push origin ${{ github.head_ref }}
