@@ -32,10 +32,14 @@ jobs:
       with:
         head-spec: app/src/main/resources/swagger/api-docs.json
         base-spec: base/app/src/main/resources/swagger/api-docs.json
-    - name: Commit api-docs
+    - name: Commit files
       run: |
-          git ls-files ./app** | grep 'api-docs*' | xargs git add
-          git config --global user.email "selfcare-github@pagopa.it"
-          git config --global user.name "selfcare-github-bot"
-          git commit -m "Update Swagger documentation" || exit 0
-          git push origin ${{ github.head_ref }}
+        git ls-files ./app** | grep 'api-docs*' | xargs git add
+        git config --global user.email "selfcare-github@pagopa.it"
+        git config --global user.name "selfcare-github-bot"
+        git commit -m "Update Swagger documentation" || exit 0
+    - name: Push changes
+      uses: ad-m/github-push-action@d91a481090679876dfc4178fef17f286781251df
+      with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
