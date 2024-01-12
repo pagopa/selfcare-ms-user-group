@@ -51,4 +51,7 @@ public class UserGroupResource {
     @ApiModelProperty(value = "${swagger.user-group.model.modifiedBy}")
     private String modifiedBy;
 
+    @ApiModelProperty(value = "${swagger.user-group.model.modifiedBy}")
+    private String test;
+
 }
