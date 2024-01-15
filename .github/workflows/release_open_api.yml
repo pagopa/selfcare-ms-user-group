@@ -40,20 +40,20 @@ jobs:
             github_token: ${{ github.token }}
       - name: Check report diff
         run: |
-                   cd output
-                   result=$(sed -n '/<span class="badge badge-Incompatible">/,/<\/span>/p'  api-docs.html)
-                   echo $result;
-                   if [[ "$result" == *"Incompatible"* ]]; then
-                        exit 1;
-                   else
-                       echo 'No incompatible differences between the two api docs';
-                   fi
+              cd output
+              result=$(sed -n '/<span class="badge badge-Incompatible">/,/<\/span>/p'  api-docs.html)
+              echo $result;
+              if [[ "$result" == *"Incompatible"* ]]; then
+                  exit 1;
+              else
+                  echo 'No incompatible differences between the two api docs';
+              fi
       - name: Commit api-docs
         run: |
-                   #git ls-files ./app** | grep 'api-docs*' | xargs git add
-                   #git config --global user.email "selfcare-github@pagopa.it"
-                   #git config --global user.name "selfcare-github-bot"
-                   #git commit -m "Update Swagger documentation" || exit 0
-                   #git push origin ${{ github.head_ref}}
+              git ls-files ./app** | grep 'api-docs*' | xargs git add
+              git config --global user.email "selfcare-github@pagopa.it"
+              git config --global user.name "selfcare-github-bot"
+              git commit -m "Update Swagger documentation" || exit 0
+              git push origin ${{ github.head_ref}}
           
           
