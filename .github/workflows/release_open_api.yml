@@ -13,16 +13,16 @@ jobs:
     permissions: write-all
     #if: github.event.pull_request.merged == true
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
-        with:
-          ref: ${{ github.head_ref }}
-          path: head
       - name: Set up JDK 17
         uses: actions/setup-java@f69f00b5e5324696b07f6b1c92f0470a6df00780
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+        with:
+          ref: ${{ github.head_ref }}
+          path: head
       - name: Check out BASE revision
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
         with:
