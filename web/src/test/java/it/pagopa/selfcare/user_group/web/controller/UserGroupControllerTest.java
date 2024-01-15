@@ -330,6 +330,7 @@ class UserGroupControllerTest {
                 .andExpect(jsonPath("$.content[0].members", not(emptyArray())))
                 .andExpect(jsonPath("$.content[0].createdAt", notNullValue()))
                 .andExpect(jsonPath("$.content[0].createdBy", notNullValue()))
+                .andExpect(jsonPath("$.content[0].modifiedAt", notNullValue()))
                 .andExpect(jsonPath("$.content[0].modifiedBy", notNullValue()));
         //then
         ArgumentCaptor<UserGroupFilter> filterCaptor = ArgumentCaptor.forClass(UserGroupFilter.class);
