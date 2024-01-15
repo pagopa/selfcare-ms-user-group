@@ -26,7 +26,7 @@
   "paths" : {
     "/user-groups/v1/" : {
       "get" : {
-        "tags" : [ "user-group" ],
+        "tags" : [ "external-v2", "support", "user-group" ],
         "summary" : "getUserGroups",
         "description" : "Service that allows to get a list of UserGroup entities",
         "operationId" : "getUserGroupsUsingGET",
@@ -908,6 +908,7 @@
       },
       "UserGroupResource" : {
         "title" : "UserGroupResource",
+        "required" : [ "description", "id", "institutionId", "name", "productId", "status" ],
         "type" : "object",
         "properties" : {
           "createdAt" : {

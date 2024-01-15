@@ -1,5 +1,3 @@
-replicaCount: 2
-
 image:
   repository: selcuacr.azurecr.io/selfcaremsusergroup
   tag: 1.0-SNAPSHOT

@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.Data;
 
+import javax.validation.constraints.NotBlank;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -11,22 +12,28 @@ import java.util.UUID;
 @Data
 public class UserGroupResource {
 
-    @ApiModelProperty(value = "${swagger.user-group.model.id}")
+    @ApiModelProperty(value = "${swagger.user-group.model.id}", required = true)
+    @NotBlank
     private String id;
 
-    @ApiModelProperty(value = "${swagger.user-group.model.institutionId}")
+    @ApiModelProperty(value = "${swagger.user-group.model.institutionId}", required = true)
+    @NotBlank
     private String institutionId;
 
-    @ApiModelProperty(value = "${swagger.user-group.model.productId}")
+    @ApiModelProperty(value = "${swagger.user-group.model.productId}", required = true)
+    @NotBlank
     private String productId;
 
-    @ApiModelProperty(value = "${swagger.user-group.model.name}")
+    @ApiModelProperty(value = "${swagger.user-group.model.name}", required = true)
+    @NotBlank
     private String name;
 
-    @ApiModelProperty(value = "${swagger.user-group.model.description}")
+    @ApiModelProperty(value = "${swagger.user-group.model.description}", required = true)
+    @NotBlank
     private String description;
 
-    @ApiModelProperty(value = "${swagger.user-group.model.status}")
+    @ApiModelProperty(value = "${swagger.user-group.model.status}", required = true)
+    @NotBlank
     private UserGroupStatus status;
 
     @ApiModelProperty(value = "${swagger.user-group.model.members}")
