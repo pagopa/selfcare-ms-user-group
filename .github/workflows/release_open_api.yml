@@ -32,15 +32,28 @@ jobs:
         working-directory: head
         run: mvn test -Dtest=SwaggerConfigTest#swaggerSpringPlugin -DfailIfNoTests=false
       - name: Run OpenAPI Diff (from HEAD revision)
-        uses: mvegter/openapi-diff-action@72cde50f8d3a75f770f08e23b815d5ebe69ff757
+        uses: LimeFlight/openapi-diff-action@7857dbc6fbb9ec018f434f5b3fdc418d67fb2883
         with:
-          head-spec: base/app/src/main/resources/swagger/api-docs.json
-          base-spec: head/app/src/main/resources/swagger/api-docs.json
-      - name: Commit api-docs
-        working-directory: head
+            head_spec: head/app/src/main/resources/swagger/api-docs.json
+            base_spec: base/app/src/main/resources/swagger/api-docs.json
+            output_path: ./output
+            github_token: ${{ github.token }}
+      - name: Check report diff
         run: |
-          git ls-files ./app** | grep 'api-docs*' | xargs git add .
-          git config --global user.email "selfcare-github@pagopa.it"
-          git config --global user.name "selfcare-github-bot"
-          git commit -m "Update Swagger documentation" || exit 0
-          git push origin ${{ github.head_ref }}
+                   cd output
+                   result=$(sed -n '/<span class="badge badge-Incompatible">/,/<\/span>/p'  api-docs.html)
+                   echo $result;
+                   if [[ "$result" == *"Incompatible"* ]]; then
+                        exit 1;
+                   else
+                       echo 'No incompatible differences between the two api docs';
+                   fi
+      - name: Commit api-docs
+        run: |
+                   #git ls-files ./app** | grep 'api-docs*' | xargs git add
+                   #git config --global user.email "selfcare-github@pagopa.it"
+                   #git config --global user.name "selfcare-github-bot"
+                   #git commit -m "Update Swagger documentation" || exit 0
+                   #git push origin ${{ github.head_ref}}
+          
+          
