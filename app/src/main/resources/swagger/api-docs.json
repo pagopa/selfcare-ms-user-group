@@ -940,11 +940,6 @@
               "format" : "uuid"
             }
           },
-          "modifiedAt" : {
-            "type" : "string",
-            "description" : "Date on which the group was modified",
-            "format" : "date-time"
-          },
           "modifiedBy" : {
             "type" : "string",
             "description" : "User by which the group was modified"
