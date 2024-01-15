@@ -961,11 +961,6 @@
             "type" : "string",
             "description" : "Users group's status",
             "enum" : [ "ACTIVE", "DELETED", "SUSPENDED" ]
-          },
-          "test" : {
-            "type" : "string",
-            "description" : "Date on which the group was modified",
-            "format" : "date-time"
           }
         }
       }
