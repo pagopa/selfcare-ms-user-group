@@ -5,6 +5,7 @@ import it.pagopa.selfcare.user_group.connector.model.UserGroupStatus;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -33,7 +34,7 @@ public class UserGroupResource {
     private String description;
 
     @ApiModelProperty(value = "${swagger.user-group.model.status}", required = true)
-    @NotBlank
+    @NotNull
     private UserGroupStatus status;
 
     @ApiModelProperty(value = "${swagger.user-group.model.members}")
