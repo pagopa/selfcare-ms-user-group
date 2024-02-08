@@ -1,6 +1,15 @@
 # Repository Settings
 
-Define settings of this GitHub repository
+Define settings of this GitHub repository.
+
+## How to use
+
+Make sure your PAT has access to this repository. Then, follow these steps:
+
+- set the subscription: `az account set --subscription "PROD-SelfCare"`
+- run `terraform init -backend-config="backend.tfvars"`
+- run `terraform plan`
+- run `terraform apply`
 
 <!-- markdownlint-disable -->
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
