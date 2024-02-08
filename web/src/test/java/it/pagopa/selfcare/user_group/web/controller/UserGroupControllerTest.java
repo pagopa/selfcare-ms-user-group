@@ -1,7 +1,6 @@
 package it.pagopa.selfcare.user_group.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import it.pagopa.selfcare.commons.utils.TestUtils;
 import it.pagopa.selfcare.user_group.connector.api.UserGroupOperations;
 import it.pagopa.selfcare.user_group.connector.exception.ResourceNotFoundException;
 import it.pagopa.selfcare.user_group.connector.model.UserGroupFilter;
@@ -10,6 +9,7 @@ import it.pagopa.selfcare.user_group.core.UserGroupService;
 import it.pagopa.selfcare.user_group.web.config.WebTestConfig;
 import it.pagopa.selfcare.user_group.web.handler.UserGroupExceptionHandler;
 import it.pagopa.selfcare.user_group.web.model.*;
+import it.pagopa.selfcare.user_group.web.model.mapper.UserGroupMapperImpl;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -44,7 +44,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = {
         UserGroupController.class,
         UserGroupExceptionHandler.class,
-        WebTestConfig.class
+        WebTestConfig.class,
+        UserGroupMapperImpl.class
 })
 class UserGroupControllerTest {
 
@@ -80,7 +81,12 @@ class UserGroupControllerTest {
         //then
         UserGroupResource group = mapper.readValue(result.getResponse().getContentAsString(), UserGroupResource.class);
         assertNotNull(group);
-        TestUtils.reflectionEqualsByName(CREATE_USER_GROUP_DTO, group);
+        assertEquals(CREATE_USER_GROUP_DTO.getDescription(), group.getDescription());
+        assertEquals(CREATE_USER_GROUP_DTO.getName(), group.getName());
+        assertEquals(CREATE_USER_GROUP_DTO.getInstitutionId(), group.getInstitutionId());
+        assertEquals(CREATE_USER_GROUP_DTO.getProductId(), group.getProductId());
+        assertEquals(CREATE_USER_GROUP_DTO.getStatus(), group.getStatus());
+        assertEquals(CREATE_USER_GROUP_DTO.getMembers(), group.getMembers());
     }
 
     @Test
@@ -211,7 +217,9 @@ class UserGroupControllerTest {
         UserGroupResource group = mapper.readValue(result.getResponse().getContentAsString(), UserGroupResource.class);
 
         assertNotNull(group);
-        TestUtils.reflectionEqualsByName(UPDATE_USER_GROUP_DTO, group);
+        assertEquals(UPDATE_USER_GROUP_DTO.getDescription(), group.getDescription());
+        assertEquals(UPDATE_USER_GROUP_DTO.getName(), group.getName());
+        assertNotEquals(UPDATE_USER_GROUP_DTO.getMembers().size(), group.getMembers().size());
     }
 
     @Test
