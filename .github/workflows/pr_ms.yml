@@ -20,10 +20,6 @@ on:
       - '!.terraform-version'
       - '!CODEOWNERS'
 
-  push:
-    branches:
-      - EC-158-git-hub-workflow-2
-
 jobs:
 
   code_review:
