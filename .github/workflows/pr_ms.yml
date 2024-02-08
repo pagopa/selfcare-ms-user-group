@@ -35,4 +35,4 @@ jobs:
 
   docker_build:
     uses: pagopa/selfcare-commons/.github/workflows/call_code_review_docker.yml@EC-149-template-git-hub-workflows
-    name: 'Docker build'
+    name: 'Docker'
