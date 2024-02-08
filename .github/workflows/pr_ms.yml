@@ -1,0 +1,12 @@
+name: Code Review ms-user-group
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  code_review:
+    name: 'Code Review'
+    runs-on: ubuntu-20.04
+    steps:
+      - run: echo 'Hello world'
