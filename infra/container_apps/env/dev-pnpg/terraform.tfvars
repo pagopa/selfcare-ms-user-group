@@ -18,7 +18,25 @@ container_app = {
 }
 
 app_settings = [
+  {
+    name  = "JAVA_TOOL_OPTIONS"
+    value = "-javaagent:applicationinsights-agent.jar"
+  },
+  {
+    name  = "APPLICATIONINSIGHTS_INSTRUMENTATION_LOGGING_LEVEL"
+    value = "OFF"
+  },
+  {
+    name  = "MS_USER_GROUP_LOG_LEVEL"
+    value = "DEBUG"
+  },
+  {
+    name  = "APPLICATIONINSIGHTS_ROLE_NAME"
+    value = "ms-user-group"
+  }
 ]
 
-secrets_names = [
-]
+secrets_names = {
+    "APPLICATIONINSIGHTS_CONNECTION_STRING"           = "appinsights-connection-string"
+    "MONGODB_CONNECTION_URI"                          = "mongodb-connection-string"
+}
