@@ -10,7 +10,7 @@ tags = {
 }
 
 container_app = {
-  min_replicas = 0
+  min_replicas = 1
   max_replicas = 2
   scale_rules  = []
   cpu          = 0.5
@@ -39,4 +39,5 @@ app_settings = [
 secrets_names = {
     "APPLICATIONINSIGHTS_CONNECTION_STRING"           = "appinsights-connection-string"
     "MONGODB_CONNECTION_URI"                          = "mongodb-connection-string"
+    "JWT_TOKEN_PUBLIC_KEY"                            = "jwt-public-key"
 }
