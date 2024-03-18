@@ -43,7 +43,7 @@ jobs:
     secrets: inherit
     with:
       environment: uat
-      tf_environment: uat-pnpg
+      tf_environment: uat
       dir: 'infra/container_apps'
 
   release_prod:
