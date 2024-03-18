@@ -18,6 +18,7 @@
 
     <properties>
         <selc-commons.version>2.5.1</selc-commons.version>
+        <sonar.host.url>https://sonarcloud.io/</sonar.host.url>
     </properties>
     <dependencyManagement>
         <dependencies>
