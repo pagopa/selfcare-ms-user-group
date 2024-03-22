@@ -61,19 +61,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [release_prod]
     steps:
-
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-        name: Checkout
+      - uses:  pagopa/selfcare-commons/github-actions-template/promote-release@main
         with:
-          ref: releases/${{ vars.CURRENT_PROD_VERSION }}
-          fetch-depth: 0
-
-      - name: Promote Repository Release
-        run: |
-          gh release edit v${{ vars.CURRENT_PROD_VERSION }} \
-            --target releases/${{ vars.CURRENT_PROD_VERSION }} \
-            --prerelease=false \
-            --latest \
-            --verify-tag
-        env:
-          GH_TOKEN: ${{ github.token }}
+          github_path_token: ${{ secrets.GH_PAT_VARIABLES }}
+          release_version: ${{ vars.CURRENT_UAT_VERSION }}
