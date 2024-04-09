@@ -25,8 +25,8 @@ container_app = {
       name = "cron-scale-rule"
     }
   ]
-  cpu          = 0.5
-  memory       = "1Gi"
+  cpu    = 0.5
+  memory = "1Gi"
 }
 
 app_settings = [
@@ -49,7 +49,7 @@ app_settings = [
 ]
 
 secrets_names = {
-    "APPLICATIONINSIGHTS_CONNECTION_STRING"           = "appinsights-connection-string"
-    "MONGODB_CONNECTION_URI"                          = "mongodb-connection-string"
-    "JWT_TOKEN_PUBLIC_KEY"                            = "jwt-public-key"
+  "APPLICATIONINSIGHTS_CONNECTION_STRING" = "appinsights-connection-string"
+  "MONGODB_CONNECTION_URI"                = "mongodb-connection-string"
+  "JWT_TOKEN_PUBLIC_KEY"                  = "jwt-public-key"
 }
