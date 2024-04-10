@@ -1,4 +1,6 @@
-env_short = "u"
+env_short             = "u"
+cae_name              = "cae"
+workload_profile_name = "Consumption"
 
 tags = {
   CreatedBy   = "Terraform"
@@ -36,7 +38,7 @@ app_settings = [
 ]
 
 secrets_names = {
-    "APPLICATIONINSIGHTS_CONNECTION_STRING"           = "appinsights-connection-string"
-    "MONGODB_CONNECTION_URI"                          = "mongodb-connection-string"
-    "JWT_TOKEN_PUBLIC_KEY"                            = "jwt-public-key"
+  "APPLICATIONINSIGHTS_CONNECTION_STRING" = "appinsights-connection-string"
+  "MONGODB_CONNECTION_URI"                = "mongodb-connection-string"
+  "JWT_TOKEN_PUBLIC_KEY"                  = "jwt-public-key"
 }
