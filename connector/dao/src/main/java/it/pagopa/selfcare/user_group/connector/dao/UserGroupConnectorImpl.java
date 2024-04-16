@@ -127,7 +127,7 @@ public class UserGroupConnectorImpl implements UserGroupConnector {
                         .currentTimestamp(UserGroupEntity.Fields.modifiedAt),
                 UserGroupEntity.class);
         if (updateResult.getModifiedCount() == 0) {
-            throw new ResourceUpdateException(COULD_NOT_UPDATE_MESSAGE);
+            log.warn("No user to delete from UserGroup");
         }
         log.trace("deleteMembers end");
     }

@@ -788,8 +788,8 @@ class UserGroupConnectorImplTest {
         //when
         Executable executable = () -> groupConnector.deleteMembers(memberId, institutionId, productId);
         //then
-        ResourceUpdateException resourceUpdateException = assertThrows(ResourceUpdateException.class, executable);
-        assertEquals("Couldn't update resource", resourceUpdateException.getMessage());
+        Assertions.assertDoesNotThrow(executable);
+
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
         ArgumentCaptor<Update> updateCaptor = ArgumentCaptor.forClass(Update.class);
         verify(mongoTemplateMock, times(1))
